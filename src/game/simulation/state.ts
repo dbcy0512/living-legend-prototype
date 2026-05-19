@@ -1,5 +1,6 @@
 import type { Direction } from '../input/actions';
 import { startingArea } from '../content/maps/startingArea';
+import { createTreeDependentResourceSeeds } from '../content/ecosystem';
 
 export type Inventory = {
   twigs: number;
@@ -62,6 +63,11 @@ export type ResourceNode = {
   y: number;
   amount: number;
   respawnMs: number;
+  source?: {
+    type: 'tree-dependent';
+    parentId: string;
+    rule: 'fallen-branch-near-resource-parent';
+  };
 };
 
 export type EnemyState = {
@@ -224,7 +230,7 @@ export const createGameState = (): GameState => ({
     { id: 'sun-herb', kind: 'herbs', x: 520, y: 720, amount: 2, respawnMs: 0 },
     { id: 'wild-fruit', kind: 'food', x: 1116, y: 674, amount: 2, respawnMs: 0 },
     { id: 'silver-herb', kind: 'herbs', x: 268, y: 684, amount: 2, respawnMs: 0 },
-    { id: 'fallen-bough', kind: 'wood', x: 1268, y: 262, amount: 3, respawnMs: 0 }
+    ...createTreeDependentResourceSeeds()
   ],
   enemies: [
     {

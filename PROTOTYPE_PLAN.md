@@ -1021,6 +1021,26 @@ Verification:
 - `npm.cmd test` passed: 53 tests.
 - `npm.cmd run build` passed.
 
+### Tree-Dependent Branch Spawning v1
+
+Status: implemented.
+
+- Added the first explicit ecosystem rule in `src/game/content/ecosystem.ts`.
+- Trees with `placementRole: resource-parent` now parent fallen branch resource seeds.
+- Fallen branches spawn in a controlled band around the parent tree instead of being arbitrary hand-placed resources.
+- Tree-dependent resources carry source metadata:
+  - source type
+  - parent tree id
+  - ecosystem rule id
+- `createGameState()` now includes these generated branches in the initial resource list.
+- This is deterministic for the prototype; later passes can add wind, storm, day/night, harvesting pressure, and regeneration behavior.
+
+Verification:
+
+- Added ecosystem tests for resource-parent trees and tree-dependent branch resources.
+- `npm.cmd test` passed: 55 tests.
+- `npm.cmd run build` passed.
+
 ### Trunk Body Mask Refinement v2
 
 Status: implemented.

@@ -1,14 +1,10 @@
 import type { ActionState } from '../../input/actions';
-import type { EnemyState, GameState } from '../state';
+import { getMeleeForwardAxis, getMeleeSeedProfile, type MeleeSeedProfile } from '../../content/meleeSeeds';
+import type { EnemyState, GameState, PlayerState } from '../state';
 import { distance } from '../rules/math';
 import { applyEnemyDamageResponse } from './enemySystem';
 
-const attackCost = 18;
-const windupMs = 105;
-const activeMs = 135;
-const recoveryMs = 210;
 const hitFlashMs = 150;
-const hitStopMs = 55;
 
 export const updateCombat = (state: GameState, actions: ActionState, deltaMs: number): void => {
   if (state.world.status !== 'playing') {
@@ -17,15 +13,17 @@ export const updateCombat = (state: GameState, actions: ActionState, deltaMs: nu
 
   const combat = state.combat;
   const player = state.player;
+  const profile = getMeleeSeedProfile(state.evolution.equippedMeleeSeed);
   combat.hitStopMs = Math.max(0, combat.hitStopMs - deltaMs);
   combat.lastHitFlashMs = Math.max(0, combat.lastHitFlashMs - deltaMs);
 
-  if (actions.attack && combat.phase === 'idle' && combat.cooldownMs <= 0 && player.stamina >= attackCost) {
-    player.stamina -= attackCost;
+  if (actions.attack && combat.phase === 'idle' && combat.cooldownMs <= 0 && player.stamina >= profile.staminaCost) {
+    player.stamina -= profile.staminaCost;
     combat.phase = 'windup';
-    combat.timerMs = windupMs;
-    combat.cooldownMs = windupMs + activeMs + recoveryMs;
+    combat.timerMs = profile.windupMs;
+    combat.cooldownMs = profile.windupMs + profile.activeMs + profile.recoveryMs;
     state.behaviorMemory.combat.attacksStarted += 1;
+    recordMeleeSeedAttack(state, profile);
   }
 
   if (combat.phase === 'idle') {
@@ -35,31 +33,56 @@ export const updateCombat = (state: GameState, actions: ActionState, deltaMs: nu
   combat.timerMs -= deltaMs;
   if (combat.phase === 'windup' && combat.timerMs <= 0) {
     combat.phase = 'active';
-    combat.timerMs = activeMs;
-    const hits = applyAttackHit(state.enemies, state.player.x, state.player.y);
+    combat.timerMs = profile.activeMs;
+    const hits = applyAttackHit(state.enemies, state.player, profile);
     if (hits > 0) {
       state.behaviorMemory.combat.hitsLanded += hits;
       state.behaviorMemory.creatures.wolfHits += hits;
-      combat.hitStopMs = hitStopMs;
+      combat.hitStopMs = profile.hitStopMs;
       combat.lastHitFlashMs = hitFlashMs;
     }
   } else if (combat.phase === 'active' && combat.timerMs <= 0) {
     combat.phase = 'recovery';
-    combat.timerMs = recoveryMs;
+    combat.timerMs = profile.recoveryMs;
   } else if ((combat.phase === 'recovery' || combat.phase === 'rolling') && combat.timerMs <= 0) {
     combat.phase = 'idle';
     combat.timerMs = 0;
   }
 };
 
-const applyAttackHit = (enemies: EnemyState[], playerX: number, playerY: number): number => {
+const applyAttackHit = (enemies: EnemyState[], player: PlayerState, profile: MeleeSeedProfile): number => {
   let hits = 0;
   for (const enemy of enemies) {
-    if (enemy.health > 0 && distance(playerX, playerY, enemy.x, enemy.y) < 72) {
-      enemy.health -= 16;
-      applyEnemyDamageResponse(enemy, 16);
+    if (enemy.health > 0 && isInsideMeleeSeedHitShape(player, enemy, profile)) {
+      enemy.health -= profile.damage;
+      applyEnemyDamageResponse(enemy, profile.damage);
       hits += 1;
     }
   }
   return hits;
+};
+
+const isInsideMeleeSeedHitShape = (player: PlayerState, enemy: EnemyState, profile: MeleeSeedProfile): boolean => {
+  const dist = distance(player.x, player.y, enemy.x, enemy.y);
+  if (profile.id === 'bare-hands') {
+    return dist < profile.reach;
+  }
+
+  const forward = getMeleeForwardAxis(player.facing);
+  const dx = enemy.x - player.x;
+  const dy = enemy.y - player.y;
+  const forwardDistance = dx * forward.x + dy * forward.y;
+  const sideDistance = Math.abs(dx * -forward.y + dy * forward.x);
+
+  return forwardDistance >= -14 && forwardDistance <= profile.reach && sideDistance <= profile.width / 2;
+};
+
+const recordMeleeSeedAttack = (state: GameState, profile: MeleeSeedProfile): void => {
+  if (profile.id === 'branch-club') {
+    state.behaviorMemory.combat.branchClubAttacks += 1;
+    state.evolution.bladeSeedAffinity += profile.affinityGain;
+  } else if (profile.id === 'stone-edge') {
+    state.behaviorMemory.combat.stoneEdgeAttacks += 1;
+    state.evolution.axeSeedAffinity += profile.affinityGain;
+  }
 };

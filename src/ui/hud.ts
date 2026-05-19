@@ -1,4 +1,5 @@
 import type { GameState } from '../game/simulation/state';
+import { getMeleeSeedProfile } from '../game/content/meleeSeeds';
 import { getAvailableCraftingRecipes, getCraftingCostText } from '../game/simulation/systems/craftingSystem';
 import { getFirstFirePreview } from '../game/simulation/systems/inventorySystem';
 
@@ -83,7 +84,7 @@ export const createHud = (root: Element | null): HudApi => {
       mood.textContent = `${Math.round(state.world.mood * 100)}%`;
       status.textContent = getStatusText(state);
       inventory.textContent = getInventoryText(state);
-      combat.textContent = state.combat.phase;
+      combat.textContent = getCombatText(state);
       inventoryGrid.innerHTML = getInventoryPanelHtml(state);
       craftingList.innerHTML = getCraftingPanelHtml(state);
       craftingMessage.textContent = state.ui.craftMessage;
@@ -119,6 +120,14 @@ const getInventoryText = (state: GameState): string => {
   return `Tw${state.inventory.twigs} G${state.inventory.dryGrass} B${state.inventory.bark} S${state.inventory.stone}`;
 };
 
+const getCombatText = (state: GameState): string => {
+  const seed = getMeleeSeedProfile(state.evolution.equippedMeleeSeed);
+  if (seed.id === 'bare-hands') {
+    return state.combat.phase;
+  }
+  return `${state.combat.phase} / ${seed.name}`;
+};
+
 const getHintText = (state: GameState): string => {
   if (state.world.openingStage === 'cold') {
     const preview = getFirstFirePreview(state);
@@ -151,7 +160,10 @@ const getInventoryPanelHtml = (state: GameState): string => {
     ['Herbs', state.inventory.herbs],
     ['Food', state.inventory.food],
     ['Stone Edges', state.inventory.stoneEdges],
-    ['Branch Clubs', state.inventory.branchClubs]
+    ['Branch Clubs', state.inventory.branchClubs],
+    ['Held', getMeleeSeedProfile(state.evolution.equippedMeleeSeed).name],
+    ['Blade Seed', state.evolution.bladeSeedAffinity],
+    ['Axe Seed', state.evolution.axeSeedAffinity]
   ];
   return rows.map(([label, value]) => `<div class="satchel__item"><span>${label}</span><strong>${value}</strong></div>`).join('');
 };

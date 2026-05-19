@@ -40,6 +40,47 @@ describe('combat system', () => {
     expect(state.combat.hitStopMs).toBeGreaterThan(0);
     expect(state.combat.lastHitFlashMs).toBeGreaterThan(0);
   });
+
+  it('uses the branch club as the first blade-line seed with wider reach', () => {
+    const state = createGameState();
+    const actions = idleActions();
+    const enemy = state.enemies[0];
+    state.evolution.equippedMeleeSeed = 'branch-club';
+    state.player.facing = 'east';
+    enemy.x = state.player.x + 86;
+    enemy.y = state.player.y + 40;
+    actions.attack = true;
+
+    updateSimulation(state, actions, 16);
+    actions.attack = false;
+    advance(state, actions, 128);
+
+    expect(enemy.health).toBe(18);
+    expect(state.behaviorMemory.combat.branchClubAttacks).toBe(1);
+    expect(state.evolution.bladeSeedAffinity).toBe(1);
+    expect(state.evolution.axeSeedAffinity).toBe(0);
+  });
+
+  it('uses the stone edge as the first axe-line seed with a heavier narrow chop', () => {
+    const state = createGameState();
+    const actions = idleActions();
+    const enemy = state.enemies[0];
+    state.evolution.equippedMeleeSeed = 'stone-edge';
+    state.player.facing = 'east';
+    enemy.x = state.player.x + 64;
+    enemy.y = state.player.y + 8;
+    actions.attack = true;
+
+    updateSimulation(state, actions, 16);
+    actions.attack = false;
+    advance(state, actions, 144);
+
+    expect(enemy.health).toBe(13);
+    expect(state.player.stamina).toBeLessThan(78);
+    expect(state.behaviorMemory.combat.stoneEdgeAttacks).toBe(1);
+    expect(state.evolution.axeSeedAffinity).toBe(1);
+    expect(state.evolution.bladeSeedAffinity).toBe(0);
+  });
 });
 
 const advance = (

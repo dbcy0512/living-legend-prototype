@@ -1213,6 +1213,34 @@ Verification:
 - `npm.cmd run build` passed.
 - Browser smoke check loaded the prototype with no console errors.
 
+### Melee Seed Evolution v1
+
+Status: implemented.
+
+- Added explicit melee seed profiles for:
+  - Bare Hands.
+  - Branch Club.
+  - Stone Edge.
+- Branch Club is the first blade-line seed:
+  - wider reach
+  - broader swing shape
+  - blade seed affinity gain on attack
+- Stone Edge is the first axe-line seed:
+  - shorter reach
+  - narrower chop shape
+  - higher damage and stamina commitment
+  - axe seed affinity gain on attack
+- Crafting a Branch Club or Stone Edge now equips that melee seed immediately.
+- Combat reads the active melee seed profile for stamina cost, damage, reach, active timing, recovery, and hit-stop.
+- Behavior memory now records branch-club attacks and stone-edge attacks separately.
+- Evolution state now stores equipped melee seed, blade seed affinity, and axe seed affinity.
+- The HUD combat line and satchel panel now expose the held seed and early affinity values.
+
+Verification:
+
+- `npm.cmd test` passed: 78 tests.
+- `npm.cmd run build` passed.
+
 ### Trunk Body Mask Refinement v2
 
 Status: implemented.

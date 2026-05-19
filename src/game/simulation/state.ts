@@ -5,6 +5,7 @@ import {
   defaultEcosystemSeed,
   type EcosystemResourceSource
 } from '../content/ecosystem';
+import type { MeleeSeed } from '../content/meleeSeeds';
 
 export type Inventory = {
   twigs: number;
@@ -119,6 +120,8 @@ export type BehaviorMemory = {
     dodgesUsed: number;
     wolfLungesDodged: number;
     hitsTaken: number;
+    branchClubAttacks: number;
+    stoneEdgeAttacks: number;
   };
   tools: {
     gathered: ItemMemory;
@@ -141,6 +144,9 @@ export type BehaviorMemory = {
 
 export type EvolutionState = {
   cleanerRoll: boolean;
+  equippedMeleeSeed: MeleeSeed;
+  bladeSeedAffinity: number;
+  axeSeedAffinity: number;
 };
 
 export type EcosystemState = {
@@ -232,7 +238,10 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
     },
     behaviorMemory: createBehaviorMemory(),
     evolution: {
-      cleanerRoll: false
+      cleanerRoll: false,
+      equippedMeleeSeed: 'bare-hands',
+      bladeSeedAffinity: 0,
+      axeSeedAffinity: 0
     },
     ecosystem: {
       seed: ecosystemSeed,
@@ -315,7 +324,9 @@ const createBehaviorMemory = (): BehaviorMemory => ({
     hitsLanded: 0,
     dodgesUsed: 0,
     wolfLungesDodged: 0,
-    hitsTaken: 0
+    hitsTaken: 0,
+    branchClubAttacks: 0,
+    stoneEdgeAttacks: 0
   },
   tools: {
     gathered: createItemMemory(),

@@ -60,6 +60,11 @@ export const craftRecipe = (state: GameState, recipeId: CraftingRecipeId): boole
     state.player.health = clamp(state.player.health + recipe.effect.health, 0, state.player.maxHealth);
   } else {
     state.inventory[recipe.effect.item] += recipe.effect.amount;
+    if (recipe.effect.item === 'branchClubs') {
+      state.evolution.equippedMeleeSeed = 'branch-club';
+    } else if (recipe.effect.item === 'stoneEdges') {
+      state.evolution.equippedMeleeSeed = 'stone-edge';
+    }
   }
 
   state.ui.lastCraftedRecipeId = recipe.id;

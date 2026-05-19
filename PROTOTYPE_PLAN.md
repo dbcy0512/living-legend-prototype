@@ -1161,6 +1161,23 @@ Verification:
 - `npm.cmd test` passed: 66 tests.
 - `npm.cmd run build` passed.
 
+### Zone-Dependent Herb Ecosystem v1
+
+Status: implemented.
+
+- Added the first non-tree ecosystem resource rule: `dew-herb-near-first-shelter`.
+- Added zone-dependent source metadata with `zoneId`, so resource ownership can come from a biome/zone rule instead of only a parent tree.
+- `createEcosystemResourceSeeds()` now combines tree-dependent branches and zone-dependent herbs through one ecosystem-owned resource path.
+- Herb candidates are seeded, collision-filtered, and capped by rule max active count.
+- Generic inventory respawn now skips all ecosystem-owned resources, not just branches.
+- Dawn regeneration now restores ecosystem-owned branches and herbs through the same world-pressure lifecycle.
+- The hidden `K` overlay distinguishes branch/tree links from zone-dependent herb markers and counts active branches/herbs.
+
+Verification:
+
+- `npm.cmd test` passed: 70 tests.
+- `npm.cmd run build` passed.
+
 ### Trunk Body Mask Refinement v2
 
 Status: implemented.

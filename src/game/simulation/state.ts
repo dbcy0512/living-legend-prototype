@@ -1,9 +1,9 @@
 import type { Direction } from '../input/actions';
 import { startingArea } from '../content/maps/startingArea';
 import {
-  createTreeDependentResourceSeeds,
+  createEcosystemResourceSeeds,
   defaultEcosystemSeed,
-  type EcosystemResourceRuleId
+  type EcosystemResourceSource
 } from '../content/ecosystem';
 
 export type Inventory = {
@@ -67,11 +67,7 @@ export type ResourceNode = {
   y: number;
   amount: number;
   respawnMs: number;
-  source?: {
-    type: 'tree-dependent';
-    parentId: string;
-    rule: EcosystemResourceRuleId;
-  };
+  source?: EcosystemResourceSource;
 };
 
 export type EnemyState = {
@@ -174,109 +170,109 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
   const ecosystemSeed = options.ecosystemSeed ?? defaultEcosystemSeed;
 
   return {
-  player: {
-    x: startingArea.playerStart.x,
-    y: startingArea.playerStart.y,
-    facing: 'south',
-    health: 100,
-    maxHealth: 100,
-    stamina: 100,
-    maxStamina: 100,
-    hunger: 100,
-    maxHunger: 100,
-    speed: 132,
-    invulnerableMs: 0
-  },
-  combat: {
-    phase: 'idle',
-    timerMs: 0,
-    cooldownMs: 0,
-    rollCooldownMs: 0,
-    hitStopMs: 0,
-    lastHitFlashMs: 0
-  },
-  world: {
-    timeOfDay: 0.32,
-    day: 1,
-    mood: 0.45,
-    windPhase: 0,
-    lifePulse: 0,
-    rawNightPressure: 0,
-    localNightPressure: 0,
-    dawnDuskGlow: 0,
-    cold: 100,
-    maxCold: 100,
-    openingStage: 'cold',
-    openingPrompt: 'fire-dead',
-    respawns: 0,
-    status: 'playing',
-    paused: false
-  },
-  inventory: {
-    twigs: 0,
-    dryGrass: 0,
-    bark: 0,
-    wood: 0,
-    stone: 0,
-    herbs: 0,
-    food: 0,
-    campfires: 0
-  },
-  behaviorMemory: createBehaviorMemory(),
-  evolution: {
-    cleanerRoll: false
-  },
-  ecosystem: {
-    seed: ecosystemSeed,
-    lastRegenerationDay: 1,
-    windfallPressure: 0,
-    lastRegenerationPressure: 0
-  },
-  respawnPoint: {
-    x: startingArea.playerStart.x - 108,
-    y: startingArea.playerStart.y + 20
-  },
-  campfires: [
-    {
-      id: 'first-fire',
+    player: {
       x: startingArea.playerStart.x,
-      y: startingArea.playerStart.y + 42,
-      radius: 150,
-      fuelMs: 0
-    }
-  ],
-  resources: [
-    { id: 'first-twig', kind: 'twigs', x: 620, y: 524, amount: 1, respawnMs: 0 },
-    { id: 'dry-grass-handful', kind: 'dryGrass', x: 815, y: 506, amount: 1, respawnMs: 0 },
-    { id: 'curl-of-bark', kind: 'bark', x: 642, y: 608, amount: 1, respawnMs: 0 },
-    { id: 'striking-stone', kind: 'stone', x: 832, y: 598, amount: 1, respawnMs: 0 },
-    { id: 'elder-branch', kind: 'wood', x: 405, y: 520, amount: 3, respawnMs: 0 },
-    { id: 'moon-stone', kind: 'stone', x: 1045, y: 332, amount: 2, respawnMs: 0 },
-    { id: 'sun-herb', kind: 'herbs', x: 520, y: 720, amount: 2, respawnMs: 0 },
-    { id: 'wild-fruit', kind: 'food', x: 1116, y: 674, amount: 2, respawnMs: 0 },
-    { id: 'silver-herb', kind: 'herbs', x: 268, y: 684, amount: 2, respawnMs: 0 },
-    ...createTreeDependentResourceSeeds(ecosystemSeed)
-  ],
-  enemies: [
-    {
-      id: 'hollow-wolf',
-      x: 1188,
-      y: 214,
-      health: 35,
-      maxHealth: 35,
-      mode: 'watching',
-      hunger: 34,
-      fear: 18,
-      territoryPressure: 0,
-      boldness: 0,
-      attackTimerMs: 0,
-      telegraphMs: 0,
-      phaseTimerMs: 0,
-      lungeX: 0,
-      lungeY: 0,
-      hasDamagedThisLunge: false
-    }
-  ]
+      y: startingArea.playerStart.y,
+      facing: 'south',
+      health: 100,
+      maxHealth: 100,
+      stamina: 100,
+      maxStamina: 100,
+      hunger: 100,
+      maxHunger: 100,
+      speed: 132,
+      invulnerableMs: 0
+    },
+    combat: {
+      phase: 'idle',
+      timerMs: 0,
+      cooldownMs: 0,
+      rollCooldownMs: 0,
+      hitStopMs: 0,
+      lastHitFlashMs: 0
+    },
+    world: {
+      timeOfDay: 0.32,
+      day: 1,
+      mood: 0.45,
+      windPhase: 0,
+      lifePulse: 0,
+      rawNightPressure: 0,
+      localNightPressure: 0,
+      dawnDuskGlow: 0,
+      cold: 100,
+      maxCold: 100,
+      openingStage: 'cold',
+      openingPrompt: 'fire-dead',
+      respawns: 0,
+      status: 'playing',
+      paused: false
+    },
+    inventory: {
+      twigs: 0,
+      dryGrass: 0,
+      bark: 0,
+      wood: 0,
+      stone: 0,
+      herbs: 0,
+      food: 0,
+      campfires: 0
+    },
+    behaviorMemory: createBehaviorMemory(),
+    evolution: {
+      cleanerRoll: false
+    },
+    ecosystem: {
+      seed: ecosystemSeed,
+      lastRegenerationDay: 1,
+      windfallPressure: 0,
+      lastRegenerationPressure: 0
+    },
+    respawnPoint: {
+      x: startingArea.playerStart.x - 108,
+      y: startingArea.playerStart.y + 20
+    },
+    campfires: [
+      {
+        id: 'first-fire',
+        x: startingArea.playerStart.x,
+        y: startingArea.playerStart.y + 42,
+        radius: 150,
+        fuelMs: 0
+      }
+    ],
+    resources: [
+      { id: 'first-twig', kind: 'twigs', x: 620, y: 524, amount: 1, respawnMs: 0 },
+      { id: 'dry-grass-handful', kind: 'dryGrass', x: 815, y: 506, amount: 1, respawnMs: 0 },
+      { id: 'curl-of-bark', kind: 'bark', x: 642, y: 608, amount: 1, respawnMs: 0 },
+      { id: 'striking-stone', kind: 'stone', x: 832, y: 598, amount: 1, respawnMs: 0 },
+      { id: 'elder-branch', kind: 'wood', x: 405, y: 520, amount: 3, respawnMs: 0 },
+      { id: 'moon-stone', kind: 'stone', x: 1045, y: 332, amount: 2, respawnMs: 0 },
+      { id: 'sun-herb', kind: 'herbs', x: 520, y: 720, amount: 2, respawnMs: 0 },
+      { id: 'wild-fruit', kind: 'food', x: 1116, y: 674, amount: 2, respawnMs: 0 },
+      { id: 'silver-herb', kind: 'herbs', x: 268, y: 684, amount: 2, respawnMs: 0 },
+      ...createEcosystemResourceSeeds(ecosystemSeed)
+    ],
+    enemies: [
+      {
+        id: 'hollow-wolf',
+        x: 1188,
+        y: 214,
+        health: 35,
+        maxHealth: 35,
+        mode: 'watching',
+        hunger: 34,
+        fear: 18,
+        territoryPressure: 0,
+        boldness: 0,
+        attackTimerMs: 0,
+        telegraphMs: 0,
+        phaseTimerMs: 0,
+        lungeX: 0,
+        lungeY: 0,
+        hasDamagedThisLunge: false
+      }
+    ]
   };
 };
 

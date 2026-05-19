@@ -1,5 +1,5 @@
 import type { GameState } from '../state';
-import { createTreeDependentResourceSeeds } from '../../content/ecosystem';
+import { createEcosystemResourceSeeds } from '../../content/ecosystem';
 import { clamp, distance } from '../rules/math';
 import { forceEnemyRespawnGrace, isPlayerUnderThreat } from './enemySystem';
 
@@ -65,7 +65,7 @@ const updateEcosystemLifecycle = (state: GameState): void => {
     return;
   }
 
-  const seeds = createTreeDependentResourceSeeds(state.ecosystem.seed);
+  const seeds = createEcosystemResourceSeeds(state.ecosystem.seed);
   for (const seed of seeds) {
     const existing = state.resources.find((resource) => resource.id === seed.id);
     if (existing) {

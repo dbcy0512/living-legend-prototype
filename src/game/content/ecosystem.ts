@@ -1,6 +1,18 @@
 import { startingArea, type TreeInstance, type TreePlacementRole } from './maps/startingArea';
 
-export type EcosystemResourceRuleId = 'fallen-branch-near-resource-parent';
+export type EcosystemResourceRuleId = 'fallen-branch-near-resource-parent' | 'dew-herb-near-first-shelter';
+
+export type EcosystemResourceSource =
+  | {
+      type: 'tree-dependent';
+      parentId: string;
+      rule: EcosystemResourceRuleId;
+    }
+  | {
+      type: 'zone-dependent';
+      zoneId: string;
+      rule: EcosystemResourceRuleId;
+    };
 
 export type TreeDependentResourceRule = {
   id: EcosystemResourceRuleId;
@@ -17,7 +29,20 @@ export type TreeDependentResourceRule = {
   offsets: readonly { x: number; y: number }[];
 };
 
-type TreeDependentSpawnCandidate = {
+export type ZoneDependentResourceRule = {
+  id: EcosystemResourceRuleId;
+  seedKey: string;
+  seedIdPrefix: string;
+  kind: 'herbs';
+  zoneId: string;
+  amount: number;
+  respawnMs: number;
+  maxActive: number;
+  collisionClearance: number;
+  candidates: readonly { x: number; y: number }[];
+};
+
+type EcosystemSpawnCandidate = {
   index: number;
   x: number;
   y: number;
@@ -25,16 +50,12 @@ type TreeDependentSpawnCandidate = {
 
 export type EcosystemResourceSeed = {
   id: string;
-  kind: 'wood';
+  kind: 'wood' | 'herbs';
   x: number;
   y: number;
   amount: number;
   respawnMs: number;
-  source: {
-    type: 'tree-dependent';
-    parentId: string;
-    rule: EcosystemResourceRuleId;
-  };
+  source: EcosystemResourceSource;
 };
 
 export const defaultEcosystemSeed = 'zone-1-first-breath';
@@ -64,9 +85,33 @@ const treeDependentResourceRules = [
   }
 ] as const satisfies readonly TreeDependentResourceRule[];
 
+const zoneDependentResourceRules = [
+  {
+    id: 'dew-herb-near-first-shelter',
+    seedKey: 'zone-1-dew-herbs',
+    seedIdPrefix: 'dew-herb',
+    kind: 'herbs',
+    zoneId: 'first-shelter-edge',
+    amount: 1,
+    respawnMs: 0,
+    maxActive: 2,
+    collisionClearance: 20,
+    candidates: [
+      { x: 456, y: 680 },
+      { x: 610, y: 704 },
+      { x: 344, y: 736 },
+      { x: 570, y: 760 },
+      { x: 470, y: 748 }
+    ]
+  }
+] as const satisfies readonly ZoneDependentResourceRule[];
+
 const fallenBranchRule = treeDependentResourceRules[0];
+const dewHerbRule = zoneDependentResourceRules[0];
 
 export const getTreeDependentResourceRules = (): readonly TreeDependentResourceRule[] => treeDependentResourceRules;
+
+export const getZoneDependentResourceRules = (): readonly ZoneDependentResourceRule[] => zoneDependentResourceRules;
 
 export const getResourceParentTrees = (rule: TreeDependentResourceRule = fallenBranchRule): readonly TreeInstance[] =>
   startingArea.environment.trees.filter((tree) => tree.placementRole === rule.parentRole);
@@ -75,14 +120,25 @@ export const isTreeDependentResourceSeed = (seed: EcosystemResourceSeed): boolea
   seed.source.type === 'tree-dependent' &&
   treeDependentResourceRules.some((rule) => rule.id === seed.source.rule);
 
-export const getTreeDependentResourceParent = (seed: EcosystemResourceSeed): TreeInstance | undefined =>
-  startingArea.environment.trees.find((tree) => tree.id === seed.source.parentId);
+export const isZoneDependentResourceSeed = (seed: EcosystemResourceSeed): boolean =>
+  seed.source.type === 'zone-dependent' &&
+  zoneDependentResourceRules.some((rule) => rule.id === seed.source.rule);
+
+export const isEcosystemResourceSeed = (seed: EcosystemResourceSeed): boolean =>
+  isTreeDependentResourceSeed(seed) || isZoneDependentResourceSeed(seed);
+
+export const getTreeDependentResourceParent = (seed: EcosystemResourceSeed): TreeInstance | undefined => {
+  const source = seed.source;
+  return source.type === 'tree-dependent'
+    ? startingArea.environment.trees.find((tree) => tree.id === source.parentId)
+    : undefined;
+};
 
 export const createTreeDependentResourceSeeds = (seed = defaultEcosystemSeed): EcosystemResourceSeed[] =>
   treeDependentResourceRules.flatMap((rule) =>
     getResourceParentTrees(rule).flatMap((tree) => {
       const candidates = getValidTreeDependentSpawnCandidates(rule, tree);
-      return selectStableSpawnCandidates(rule, tree, candidates, seed).map((candidate) => ({
+      return selectStableSpawnCandidates(rule, tree.id, candidates, seed, rule.maxActivePerParent).map((candidate) => ({
         id: `${tree.id}-${rule.seedIdPrefix}-${candidate.index + 1}`,
         kind: rule.kind,
         x: candidate.x,
@@ -98,10 +154,33 @@ export const createTreeDependentResourceSeeds = (seed = defaultEcosystemSeed): E
     })
   );
 
+export const createZoneDependentResourceSeeds = (seed = defaultEcosystemSeed): EcosystemResourceSeed[] =>
+  zoneDependentResourceRules.flatMap((rule) =>
+    selectStableSpawnCandidates(rule, rule.zoneId, getValidZoneDependentSpawnCandidates(rule), seed, rule.maxActive)
+      .map((candidate) => ({
+        id: `${rule.zoneId}-${rule.seedIdPrefix}-${candidate.index + 1}`,
+        kind: rule.kind,
+        x: candidate.x,
+        y: candidate.y,
+        amount: rule.amount,
+        respawnMs: rule.respawnMs,
+        source: {
+          type: 'zone-dependent' as const,
+          zoneId: rule.zoneId,
+          rule: rule.id
+        }
+      }))
+  );
+
+export const createEcosystemResourceSeeds = (seed = defaultEcosystemSeed): EcosystemResourceSeed[] => [
+  ...createTreeDependentResourceSeeds(seed),
+  ...createZoneDependentResourceSeeds(seed)
+];
+
 export const getValidTreeDependentSpawnCandidates = (
   rule: TreeDependentResourceRule,
   tree: TreeInstance
-): readonly TreeDependentSpawnCandidate[] =>
+): readonly EcosystemSpawnCandidate[] =>
   rule.offsets
     .map((offset, index) => ({
       index,
@@ -109,6 +188,17 @@ export const getValidTreeDependentSpawnCandidates = (
       y: tree.y + offset.y
     }))
     .filter((candidate) => isValidTreeDependentSpawn(rule, tree, candidate.x, candidate.y));
+
+export const getValidZoneDependentSpawnCandidates = (
+  rule: ZoneDependentResourceRule = dewHerbRule
+): readonly EcosystemSpawnCandidate[] =>
+  rule.candidates
+    .map((candidate, index) => ({
+      index,
+      x: candidate.x,
+      y: candidate.y
+    }))
+    .filter((candidate) => isOutsideMapCollision(candidate.x, candidate.y, rule.collisionClearance));
 
 export const isInsideTreeBranchSpawnBand = (tree: TreeInstance, x: number, y: number): boolean => {
   return isInsideTreeDependentSpawnBand(fallenBranchRule, tree, x, y);
@@ -147,19 +237,31 @@ const isValidTreeDependentSpawn = (
   (!rule.excludeParentTrunkCollision || isOutsideParentTrunkCollision(tree, x, y));
 
 const selectStableSpawnCandidates = (
-  rule: TreeDependentResourceRule,
-  tree: TreeInstance,
-  candidates: readonly TreeDependentSpawnCandidate[],
-  seed: string
-): TreeDependentSpawnCandidate[] =>
+  rule: TreeDependentResourceRule | ZoneDependentResourceRule,
+  scopeId: string,
+  candidates: readonly EcosystemSpawnCandidate[],
+  seed: string,
+  maxActive: number
+): EcosystemSpawnCandidate[] =>
   [...candidates]
     .sort((left, right) => {
-      const leftScore = getStableSeedScore(`${seed}:${rule.seedKey}:${tree.id}:${left.index}`);
-      const rightScore = getStableSeedScore(`${seed}:${rule.seedKey}:${tree.id}:${right.index}`);
+      const leftScore = getStableSeedScore(`${seed}:${rule.seedKey}:${scopeId}:${left.index}`);
+      const rightScore = getStableSeedScore(`${seed}:${rule.seedKey}:${scopeId}:${right.index}`);
       return leftScore - rightScore;
     })
-    .slice(0, rule.maxActivePerParent)
+    .slice(0, maxActive)
     .sort((left, right) => left.index - right.index);
+
+const isOutsideMapCollision = (x: number, y: number, clearance: number): boolean =>
+  startingArea.collision.every((obstacle) => {
+    const endY = obstacle.segmentEndY ?? obstacle.y;
+    const top = Math.min(obstacle.y, endY) - clearance;
+    const bottom = Math.max(obstacle.y, endY) + clearance;
+    const left = obstacle.x - obstacle.radius - clearance;
+    const right = obstacle.x + obstacle.radius + clearance;
+
+    return x < left || x > right || y < top || y > bottom;
+  });
 
 const getStableSeedScore = (value: string): number => {
   let hash = 2166136261;

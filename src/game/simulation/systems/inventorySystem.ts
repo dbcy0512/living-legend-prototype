@@ -35,7 +35,7 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
 
   for (const node of state.resources) {
     if (node.amount <= 0) {
-      if (node.source?.type === 'tree-dependent') {
+      if (node.source) {
         continue;
       }
       node.respawnMs = Math.max(0, node.respawnMs - deltaMs);
@@ -53,7 +53,7 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
       node.amount -= 1;
       if (node.amount <= 0) {
         node.respawnMs =
-          isOpeningKindling(node) || node.source?.type === 'tree-dependent'
+          isOpeningKindling(node) || node.source
             ? Number.POSITIVE_INFINITY
             : 12000;
       }

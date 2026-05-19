@@ -114,6 +114,27 @@ describe('living world pressure', () => {
     expect(state.ecosystem.windfallPressure).toBeLessThan(0.5);
   });
 
+  it('regenerates depleted zone-dependent ecosystem resources at the next dawn', () => {
+    const state = createGameState();
+    const resource = state.resources.find((node) => node.source?.type === 'zone-dependent');
+    if (!resource) {
+      throw new Error('zone-dependent resource fixture missing');
+    }
+    resource.amount = 0;
+    resource.respawnMs = Number.POSITIVE_INFINITY;
+    state.world.day = 2;
+    state.world.timeOfDay = 0.279;
+    state.ecosystem.lastRegenerationDay = 1;
+    state.ecosystem.windfallPressure = 0.5;
+
+    updateWorld(state, 250);
+
+    expect(resource.kind).toBe('herbs');
+    expect(resource.amount).toBe(1);
+    expect(resource.respawnMs).toBe(0);
+    expect(state.ecosystem.lastRegenerationDay).toBe(2);
+  });
+
   it('waits to regenerate ecosystem resources until enough world pressure has accumulated', () => {
     const state = createGameState();
     const resource = state.resources.find((node) => node.source?.type === 'tree-dependent');

@@ -569,10 +569,16 @@ export class WorldScene extends Phaser.Scene {
     this.collisionDebug.lineStyle(1, 0xffc15c, 0.74);
     this.collisionDebug.fillStyle(0xffc15c, 0.72);
     for (const node of this.state.resources) {
-      if (node.amount <= 0 || node.source?.type !== 'tree-dependent') {
+      const source = node.source;
+      if (node.amount <= 0 || !source) {
         continue;
       }
-      const parentTree = this.treeViews.find((tree) => tree.id === node.source?.parentId);
+      if (source.type === 'zone-dependent') {
+        this.collisionDebug.fillCircle(node.x, node.y, 4);
+        this.collisionDebug.strokeCircle(node.x, node.y, 10);
+        continue;
+      }
+      const parentTree = this.treeViews.find((tree) => tree.id === source.parentId);
       if (!parentTree) {
         continue;
       }
@@ -585,9 +591,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private getEcosystemDebugText(): string {
-    const treeDependent = this.state.resources.filter((node) => node.source?.type === 'tree-dependent');
-    const active = treeDependent.filter((node) => node.amount > 0).length;
-    const depleted = treeDependent.length - active;
+    const ecosystemResources = this.state.resources.filter((node) => node.source);
+    const active = ecosystemResources.filter((node) => node.amount > 0).length;
+    const depleted = ecosystemResources.length - active;
+    const activeBranches = ecosystemResources.filter((node) => node.source?.type === 'tree-dependent' && node.amount > 0).length;
+    const activeHerbs = ecosystemResources.filter((node) => node.source?.type === 'zone-dependent' && node.amount > 0).length;
     const ecosystem = this.state.ecosystem;
     const world = this.state.world;
 
@@ -595,7 +603,8 @@ export class WorldScene extends Phaser.Scene {
       `eco seed: ${ecosystem.seed}`,
       `windfall: ${ecosystem.windfallPressure.toFixed(2)}`,
       `last regen: day ${ecosystem.lastRegenerationDay} @ ${ecosystem.lastRegenerationPressure.toFixed(2)}`,
-      `tree resources: ${active} active / ${depleted} depleted`,
+      `eco resources: ${active} active / ${depleted} depleted`,
+      `branches ${activeBranches} / herbs ${activeHerbs}`,
       `world: day ${world.day} time ${world.timeOfDay.toFixed(2)} night ${world.rawNightPressure.toFixed(2)}`
     ].join('\n');
   }

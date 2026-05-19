@@ -1,14 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import {
+  createEcosystemResourceSeeds,
   createTreeDependentResourceSeeds,
+  createZoneDependentResourceSeeds,
   defaultEcosystemSeed,
   getResourceParentTrees,
   getTreeDependentResourceParent,
   getTreeDependentResourceRules,
+  getValidZoneDependentSpawnCandidates,
+  getZoneDependentResourceRules,
   getValidTreeDependentSpawnCandidates,
   isInsideTreeBranchSpawnBand,
   isOutsideParentTrunkCollision,
-  isTreeDependentResourceSeed
+  isTreeDependentResourceSeed,
+  isZoneDependentResourceSeed
 } from '../src/game/content/ecosystem';
 import { createGameState } from '../src/game/simulation/state';
 
@@ -25,6 +30,17 @@ describe('zone one ecosystem rules', () => {
     expect(fallenBranchRule?.offsets.length).toBeGreaterThan(fallenBranchRule?.maxActivePerParent ?? 0);
   });
 
+  it('defines zone-dependent herb rules as inspectable data', () => {
+    const rules = getZoneDependentResourceRules();
+    const herbRule = rules.find((rule) => rule.id === 'dew-herb-near-first-shelter');
+
+    expect(herbRule).toBeDefined();
+    expect(herbRule?.kind).toBe('herbs');
+    expect(herbRule?.zoneId).toBe('first-shelter-edge');
+    expect(herbRule?.maxActive).toBe(2);
+    expect(herbRule?.candidates.length).toBeGreaterThan(herbRule?.maxActive ?? 0);
+  });
+
   it('uses resource-parent trees as fallen branch parents', () => {
     const fallenBranchRule = getTreeDependentResourceRules()[0];
     const parentTrees = getResourceParentTrees(fallenBranchRule);
@@ -33,7 +49,11 @@ describe('zone one ecosystem rules', () => {
     expect(parentTrees.length).toBeGreaterThan(0);
     expect(branches.length).toBe(parentTrees.length * 3);
     for (const branch of branches) {
-      const parent = parentTrees.find((tree) => tree.id === branch.source.parentId);
+      const source = branch.source;
+      if (source.type !== 'tree-dependent') {
+        throw new Error('tree-dependent branch fixture has wrong source type');
+      }
+      const parent = parentTrees.find((tree) => tree.id === source.parentId);
 
       expect(parent).toBeDefined();
       expect(branch.kind).toBe('wood');
@@ -50,7 +70,9 @@ describe('zone one ecosystem rules', () => {
 
     for (const parent of parentTrees) {
       const candidates = getValidTreeDependentSpawnCandidates(fallenBranchRule, parent);
-      const branches = createTreeDependentResourceSeeds().filter((branch) => branch.source.parentId === parent.id);
+      const branches = createTreeDependentResourceSeeds().filter(
+        (branch) => branch.source.type === 'tree-dependent' && branch.source.parentId === parent.id
+      );
 
       expect(candidates.length).toBeGreaterThan(branches.length);
       expect(branches.length).toBe(fallenBranchRule.maxActivePerParent);
@@ -67,6 +89,27 @@ describe('zone one ecosystem rules', () => {
 
     expect(secondPass).toEqual(firstPass);
     expect(differentSeed).not.toEqual(firstPass);
+  });
+
+  it('creates zone-dependent herbs from valid seeded candidates', () => {
+    const herbRule = getZoneDependentResourceRules()[0];
+    const candidates = getValidZoneDependentSpawnCandidates(herbRule);
+    const herbs = createZoneDependentResourceSeeds();
+
+    expect(candidates.length).toBeGreaterThan(herbs.length);
+    expect(herbs.length).toBe(herbRule.maxActive);
+    for (const herb of herbs) {
+      expect(herb.kind).toBe('herbs');
+      expect(isZoneDependentResourceSeed(herb)).toBe(true);
+      expect(herb.source.type).toBe('zone-dependent');
+      expect(candidates.some((candidate) => candidate.x === herb.x && candidate.y === herb.y)).toBe(true);
+    }
+  });
+
+  it('creates all current ecosystem resource seeds through the combined generator', () => {
+    expect(createEcosystemResourceSeeds()).toHaveLength(
+      createTreeDependentResourceSeeds().length + createZoneDependentResourceSeeds().length
+    );
   });
 
   it('adds tree-dependent branches to new game state resources', () => {
@@ -87,11 +130,11 @@ describe('zone one ecosystem rules', () => {
 
   it('stores the ecosystem seed on game state and uses it to create resources', () => {
     const state = createGameState({ ecosystemSeed: 'test-seed-b' });
-    const seededBranches = createTreeDependentResourceSeeds('test-seed-b');
-    const ecosystemBranches = state.resources.filter((resource) => resource.source?.type === 'tree-dependent');
+    const seededResources = createEcosystemResourceSeeds('test-seed-b');
+    const ecosystemResources = state.resources.filter((resource) => resource.source);
 
     expect(state.ecosystem.seed).toBe('test-seed-b');
-    expect(ecosystemBranches.map((branch) => branch.id)).toEqual(seededBranches.map((branch) => branch.id));
+    expect(ecosystemResources.map((resource) => resource.id)).toEqual(seededResources.map((resource) => resource.id));
   });
 
   it('uses the default ecosystem seed when no game state option is provided', () => {

@@ -32,12 +32,13 @@ export const updateSimulation = (state: GameState, actions: ActionState, deltaMs
 };
 
 const resetGameState = (state: GameState): void => {
-  const fresh = createGameState();
+  const fresh = createGameState({ ecosystemSeed: state.ecosystem.seed });
   Object.assign(state.player, fresh.player);
   Object.assign(state.combat, fresh.combat);
   Object.assign(state.world, fresh.world);
   Object.assign(state.inventory, fresh.inventory);
   Object.assign(state.evolution, fresh.evolution);
+  Object.assign(state.ecosystem, fresh.ecosystem);
   Object.assign(state.behaviorMemory.body, fresh.behaviorMemory.body);
   Object.assign(state.behaviorMemory.combat, fresh.behaviorMemory.combat);
   Object.assign(state.behaviorMemory.tools.gathered, fresh.behaviorMemory.tools.gathered);

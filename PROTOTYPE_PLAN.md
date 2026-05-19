@@ -1095,6 +1095,21 @@ Verification:
 - `npm.cmd test` passed: 59 tests.
 - `npm.cmd run build` passed.
 
+### Ecosystem Seed State v1
+
+Status: implemented.
+
+- Exported the default Zone 1 ecosystem seed from the ecosystem content module.
+- Added `ecosystem.seed` to `GameState`.
+- `createGameState({ ecosystemSeed })` now uses the requested seed when generating tree-dependent resource nodes.
+- Restart now preserves the active ecosystem seed, so a future seeded world or save file does not silently reset to the default layout after failure.
+- Tests now cover default seed state, custom seeded resource creation, and restart seed preservation.
+
+Verification:
+
+- `npm.cmd test` passed: 62 tests.
+- `npm.cmd run build` passed.
+
 ### Trunk Body Mask Refinement v2
 
 Status: implemented.

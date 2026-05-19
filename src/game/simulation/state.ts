@@ -1,6 +1,10 @@
 import type { Direction } from '../input/actions';
 import { startingArea } from '../content/maps/startingArea';
-import { createTreeDependentResourceSeeds, type EcosystemResourceRuleId } from '../content/ecosystem';
+import {
+  createTreeDependentResourceSeeds,
+  defaultEcosystemSeed,
+  type EcosystemResourceRuleId
+} from '../content/ecosystem';
 
 export type Inventory = {
   twigs: number;
@@ -141,6 +145,10 @@ export type EvolutionState = {
   cleanerRoll: boolean;
 };
 
+export type EcosystemState = {
+  seed: string;
+};
+
 export type GameState = {
   player: PlayerState;
   combat: CombatState;
@@ -148,13 +156,21 @@ export type GameState = {
   inventory: Inventory;
   behaviorMemory: BehaviorMemory;
   evolution: EvolutionState;
+  ecosystem: EcosystemState;
   respawnPoint: RespawnPointState;
   campfires: CampfireState[];
   resources: ResourceNode[];
   enemies: EnemyState[];
 };
 
-export const createGameState = (): GameState => ({
+export type GameStateOptions = {
+  ecosystemSeed?: string;
+};
+
+export const createGameState = (options: GameStateOptions = {}): GameState => {
+  const ecosystemSeed = options.ecosystemSeed ?? defaultEcosystemSeed;
+
+  return {
   player: {
     x: startingArea.playerStart.x,
     y: startingArea.playerStart.y,
@@ -207,6 +223,9 @@ export const createGameState = (): GameState => ({
   evolution: {
     cleanerRoll: false
   },
+  ecosystem: {
+    seed: ecosystemSeed
+  },
   respawnPoint: {
     x: startingArea.playerStart.x - 108,
     y: startingArea.playerStart.y + 20
@@ -230,7 +249,7 @@ export const createGameState = (): GameState => ({
     { id: 'sun-herb', kind: 'herbs', x: 520, y: 720, amount: 2, respawnMs: 0 },
     { id: 'wild-fruit', kind: 'food', x: 1116, y: 674, amount: 2, respawnMs: 0 },
     { id: 'silver-herb', kind: 'herbs', x: 268, y: 684, amount: 2, respawnMs: 0 },
-    ...createTreeDependentResourceSeeds()
+    ...createTreeDependentResourceSeeds(ecosystemSeed)
   ],
   enemies: [
     {
@@ -252,7 +271,8 @@ export const createGameState = (): GameState => ({
       hasDamagedThisLunge: false
     }
   ]
-});
+  };
+};
 
 const createItemMemory = (): ItemMemory => ({
   twigs: 0,

@@ -19,6 +19,26 @@ describe('simulation status', () => {
     expect(state.inventory.food).toBe(0);
   });
 
+  it('preserves the active ecosystem seed when restarting', () => {
+    const state = createGameState({ ecosystemSeed: 'restart-seed' });
+    const actions = idleActions();
+    const seededBranchIds = state.resources
+      .filter((resource) => resource.source?.type === 'tree-dependent')
+      .map((resource) => resource.id);
+    state.world.status = 'lost';
+    state.resources.splice(0, state.resources.length);
+    actions.restart = true;
+
+    updateSimulation(state, actions, 16);
+
+    expect(state.ecosystem.seed).toBe('restart-seed');
+    expect(
+      state.resources
+        .filter((resource) => resource.source?.type === 'tree-dependent')
+        .map((resource) => resource.id)
+    ).toEqual(seededBranchIds);
+  });
+
   it('toggles pause and stops simulation updates while paused', () => {
     const state = createGameState();
     const actions = idleActions();

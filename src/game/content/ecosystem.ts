@@ -37,7 +37,7 @@ export type EcosystemResourceSeed = {
   };
 };
 
-const defaultEcosystemSeed = 'zone-1-first-breath';
+export const defaultEcosystemSeed = 'zone-1-first-breath';
 
 const treeDependentResourceRules = [
   {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   createTreeDependentResourceSeeds,
+  defaultEcosystemSeed,
   getResourceParentTrees,
   getTreeDependentResourceParent,
   getTreeDependentResourceRules,
@@ -82,6 +83,21 @@ describe('zone one ecosystem rules', () => {
       expect(branch.amount).toBe(1);
       expect(branch.source).toEqual(seed?.source);
     }
+  });
+
+  it('stores the ecosystem seed on game state and uses it to create resources', () => {
+    const state = createGameState({ ecosystemSeed: 'test-seed-b' });
+    const seededBranches = createTreeDependentResourceSeeds('test-seed-b');
+    const ecosystemBranches = state.resources.filter((resource) => resource.source?.type === 'tree-dependent');
+
+    expect(state.ecosystem.seed).toBe('test-seed-b');
+    expect(ecosystemBranches.map((branch) => branch.id)).toEqual(seededBranches.map((branch) => branch.id));
+  });
+
+  it('uses the default ecosystem seed when no game state option is provided', () => {
+    const state = createGameState();
+
+    expect(state.ecosystem.seed).toBe(defaultEcosystemSeed);
   });
 
   it('keeps tree-dependent branch parent rules inspectable', () => {

@@ -26,6 +26,12 @@ const branchSpawnMaxDistanceFromTrunk = 96;
 export const getResourceParentTrees = (): readonly TreeInstance[] =>
   startingArea.environment.trees.filter((tree) => tree.placementRole === 'resource-parent');
 
+export const isTreeDependentResourceSeed = (seed: EcosystemResourceSeed): boolean =>
+  seed.source.type === 'tree-dependent' && seed.source.rule === 'fallen-branch-near-resource-parent';
+
+export const getTreeDependentResourceParent = (seed: EcosystemResourceSeed): TreeInstance | undefined =>
+  getResourceParentTrees().find((tree) => tree.id === seed.source.parentId);
+
 export const createTreeDependentResourceSeeds = (): EcosystemResourceSeed[] =>
   getResourceParentTrees().flatMap((tree) =>
     branchSpawnOffsets.map((offset, index) => ({
@@ -51,3 +57,12 @@ export const isInsideTreeBranchSpawnBand = (tree: TreeInstance, x: number, y: nu
   return distance >= branchSpawnMinDistanceFromTrunk && distance <= branchSpawnMaxDistanceFromTrunk;
 };
 
+export const isOutsideParentTrunkCollision = (tree: TreeInstance, x: number, y: number): boolean => {
+  const collisionEndY = tree.y + tree.trunkCollisionOffsetY;
+  const top = Math.min(tree.y, collisionEndY);
+  const bottom = Math.max(tree.y, collisionEndY);
+  const left = tree.x - tree.trunkCollisionRadius;
+  const right = tree.x + tree.trunkCollisionRadius;
+
+  return x < left || x > right || y < top || y > bottom;
+};

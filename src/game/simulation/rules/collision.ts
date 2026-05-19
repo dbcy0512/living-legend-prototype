@@ -19,8 +19,6 @@ const playerCollisionRadius = 14;
 
 export const getPlayerCollisionRadius = (): number => playerCollisionRadius;
 
-const clampNumber = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
-
 const resolveVerticalTrunkCollision = (
   x: number,
   y: number,

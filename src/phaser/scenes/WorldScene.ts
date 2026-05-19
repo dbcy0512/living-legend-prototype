@@ -15,6 +15,7 @@ const combatFxDepth = 62;
 const treeDepthBaseOffset = 12;
 
 type TreeView = {
+  id: string;
   sprite: Phaser.GameObjects.Image;
   x: number;
   y: number;
@@ -231,6 +232,7 @@ export class WorldScene extends Phaser.Scene {
         ? this.createAssembledTreeView(treeInstance, treeDepth)
         : this.createWholeTreeView(treeInstance, treeDepth);
       this.treeViews.push({
+        id: treeInstance.id,
         sprite: tree,
         x: treeInstance.x,
         y: treeInstance.y,
@@ -291,6 +293,7 @@ export class WorldScene extends Phaser.Scene {
     const texture = this.getResourceTexture(node);
     const sprite = this.add.image(node.x, node.y, texture);
     sprite.setScale(this.getResourceScale(node));
+    sprite.setRotation(this.getResourceRotation(node));
     sprite.setDepth(groundPropDepth + 2);
     this.resourceAmounts.set(node.id, node.amount);
     return sprite;
@@ -328,7 +331,25 @@ export class WorldScene extends Phaser.Scene {
     if (node.kind === 'twigs' || node.kind === 'bark') {
       return 0.84;
     }
+    if (node.kind === 'wood' && node.source?.type === 'tree-dependent') {
+      return [0.72, 0.68, 0.76][this.getStableResourceIndex(node.id) % 3];
+    }
     return 0.64;
+  }
+
+  private getResourceRotation(node: ResourceNode): number {
+    if (node.source?.type !== 'tree-dependent') {
+      return 0;
+    }
+    return Phaser.Math.DegToRad([-18, 9, 24][this.getStableResourceIndex(node.id) % 3]);
+  }
+
+  private getStableResourceIndex(id: string): number {
+    let hash = 0;
+    for (let index = 0; index < id.length; index += 1) {
+      hash = (hash * 31 + id.charCodeAt(index)) % 9973;
+    }
+    return hash;
   }
 
   private createActors(): void {
@@ -388,6 +409,7 @@ export class WorldScene extends Phaser.Scene {
         this.resourceAmounts.set(node.id, node.amount);
         sprite.setAlpha(node.amount > 0 ? 1 : 0.25);
         sprite.setScale(this.getResourceScale(node));
+        sprite.setRotation(this.getResourceRotation(node));
       }
     }
 
@@ -530,6 +552,21 @@ export class WorldScene extends Phaser.Scene {
     this.collisionDebug.lineStyle(1, 0xb7f7c6, 0.62);
     for (const tree of this.treeViews) {
       this.collisionDebug.strokeEllipse(tree.canopyX, tree.canopyY, tree.canopyRadiusX * 2, tree.canopyRadiusY * 2);
+    }
+
+    this.collisionDebug.lineStyle(1, 0xffc15c, 0.74);
+    this.collisionDebug.fillStyle(0xffc15c, 0.72);
+    for (const node of this.state.resources) {
+      if (node.amount <= 0 || node.source?.type !== 'tree-dependent') {
+        continue;
+      }
+      const parentTree = this.treeViews.find((tree) => tree.id === node.source?.parentId);
+      if (!parentTree) {
+        continue;
+      }
+      this.collisionDebug.lineBetween(node.x, node.y, parentTree.x, parentTree.y);
+      this.collisionDebug.fillCircle(node.x, node.y, 3);
+      this.collisionDebug.strokeCircle(parentTree.x, parentTree.y, 5);
     }
   }
 

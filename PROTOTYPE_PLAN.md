@@ -1041,6 +1041,21 @@ Verification:
 - `npm.cmd test` passed: 55 tests.
 - `npm.cmd run build` passed.
 
+### Ecosystem Branch Readability v1
+
+Status: implemented.
+
+- Tree-dependent fallen branches now render with deterministic scale and rotation variation so they read less like copied props.
+- The hidden `K` debug overlay now draws parent links from tree-dependent branches back to their source tree.
+- Added ecosystem helpers for checking tree-dependent source metadata, parent lookup, branch spawn band, and trunk-collision avoidance.
+- Added tests proving generated fallen branches stay tied to `resource-parent` trees, preserve source metadata in game state, and do not spawn inside the parent trunk collision band.
+- This keeps the first ecosystem rule inspectable before adding randomized spawns, seasonal rules, or wildlife interactions.
+
+Verification:
+
+- `npm.cmd test` passed: 56 tests.
+- `npm.cmd run build` passed.
+
 ### Trunk Body Mask Refinement v2
 
 Status: implemented.

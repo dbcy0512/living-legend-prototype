@@ -1,0 +1,57 @@
+import { describe, expect, it } from 'vitest';
+import { idleActions } from '../src/game/input/actions';
+import { createGameState } from '../src/game/simulation/state';
+import { updateSimulation } from '../src/game/simulation/systems/simulationSystem';
+
+describe('simulation status', () => {
+  it('restarts from a terminal state when restart is requested', () => {
+    const state = createGameState();
+    const actions = idleActions();
+    state.world.status = 'lost';
+    state.player.health = 0;
+    state.inventory.food = 4;
+    actions.restart = true;
+
+    updateSimulation(state, actions, 16);
+
+    expect(state.world.status).toBe('playing');
+    expect(state.player.health).toBe(state.player.maxHealth);
+    expect(state.inventory.food).toBe(0);
+  });
+
+  it('toggles pause and stops simulation updates while paused', () => {
+    const state = createGameState();
+    const actions = idleActions();
+    actions.pause = true;
+
+    updateSimulation(state, actions, 16);
+
+    const pausedTime = state.world.timeOfDay;
+    const pausedWind = state.world.windPhase;
+    expect(state.world.paused).toBe(true);
+
+    const movement = idleActions();
+    movement.moveX = 1;
+    updateSimulation(state, movement, 1000);
+
+    expect(state.world.timeOfDay).toBe(pausedTime);
+    expect(state.world.windPhase).toBe(pausedWind);
+    expect(state.player.x).toBe(710);
+  });
+
+  it('resumes simulation when pause is toggled again', () => {
+    const state = createGameState();
+    const pause = idleActions();
+    pause.pause = true;
+
+    updateSimulation(state, pause, 16);
+    updateSimulation(state, pause, 16);
+
+    expect(state.world.paused).toBe(false);
+
+    const timeBefore = state.world.timeOfDay;
+    updateSimulation(state, idleActions(), 1000);
+
+    expect(state.world.timeOfDay).toBeGreaterThan(timeBefore);
+  });
+});

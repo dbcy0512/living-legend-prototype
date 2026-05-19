@@ -82,6 +82,25 @@ describe('living world pressure', () => {
     expect(state.player.invulnerableMs).toBeGreaterThan(0);
   });
 
+  it('regenerates depleted tree-dependent resources at the next dawn', () => {
+    const state = createGameState();
+    const resource = state.resources.find((node) => node.source?.type === 'tree-dependent');
+    if (!resource) {
+      throw new Error('tree-dependent resource fixture missing');
+    }
+    resource.amount = 0;
+    resource.respawnMs = Number.POSITIVE_INFINITY;
+    state.world.day = 2;
+    state.world.timeOfDay = 0.279;
+    state.ecosystem.lastRegenerationDay = 1;
+
+    updateWorld(state, 250);
+
+    expect(resource.amount).toBe(1);
+    expect(resource.respawnMs).toBe(0);
+    expect(state.ecosystem.lastRegenerationDay).toBe(2);
+  });
+
   it('marks the run won after surviving into the next dawn window', () => {
     const state = createGameState();
     state.world.openingStage = 'open';

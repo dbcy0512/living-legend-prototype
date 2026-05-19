@@ -147,6 +147,7 @@ export type EvolutionState = {
 
 export type EcosystemState = {
   seed: string;
+  lastRegenerationDay: number;
 };
 
 export type GameState = {
@@ -224,7 +225,8 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
     cleanerRoll: false
   },
   ecosystem: {
-    seed: ecosystemSeed
+    seed: ecosystemSeed,
+    lastRegenerationDay: 1
   },
   respawnPoint: {
     x: startingArea.playerStart.x - 108,

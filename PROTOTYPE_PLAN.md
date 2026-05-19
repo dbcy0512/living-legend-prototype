@@ -1110,6 +1110,22 @@ Verification:
 - `npm.cmd test` passed: 62 tests.
 - `npm.cmd run build` passed.
 
+### Ecosystem Lifecycle v1
+
+Status: implemented.
+
+- Tree-dependent resources are now owned by ecosystem lifecycle rules instead of generic inventory respawn.
+- Depleted tree-dependent branches remain depleted after gathering and do not use the simple timed resource respawn path.
+- `GameState.ecosystem.lastRegenerationDay` tracks when the ecosystem last refilled rule-driven resources.
+- The world system regenerates missing/depleted tree-dependent resources at the next dawn window using the active ecosystem seed.
+- Regenerated resources still come from valid seeded candidates and keep their parent tree/rule source metadata.
+- This is the first step from "resource placement" toward "the world produces things over time."
+
+Verification:
+
+- `npm.cmd test` passed: 64 tests.
+- `npm.cmd run build` passed.
+
 ### Trunk Body Mask Refinement v2
 
 Status: implemented.

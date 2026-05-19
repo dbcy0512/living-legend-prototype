@@ -35,6 +35,9 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
 
   for (const node of state.resources) {
     if (node.amount <= 0) {
+      if (node.source?.type === 'tree-dependent') {
+        continue;
+      }
       node.respawnMs = Math.max(0, node.respawnMs - deltaMs);
       if (node.respawnMs <= 0) {
         node.amount = node.kind === 'wood' ? 3 : 2;
@@ -49,7 +52,10 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
       state.behaviorMemory.tools.gathered[node.kind] += 1;
       node.amount -= 1;
       if (node.amount <= 0) {
-        node.respawnMs = isOpeningKindling(node) ? Number.POSITIVE_INFINITY : 12000;
+        node.respawnMs =
+          isOpeningKindling(node) || node.source?.type === 'tree-dependent'
+            ? Number.POSITIVE_INFINITY
+            : 12000;
       }
     }
   }

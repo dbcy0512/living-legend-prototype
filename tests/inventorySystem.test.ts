@@ -146,6 +146,21 @@ describe('inventory crafting', () => {
     expect(resource.amount).toBe(0);
   });
 
+  it('leaves depleted tree-dependent resources for ecosystem regeneration', () => {
+    const state = createGameState();
+    const resource = state.resources.find((node) => node.source?.type === 'tree-dependent');
+    if (!resource) {
+      throw new Error('tree-dependent resource fixture missing');
+    }
+    resource.amount = 0;
+    resource.respawnMs = 12000;
+
+    updateInventory(state, idleActions(), 12000);
+
+    expect(resource.amount).toBe(0);
+    expect(resource.respawnMs).toBe(12000);
+  });
+
   it('finds a resource just ahead of the player facing direction', () => {
     const state = createGameState();
     const resource = state.resources[0];

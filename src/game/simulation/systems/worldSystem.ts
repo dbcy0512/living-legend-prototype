@@ -1,6 +1,9 @@
 import type { GameState } from '../state';
+import { createTreeDependentResourceSeeds } from '../../content/ecosystem';
 import { clamp, distance } from '../rules/math';
 import { forceEnemyRespawnGrace, isPlayerUnderThreat } from './enemySystem';
+
+const ecosystemRegenerationTime = 0.28;
 
 export const updateWorld = (state: GameState, deltaMs: number): void => {
   if (state.world.status !== 'playing') {
@@ -27,6 +30,7 @@ export const updateWorld = (state: GameState, deltaMs: number): void => {
   world.lifePulse = (Math.sin(world.windPhase * 2.1) + 1) / 2;
   world.mood = clamp(0.35 + localNightPressure * 0.45 + dawnDuskGlow * 0.16 + world.lifePulse * 0.12, 0, 1);
   updateBehaviorMemory(state, deltaMs);
+  updateEcosystemLifecycle(state);
 
   updateCold(state, seconds);
 
@@ -42,6 +46,30 @@ export const updateWorld = (state: GameState, deltaMs: number): void => {
   } else if (world.openingStage === 'open' && world.day > 1 && world.timeOfDay >= 0.28 && world.timeOfDay <= 0.36) {
     world.status = 'won';
   }
+};
+
+const updateEcosystemLifecycle = (state: GameState): void => {
+  const world = state.world;
+  if (world.day <= state.ecosystem.lastRegenerationDay || world.timeOfDay < ecosystemRegenerationTime) {
+    return;
+  }
+
+  const seeds = createTreeDependentResourceSeeds(state.ecosystem.seed);
+  for (const seed of seeds) {
+    const existing = state.resources.find((resource) => resource.id === seed.id);
+    if (existing) {
+      if (existing.amount <= 0) {
+        existing.x = seed.x;
+        existing.y = seed.y;
+        existing.amount = seed.amount;
+        existing.respawnMs = seed.respawnMs;
+      }
+      continue;
+    }
+    state.resources.push({ ...seed });
+  }
+
+  state.ecosystem.lastRegenerationDay = world.day;
 };
 
 export const getNightPressure = (timeOfDay: number): number => {

@@ -4,6 +4,7 @@ import {
   getResourceParentTrees,
   getTreeDependentResourceParent,
   getTreeDependentResourceRules,
+  getValidTreeDependentSpawnCandidates,
   isInsideTreeBranchSpawnBand,
   isOutsideParentTrunkCollision,
   isTreeDependentResourceSeed
@@ -19,7 +20,8 @@ describe('zone one ecosystem rules', () => {
     expect(fallenBranchRule?.parentRole).toBe('resource-parent');
     expect(fallenBranchRule?.kind).toBe('wood');
     expect(fallenBranchRule?.excludeParentTrunkCollision).toBe(true);
-    expect(fallenBranchRule?.offsets.length).toBe(3);
+    expect(fallenBranchRule?.maxActivePerParent).toBe(3);
+    expect(fallenBranchRule?.offsets.length).toBeGreaterThan(fallenBranchRule?.maxActivePerParent ?? 0);
   });
 
   it('uses resource-parent trees as fallen branch parents', () => {
@@ -39,6 +41,31 @@ describe('zone one ecosystem rules', () => {
       expect(parent && isInsideTreeBranchSpawnBand(parent, branch.x, branch.y)).toBe(true);
       expect(parent && isOutsideParentTrunkCollision(parent, branch.x, branch.y)).toBe(true);
     }
+  });
+
+  it('chooses active tree-dependent resources from a larger valid candidate pool', () => {
+    const fallenBranchRule = getTreeDependentResourceRules()[0];
+    const parentTrees = getResourceParentTrees(fallenBranchRule);
+
+    for (const parent of parentTrees) {
+      const candidates = getValidTreeDependentSpawnCandidates(fallenBranchRule, parent);
+      const branches = createTreeDependentResourceSeeds().filter((branch) => branch.source.parentId === parent.id);
+
+      expect(candidates.length).toBeGreaterThan(branches.length);
+      expect(branches.length).toBe(fallenBranchRule.maxActivePerParent);
+      for (const branch of branches) {
+        expect(candidates.some((candidate) => candidate.x === branch.x && candidate.y === branch.y)).toBe(true);
+      }
+    }
+  });
+
+  it('uses a stable seed for controlled resource variation', () => {
+    const firstPass = createTreeDependentResourceSeeds('test-seed-a').map((branch) => branch.id);
+    const secondPass = createTreeDependentResourceSeeds('test-seed-a').map((branch) => branch.id);
+    const differentSeed = createTreeDependentResourceSeeds('test-seed-b').map((branch) => branch.id);
+
+    expect(secondPass).toEqual(firstPass);
+    expect(differentSeed).not.toEqual(firstPass);
   });
 
   it('adds tree-dependent branches to new game state resources', () => {

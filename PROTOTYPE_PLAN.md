@@ -1079,6 +1079,22 @@ Verification:
 - `npm.cmd test` passed: 57 tests.
 - `npm.cmd run build` passed.
 
+### Controlled Resource Randomization v1
+
+Status: implemented.
+
+- Tree-dependent resource rules now support stable seeded selection.
+- The fallen-branch rule now defines more valid candidate offsets than active spawned branches.
+- `createTreeDependentResourceSeeds(seed)` chooses active branches from valid candidates by stable seed score.
+- The default seed keeps the prototype deterministic, while alternate seeds can produce different branch layouts without changing authored map data.
+- Spawn candidates are still filtered through the rule's distance band and parent trunk collision exclusion before selection.
+- This gives Zone 1 the first controlled version of "not every run/place needs to look exactly hand-placed" while preserving authored guardrails.
+
+Verification:
+
+- `npm.cmd test` passed: 59 tests.
+- `npm.cmd run build` passed.
+
 ### Trunk Body Mask Refinement v2
 
 Status: implemented.

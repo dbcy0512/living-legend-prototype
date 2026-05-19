@@ -467,23 +467,35 @@ What is not flexible:
 
 Initial items:
 
+- Twigs.
+- Dry grass.
+- Bark.
 - Wood.
 - Stone.
 - Herbs.
 - Food.
 - Campfire.
+- Stone edge.
+- Branch club.
 
 Initial recipes:
 
-- Campfire = 2 wood + 1 stone.
+- Feed Fire = 1 wood + nearby active fire.
+- Simple Poultice = 1 herb + 1 bark.
+- Stone Edge = 1 stone + 1 bark + 1 twig.
+- Branch Club = 1 wood + 1 bark.
 
-Next recipes:
+Deferred recipes:
 
-- Poultice = 2 herbs.
 - Cooked food = 1 food + active campfire.
-- Torch = 1 wood + active campfire.
+- Torch or ember bundle = fuel material + active campfire.
 
 Inventory should remain simple until the survival loop is fun.
+
+The first UI should be a beginner satchel and making panel, not a large RPG grid. It should answer two questions:
+
+- What do I have?
+- What can I make from what I understand?
 
 ## Art Direction
 
@@ -1177,6 +1189,29 @@ Verification:
 
 - `npm.cmd test` passed: 70 tests.
 - `npm.cmd run build` passed.
+
+### Beginner Crafting Registry And UI v1
+
+Status: implemented.
+
+- Added a data-driven beginner recipe registry for:
+  - Feed Fire.
+  - Simple Poultice.
+  - Stone Edge.
+  - Branch Club.
+- Added a crafting system that checks inventory costs, nearby active-fire context, and recipe effects.
+- Added `stoneEdges` and `branchClubs` to inventory state as the first crafted tool outputs.
+- Added beginner UI state for inventory/crafting panels.
+- Added `I` for the satchel panel and `Tab` for the making panel.
+- Added number-key recipe execution while the making panel is open.
+- Updated the HUD hint away from campfire placement and toward satchel/making discovery.
+- Kept the first-fire opening behavior intact.
+
+Verification:
+
+- `npm.cmd test` passed: 76 tests.
+- `npm.cmd run build` passed.
+- Browser smoke check loaded the prototype with no console errors.
 
 ### Trunk Body Mask Refinement v2
 

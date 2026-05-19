@@ -74,4 +74,16 @@ describe('simulation status', () => {
 
     expect(state.world.timeOfDay).toBeGreaterThan(timeBefore);
   });
+
+  it('toggles beginner inventory and crafting panels through simulation state', () => {
+    const state = createGameState();
+    const actions = idleActions();
+    actions.toggleInventory = true;
+    actions.toggleCrafting = true;
+
+    updateSimulation(state, actions, 16);
+
+    expect(state.ui.inventoryOpen).toBe(true);
+    expect(state.ui.craftingOpen).toBe(true);
+  });
 });

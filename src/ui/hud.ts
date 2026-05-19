@@ -1,5 +1,6 @@
 import type { GameState } from '../game/simulation/state';
-import { getCampfirePlacementPreview, getFirstFirePreview } from '../game/simulation/systems/inventorySystem';
+import { getAvailableCraftingRecipes, getCraftingCostText } from '../game/simulation/systems/craftingSystem';
+import { getFirstFirePreview } from '../game/simulation/systems/inventorySystem';
 
 export type HudApi = {
   render: (state: GameState) => void;
@@ -31,7 +32,16 @@ export const createHud = (root: Element | null): HudApi => {
         <div class="pause__line">Press P to return</div>
       </div>
     </div>
-    <div class="hud__hint" data-hud="hint">Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, C places a campfire, F eats food.</div>
+    <div class="satchel" data-hud="inventoryPanel" aria-hidden="true">
+      <div class="satchel__title">Satchel</div>
+      <div class="satchel__grid" data-hud="inventoryGrid"></div>
+    </div>
+    <div class="crafting" data-hud="craftingPanel" aria-hidden="true">
+      <div class="crafting__title">Making</div>
+      <div class="crafting__list" data-hud="craftingList"></div>
+      <div class="crafting__message" data-hud="craftingMessage"></div>
+    </div>
+    <div class="hud__hint" data-hud="hint">Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, I satchel, Tab making, F eats food.</div>
   `;
 
   const lookup = (key: string): HTMLElement => {
@@ -52,11 +62,20 @@ export const createHud = (root: Element | null): HudApi => {
   const combat = lookup('combat');
   const hint = lookup('hint');
   const pause = lookup('pause');
+  const inventoryPanel = lookup('inventoryPanel');
+  const inventoryGrid = lookup('inventoryGrid');
+  const craftingPanel = lookup('craftingPanel');
+  const craftingList = lookup('craftingList');
+  const craftingMessage = lookup('craftingMessage');
 
   return {
     render: (state: GameState): void => {
       pause.classList.toggle('pause--active', state.world.paused);
       pause.setAttribute('aria-hidden', state.world.paused ? 'false' : 'true');
+      inventoryPanel.classList.toggle('satchel--active', state.ui.inventoryOpen);
+      inventoryPanel.setAttribute('aria-hidden', state.ui.inventoryOpen ? 'false' : 'true');
+      craftingPanel.classList.toggle('crafting--active', state.ui.craftingOpen);
+      craftingPanel.setAttribute('aria-hidden', state.ui.craftingOpen ? 'false' : 'true');
       health.style.setProperty('--value', `${(state.player.health / state.player.maxHealth) * 100}%`);
       stamina.style.setProperty('--value', `${(state.player.stamina / state.player.maxStamina) * 100}%`);
       hunger.style.setProperty('--value', `${(state.player.hunger / state.player.maxHunger) * 100}%`);
@@ -65,6 +84,9 @@ export const createHud = (root: Element | null): HudApi => {
       status.textContent = getStatusText(state);
       inventory.textContent = getInventoryText(state);
       combat.textContent = state.combat.phase;
+      inventoryGrid.innerHTML = getInventoryPanelHtml(state);
+      craftingList.innerHTML = getCraftingPanelHtml(state);
+      craftingMessage.textContent = state.ui.craftMessage;
       if (state.world.paused) {
         hint.textContent = 'Paused. Press P to return.';
       } else if (state.world.status === 'playing') {
@@ -90,7 +112,7 @@ const getStatusText = (state: GameState): string => {
 };
 
 const getInventoryText = (state: GameState): string => {
-  const survival = `W${state.inventory.wood} S${state.inventory.stone} H${state.inventory.herbs} F${state.inventory.food} C${state.inventory.campfires}`;
+  const survival = `W${state.inventory.wood} S${state.inventory.stone} H${state.inventory.herbs} F${state.inventory.food} E${state.inventory.stoneEdges} Cl${state.inventory.branchClubs}`;
   if (state.world.openingStage === 'open') {
     return survival;
   }
@@ -115,14 +137,55 @@ const getHintText = (state: GameState): string => {
     return 'The spark catches. Stay close.';
   }
 
-  const preview = getCampfirePlacementPreview(state);
-  const campfireHint =
-    preview.reason === 'ready'
-      ? 'C places campfire.'
-      : preview.reason === 'too-close'
-        ? 'Campfire spot too close.'
-        : 'Need 2 wood and 1 stone.';
-  return `Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, F eats food. ${campfireHint}`;
+  const craftHint = state.ui.craftingOpen ? 'Number keys make ready recipes.' : 'Tab opens making.';
+  return `Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, I satchel, F eats food. ${craftHint}`;
+};
+
+const getInventoryPanelHtml = (state: GameState): string => {
+  const rows = [
+    ['Twigs', state.inventory.twigs],
+    ['Dry Grass', state.inventory.dryGrass],
+    ['Bark', state.inventory.bark],
+    ['Wood', state.inventory.wood],
+    ['Stone', state.inventory.stone],
+    ['Herbs', state.inventory.herbs],
+    ['Food', state.inventory.food],
+    ['Stone Edges', state.inventory.stoneEdges],
+    ['Branch Clubs', state.inventory.branchClubs]
+  ];
+  return rows.map(([label, value]) => `<div class="satchel__item"><span>${label}</span><strong>${value}</strong></div>`).join('');
+};
+
+const getCraftingPanelHtml = (state: GameState): string =>
+  getAvailableCraftingRecipes(state)
+    .map(({ recipe, availability }, index) => {
+      const stateClass = availability.canCraft ? 'crafting__recipe--ready' : 'crafting__recipe--blocked';
+      const reason = availability.canCraft ? 'Ready' : getCraftingReasonText(availability.reason);
+      return `
+        <div class="crafting__recipe ${stateClass}">
+          <div class="crafting__key">${index + 1}</div>
+          <div class="crafting__body">
+            <div class="crafting__name">${recipe.name}</div>
+            <div class="crafting__cost">${getCraftingCostText(recipe.cost)}</div>
+            <div class="crafting__desc">${recipe.description}</div>
+          </div>
+          <div class="crafting__state">${reason}</div>
+        </div>
+      `;
+    })
+    .join('');
+
+const getCraftingReasonText = (reason: ReturnType<typeof getAvailableCraftingRecipes>[number]['availability']['reason']): string => {
+  switch (reason) {
+    case 'missing-items':
+      return 'Missing';
+    case 'needs-active-fire':
+      return 'Needs Fire';
+    case 'unknown-recipe':
+      return 'Unknown';
+    case 'ready':
+      return 'Ready';
+  }
 };
 
 const getMissingFirstFireMaterials = (state: GameState): string => {

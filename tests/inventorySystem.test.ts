@@ -14,10 +14,32 @@ import { idleActions } from '../src/game/input/actions';
 
 describe('inventory crafting', () => {
   it('crafts campfire only when resource costs are available', () => {
-    const inventory = { twigs: 0, dryGrass: 0, bark: 0, wood: 2, stone: 1, herbs: 0, food: 0, campfires: 0 };
+    const inventory = {
+      twigs: 0,
+      dryGrass: 0,
+      bark: 0,
+      wood: 2,
+      stone: 1,
+      herbs: 0,
+      food: 0,
+      campfires: 0,
+      stoneEdges: 0,
+      branchClubs: 0
+    };
 
     expect(craftCampfire(inventory)).toBe(true);
-    expect(inventory).toEqual({ twigs: 0, dryGrass: 0, bark: 0, wood: 0, stone: 0, herbs: 0, food: 0, campfires: 1 });
+    expect(inventory).toEqual({
+      twigs: 0,
+      dryGrass: 0,
+      bark: 0,
+      wood: 0,
+      stone: 0,
+      herbs: 0,
+      food: 0,
+      campfires: 1,
+      stoneEdges: 0,
+      branchClubs: 0
+    });
     expect(craftCampfire(inventory)).toBe(false);
     expect(inventory.campfires).toBe(1);
   });

@@ -1,6 +1,7 @@
 import type { ActionState } from '../../input/actions';
 import type { GameState, Inventory, PlayerState, ResourceNode } from '../state';
 import { clamp, distance } from '../rules/math';
+import { craftRecipe } from './craftingSystem';
 
 const campfireWoodCost = 2;
 const campfireStoneCost = 1;
@@ -67,6 +68,10 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
     } else if (!rebuildFirstFire(state)) {
       placeCampfire(state);
     }
+  }
+
+  if (actions.craftRecipe) {
+    craftRecipe(state, actions.craftRecipe);
   }
 
   if (actions.useFood) {

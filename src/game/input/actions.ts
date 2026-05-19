@@ -1,3 +1,5 @@
+import type { CraftingRecipeId } from '../content/craftingRecipes';
+
 export type Direction = 'north' | 'south' | 'west' | 'east';
 
 export type ActionState = {
@@ -10,6 +12,9 @@ export type ActionState = {
   useFood: boolean;
   restart: boolean;
   pause: boolean;
+  toggleInventory: boolean;
+  toggleCrafting: boolean;
+  craftRecipe?: CraftingRecipeId;
 };
 
 export const idleActions = (): ActionState => ({
@@ -21,5 +26,7 @@ export const idleActions = (): ActionState => ({
   craft: false,
   useFood: false,
   restart: false,
-  pause: false
+  pause: false,
+  toggleInventory: false,
+  toggleCrafting: false
 });

@@ -114,6 +114,142 @@ body {
   line-height: 1.45;
 }
 
+.satchel,
+.crafting {
+  position: absolute;
+  top: 98px;
+  width: min(360px, calc(100vw - 40px));
+  border: 2px solid rgba(245, 239, 216, 0.68);
+  background: rgba(12, 17, 27, 0.72);
+  box-shadow: 0 7px 0 rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(5px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-5px);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+}
+
+.satchel {
+  left: 20px;
+  padding: 12px;
+}
+
+.crafting {
+  right: 20px;
+  padding: 12px;
+}
+
+.satchel--active,
+.crafting--active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.satchel__title,
+.crafting__title {
+  margin-bottom: 9px;
+  color: #f8d16c;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.satchel__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.satchel__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 30px;
+  padding: 6px 8px;
+  border: 1px solid rgba(245, 239, 216, 0.24);
+  background: rgba(5, 8, 12, 0.38);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.satchel__item strong {
+  color: #f8d16c;
+}
+
+.crafting__list {
+  display: grid;
+  gap: 8px;
+}
+
+.crafting__recipe {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 64px;
+  padding: 8px;
+  border: 1px solid rgba(245, 239, 216, 0.24);
+  background: rgba(5, 8, 12, 0.38);
+}
+
+.crafting__recipe--ready {
+  border-color: rgba(248, 209, 108, 0.72);
+}
+
+.crafting__recipe--blocked {
+  color: rgba(245, 239, 216, 0.6);
+}
+
+.crafting__key {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(248, 209, 108, 0.68);
+  color: #f8d16c;
+  background: rgba(0, 0, 0, 0.26);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.crafting__name {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.crafting__cost,
+.crafting__desc,
+.crafting__state,
+.crafting__message {
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.crafting__cost {
+  margin-top: 3px;
+  color: #f8d16c;
+}
+
+.crafting__desc {
+  margin-top: 2px;
+  color: rgba(245, 239, 216, 0.7);
+}
+
+.crafting__state {
+  min-width: 58px;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.crafting__message {
+  min-height: 16px;
+  margin-top: 9px;
+  color: #f8d16c;
+}
+
 .pause {
   position: absolute;
   inset: 0;
@@ -166,8 +302,25 @@ body {
 
   .hud__line,
   .hud__hint,
+  .satchel__item,
+  .crafting__name,
+  .crafting__cost,
+  .crafting__desc,
+  .crafting__state,
+  .crafting__message,
   .pause__line {
     font-size: 12px;
+  }
+
+  .satchel,
+  .crafting {
+    left: 10px;
+    right: 10px;
+    width: auto;
+  }
+
+  .crafting {
+    top: 330px;
   }
 
   .pause__title {

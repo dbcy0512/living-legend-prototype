@@ -15,6 +15,8 @@ export type Inventory = {
   herbs: number;
   food: number;
   campfires: number;
+  stoneEdges: number;
+  branchClubs: number;
 };
 
 export type ItemKind = keyof Pick<Inventory, 'twigs' | 'dryGrass' | 'bark' | 'wood' | 'stone' | 'herbs' | 'food'>;
@@ -148,6 +150,13 @@ export type EcosystemState = {
   lastRegenerationPressure: number;
 };
 
+export type UiState = {
+  inventoryOpen: boolean;
+  craftingOpen: boolean;
+  lastCraftedRecipeId?: string;
+  craftMessage: string;
+};
+
 export type GameState = {
   player: PlayerState;
   combat: CombatState;
@@ -156,6 +165,7 @@ export type GameState = {
   behaviorMemory: BehaviorMemory;
   evolution: EvolutionState;
   ecosystem: EcosystemState;
+  ui: UiState;
   respawnPoint: RespawnPointState;
   campfires: CampfireState[];
   resources: ResourceNode[];
@@ -216,7 +226,9 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       stone: 0,
       herbs: 0,
       food: 0,
-      campfires: 0
+      campfires: 0,
+      stoneEdges: 0,
+      branchClubs: 0
     },
     behaviorMemory: createBehaviorMemory(),
     evolution: {
@@ -227,6 +239,11 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       lastRegenerationDay: 1,
       windfallPressure: 0,
       lastRegenerationPressure: 0
+    },
+    ui: {
+      inventoryOpen: false,
+      craftingOpen: false,
+      craftMessage: ''
     },
     respawnPoint: {
       x: startingArea.playerStart.x - 108,

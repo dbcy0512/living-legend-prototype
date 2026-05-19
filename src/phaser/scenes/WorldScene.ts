@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { idleActions, type ActionState } from '../../game/input/actions';
 import { animationKeys, assetKeys } from '../../game/assets/manifest';
+import { getCraftingRecipes } from '../../game/content/craftingRecipes';
 import { startingArea, viewportSize } from '../../game/content/maps/startingArea';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
 import type { CampfireState, GameState, ResourceNode } from '../../game/simulation/state';
@@ -41,6 +42,12 @@ type Keys = Record<
   | 'useFood'
   | 'restart'
   | 'pause'
+  | 'inventory'
+  | 'crafting'
+  | 'recipe1'
+  | 'recipe2'
+  | 'recipe3'
+  | 'recipe4'
   | 'debugCollision',
   Phaser.Input.Keyboard.Key
 >;
@@ -120,6 +127,7 @@ export class WorldScene extends Phaser.Scene {
     if (!keyboard) {
       throw new Error('Keyboard input is required for this prototype.');
     }
+    keyboard.addCapture([Phaser.Input.Keyboard.KeyCodes.TAB]);
     return {
       up: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
       down: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
@@ -136,6 +144,12 @@ export class WorldScene extends Phaser.Scene {
       useFood: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F),
       restart: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R),
       pause: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P),
+      inventory: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I),
+      crafting: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB),
+      recipe1: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE),
+      recipe2: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO),
+      recipe3: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE),
+      recipe4: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR),
       debugCollision: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K)
     };
   }
@@ -152,11 +166,35 @@ export class WorldScene extends Phaser.Scene {
     actions.useFood = Phaser.Input.Keyboard.JustDown(this.keys.useFood);
     actions.restart = Phaser.Input.Keyboard.JustDown(this.keys.restart);
     actions.pause = Phaser.Input.Keyboard.JustDown(this.keys.pause);
+    actions.toggleInventory = Phaser.Input.Keyboard.JustDown(this.keys.inventory);
+    actions.toggleCrafting = Phaser.Input.Keyboard.JustDown(this.keys.crafting);
+    actions.craftRecipe = this.readCraftingRecipeAction();
     if (Phaser.Input.Keyboard.JustDown(this.keys.debugCollision)) {
       this.collisionDebugVisible = !this.collisionDebugVisible;
     }
     this.wasPrimaryPointerDown = primaryPointerDown;
     return actions;
+  }
+
+  private readCraftingRecipeAction(): ActionState['craftRecipe'] {
+    if (!this.state.ui.craftingOpen) {
+      return undefined;
+    }
+
+    const slot =
+      Phaser.Input.Keyboard.JustDown(this.keys.recipe1)
+        ? 0
+        : Phaser.Input.Keyboard.JustDown(this.keys.recipe2)
+          ? 1
+          : Phaser.Input.Keyboard.JustDown(this.keys.recipe3)
+            ? 2
+            : Phaser.Input.Keyboard.JustDown(this.keys.recipe4)
+              ? 3
+              : -1;
+    if (slot < 0) {
+      return undefined;
+    }
+    return getCraftingRecipes()[slot]?.id;
   }
 
   private createWorld(): void {

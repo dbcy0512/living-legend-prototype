@@ -18,6 +18,12 @@ export const updateSimulation = (state: GameState, actions: ActionState, deltaMs
   if (actions.pause) {
     state.world.paused = !state.world.paused;
   }
+  if (actions.toggleInventory) {
+    state.ui.inventoryOpen = !state.ui.inventoryOpen;
+  }
+  if (actions.toggleCrafting) {
+    state.ui.craftingOpen = !state.ui.craftingOpen;
+  }
   if (state.world.paused) {
     return;
   }
@@ -39,6 +45,7 @@ const resetGameState = (state: GameState): void => {
   Object.assign(state.inventory, fresh.inventory);
   Object.assign(state.evolution, fresh.evolution);
   Object.assign(state.ecosystem, fresh.ecosystem);
+  Object.assign(state.ui, fresh.ui);
   Object.assign(state.behaviorMemory.body, fresh.behaviorMemory.body);
   Object.assign(state.behaviorMemory.combat, fresh.behaviorMemory.combat);
   Object.assign(state.behaviorMemory.tools.gathered, fresh.behaviorMemory.tools.gathered);

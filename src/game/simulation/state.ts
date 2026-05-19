@@ -1,6 +1,6 @@
 import type { Direction } from '../input/actions';
 import { startingArea } from '../content/maps/startingArea';
-import { createTreeDependentResourceSeeds } from '../content/ecosystem';
+import { createTreeDependentResourceSeeds, type EcosystemResourceRuleId } from '../content/ecosystem';
 
 export type Inventory = {
   twigs: number;
@@ -66,7 +66,7 @@ export type ResourceNode = {
   source?: {
     type: 'tree-dependent';
     parentId: string;
-    rule: 'fallen-branch-near-resource-parent';
+    rule: EcosystemResourceRuleId;
   };
 };
 

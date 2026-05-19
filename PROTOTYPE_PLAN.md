@@ -1056,6 +1056,29 @@ Verification:
 - `npm.cmd test` passed: 56 tests.
 - `npm.cmd run build` passed.
 
+### Ecosystem Spawn Rule Registry v1
+
+Status: implemented.
+
+- Converted the first tree-dependent resource behavior from a one-off branch helper into an inspectable spawn-rule registry.
+- The current fallen-branch rule now declares:
+  - rule id
+  - seed id prefix
+  - spawned resource kind
+  - eligible parent tree role
+  - amount and respawn timing
+  - allowed distance band from the parent trunk
+  - parent trunk collision exclusion
+  - deterministic prototype offsets
+- `createTreeDependentResourceSeeds()` now generates branches from this registry while preserving the current visible branch layout.
+- `ResourceNode.source.rule` now uses the ecosystem rule id type so future rules can expand without losing source metadata.
+- This is still deterministic. Randomized spawns should come next only after each rule declares its valid parent, material, distance, and collision constraints.
+
+Verification:
+
+- `npm.cmd test` passed: 57 tests.
+- `npm.cmd run build` passed.
+
 ### Trunk Body Mask Refinement v2
 
 Status: implemented.

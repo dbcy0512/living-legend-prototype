@@ -3,6 +3,7 @@ import {
   createTreeDependentResourceSeeds,
   getResourceParentTrees,
   getTreeDependentResourceParent,
+  getTreeDependentResourceRules,
   isInsideTreeBranchSpawnBand,
   isOutsideParentTrunkCollision,
   isTreeDependentResourceSeed
@@ -10,8 +11,20 @@ import {
 import { createGameState } from '../src/game/simulation/state';
 
 describe('zone one ecosystem rules', () => {
+  it('defines tree-dependent resource rules as inspectable data', () => {
+    const rules = getTreeDependentResourceRules();
+    const fallenBranchRule = rules.find((rule) => rule.id === 'fallen-branch-near-resource-parent');
+
+    expect(fallenBranchRule).toBeDefined();
+    expect(fallenBranchRule?.parentRole).toBe('resource-parent');
+    expect(fallenBranchRule?.kind).toBe('wood');
+    expect(fallenBranchRule?.excludeParentTrunkCollision).toBe(true);
+    expect(fallenBranchRule?.offsets.length).toBe(3);
+  });
+
   it('uses resource-parent trees as fallen branch parents', () => {
-    const parentTrees = getResourceParentTrees();
+    const fallenBranchRule = getTreeDependentResourceRules()[0];
+    const parentTrees = getResourceParentTrees(fallenBranchRule);
     const branches = createTreeDependentResourceSeeds();
 
     expect(parentTrees.length).toBeGreaterThan(0);

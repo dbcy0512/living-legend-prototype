@@ -1,4 +1,19 @@
-import { startingArea, type TreeInstance } from './maps/startingArea';
+import { startingArea, type TreeInstance, type TreePlacementRole } from './maps/startingArea';
+
+export type EcosystemResourceRuleId = 'fallen-branch-near-resource-parent';
+
+export type TreeDependentResourceRule = {
+  id: EcosystemResourceRuleId;
+  seedIdPrefix: string;
+  kind: 'wood';
+  parentRole: TreePlacementRole;
+  amount: number;
+  respawnMs: number;
+  minDistanceFromTrunk: number;
+  maxDistanceFromTrunk: number;
+  excludeParentTrunkCollision: boolean;
+  offsets: readonly { x: number; y: number }[];
+};
 
 export type EcosystemResourceSeed = {
   id: string;
@@ -10,51 +25,79 @@ export type EcosystemResourceSeed = {
   source: {
     type: 'tree-dependent';
     parentId: string;
-    rule: 'fallen-branch-near-resource-parent';
+    rule: EcosystemResourceRuleId;
   };
 };
 
-const branchSpawnOffsets = [
-  { x: -54, y: 46 },
-  { x: 46, y: 38 },
-  { x: 18, y: 70 }
-] as const;
+const treeDependentResourceRules = [
+  {
+    id: 'fallen-branch-near-resource-parent',
+    seedIdPrefix: 'fallen-branch',
+    kind: 'wood',
+    parentRole: 'resource-parent',
+    amount: 1,
+    respawnMs: 0,
+    minDistanceFromTrunk: 34,
+    maxDistanceFromTrunk: 96,
+    excludeParentTrunkCollision: true,
+    offsets: [
+      { x: -54, y: 46 },
+      { x: 46, y: 38 },
+      { x: 18, y: 70 }
+    ]
+  }
+] as const satisfies readonly TreeDependentResourceRule[];
 
-const branchSpawnMinDistanceFromTrunk = 34;
-const branchSpawnMaxDistanceFromTrunk = 96;
+const fallenBranchRule = treeDependentResourceRules[0];
 
-export const getResourceParentTrees = (): readonly TreeInstance[] =>
-  startingArea.environment.trees.filter((tree) => tree.placementRole === 'resource-parent');
+export const getTreeDependentResourceRules = (): readonly TreeDependentResourceRule[] => treeDependentResourceRules;
+
+export const getResourceParentTrees = (rule: TreeDependentResourceRule = fallenBranchRule): readonly TreeInstance[] =>
+  startingArea.environment.trees.filter((tree) => tree.placementRole === rule.parentRole);
 
 export const isTreeDependentResourceSeed = (seed: EcosystemResourceSeed): boolean =>
-  seed.source.type === 'tree-dependent' && seed.source.rule === 'fallen-branch-near-resource-parent';
+  seed.source.type === 'tree-dependent' &&
+  treeDependentResourceRules.some((rule) => rule.id === seed.source.rule);
 
 export const getTreeDependentResourceParent = (seed: EcosystemResourceSeed): TreeInstance | undefined =>
-  getResourceParentTrees().find((tree) => tree.id === seed.source.parentId);
+  startingArea.environment.trees.find((tree) => tree.id === seed.source.parentId);
 
 export const createTreeDependentResourceSeeds = (): EcosystemResourceSeed[] =>
-  getResourceParentTrees().flatMap((tree) =>
-    branchSpawnOffsets.map((offset, index) => ({
-      id: `${tree.id}-fallen-branch-${index + 1}`,
-      kind: 'wood',
-      x: tree.x + offset.x,
-      y: tree.y + offset.y,
-      amount: 1,
-      respawnMs: 0,
-      source: {
-        type: 'tree-dependent',
-        parentId: tree.id,
-        rule: 'fallen-branch-near-resource-parent'
-      }
-    }))
+  treeDependentResourceRules.flatMap((rule) =>
+    getResourceParentTrees(rule).flatMap((tree) =>
+      rule.offsets
+        .map((offset, index) => ({
+          id: `${tree.id}-${rule.seedIdPrefix}-${index + 1}`,
+          kind: rule.kind,
+          x: tree.x + offset.x,
+          y: tree.y + offset.y,
+          amount: rule.amount,
+          respawnMs: rule.respawnMs,
+          source: {
+            type: 'tree-dependent' as const,
+            parentId: tree.id,
+            rule: rule.id
+          }
+        }))
+        .filter((seed) => isValidTreeDependentSpawn(rule, tree, seed.x, seed.y))
+    )
   );
 
 export const isInsideTreeBranchSpawnBand = (tree: TreeInstance, x: number, y: number): boolean => {
+  return isInsideTreeDependentSpawnBand(fallenBranchRule, tree, x, y);
+};
+
+const isInsideTreeDependentSpawnBand = (
+  rule: TreeDependentResourceRule,
+  tree: TreeInstance,
+  x: number,
+  y: number
+): boolean => {
   const dx = x - tree.x;
   const dy = y - tree.y;
   const distance = Math.sqrt(dx * dx + dy * dy);
 
-  return distance >= branchSpawnMinDistanceFromTrunk && distance <= branchSpawnMaxDistanceFromTrunk;
+  return distance >= rule.minDistanceFromTrunk && distance <= rule.maxDistanceFromTrunk;
 };
 
 export const isOutsideParentTrunkCollision = (tree: TreeInstance, x: number, y: number): boolean => {
@@ -66,3 +109,12 @@ export const isOutsideParentTrunkCollision = (tree: TreeInstance, x: number, y: 
 
   return x < left || x > right || y < top || y > bottom;
 };
+
+const isValidTreeDependentSpawn = (
+  rule: TreeDependentResourceRule,
+  tree: TreeInstance,
+  x: number,
+  y: number
+): boolean =>
+  isInsideTreeDependentSpawnBand(rule, tree, x, y) &&
+  (!rule.excludeParentTrunkCollision || isOutsideParentTrunkCollision(tree, x, y));

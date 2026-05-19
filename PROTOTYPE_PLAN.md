@@ -1126,6 +1126,22 @@ Verification:
 - `npm.cmd test` passed: 64 tests.
 - `npm.cmd run build` passed.
 
+### World Event Influence v1
+
+Status: implemented.
+
+- Added `ecosystem.windfallPressure` and `ecosystem.lastRegenerationPressure` to game state.
+- Night pressure and dawn/dusk glow now accumulate ecosystem windfall pressure over time.
+- Dawn regeneration now requires enough accumulated windfall pressure before tree-dependent resources refill.
+- Regeneration consumes part of the accumulated pressure and records the pressure that caused the refill.
+- This gives the current branch lifecycle a world cause: fallen branches are no longer only day-timer refills; they are tied to accumulated environmental pressure.
+- Future storm, wind, season, animal, and player-impact rules can feed this same pressure path.
+
+Verification:
+
+- `npm.cmd test` passed: 66 tests.
+- `npm.cmd run build` passed.
+
 ### Trunk Body Mask Refinement v2
 
 Status: implemented.

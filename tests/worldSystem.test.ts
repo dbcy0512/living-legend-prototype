@@ -30,6 +30,16 @@ describe('living world pressure', () => {
     expect(state.player.hunger).toBeLessThan(hunger);
   });
 
+  it('accumulates ecosystem windfall pressure from world pressure', () => {
+    const state = createGameState();
+    state.world.timeOfDay = 0.9;
+    const pressure = state.ecosystem.windfallPressure;
+
+    updateWorld(state, 1000);
+
+    expect(state.ecosystem.windfallPressure).toBeGreaterThan(pressure);
+  });
+
   it('reduces local night pressure when the player is inside an active campfire radius', () => {
     const state = createGameState();
     state.campfires.push({
@@ -93,12 +103,33 @@ describe('living world pressure', () => {
     state.world.day = 2;
     state.world.timeOfDay = 0.279;
     state.ecosystem.lastRegenerationDay = 1;
+    state.ecosystem.windfallPressure = 0.5;
 
     updateWorld(state, 250);
 
     expect(resource.amount).toBe(1);
     expect(resource.respawnMs).toBe(0);
     expect(state.ecosystem.lastRegenerationDay).toBe(2);
+    expect(state.ecosystem.lastRegenerationPressure).toBeGreaterThanOrEqual(0.5);
+    expect(state.ecosystem.windfallPressure).toBeLessThan(0.5);
+  });
+
+  it('waits to regenerate ecosystem resources until enough world pressure has accumulated', () => {
+    const state = createGameState();
+    const resource = state.resources.find((node) => node.source?.type === 'tree-dependent');
+    if (!resource) {
+      throw new Error('tree-dependent resource fixture missing');
+    }
+    resource.amount = 0;
+    state.world.day = 2;
+    state.world.timeOfDay = 0.28;
+    state.ecosystem.lastRegenerationDay = 1;
+    state.ecosystem.windfallPressure = 0.05;
+
+    updateWorld(state, 16);
+
+    expect(resource.amount).toBe(0);
+    expect(state.ecosystem.lastRegenerationDay).toBe(1);
   });
 
   it('marks the run won after surviving into the next dawn window', () => {

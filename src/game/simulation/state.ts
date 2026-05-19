@@ -148,6 +148,8 @@ export type EvolutionState = {
 export type EcosystemState = {
   seed: string;
   lastRegenerationDay: number;
+  windfallPressure: number;
+  lastRegenerationPressure: number;
 };
 
 export type GameState = {
@@ -226,7 +228,9 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
   },
   ecosystem: {
     seed: ecosystemSeed,
-    lastRegenerationDay: 1
+    lastRegenerationDay: 1,
+    windfallPressure: 0,
+    lastRegenerationPressure: 0
   },
   respawnPoint: {
     x: startingArea.playerStart.x - 108,

@@ -4,6 +4,7 @@ import { clamp, distance } from '../rules/math';
 import { forceEnemyRespawnGrace, isPlayerUnderThreat } from './enemySystem';
 
 const ecosystemRegenerationTime = 0.28;
+const ecosystemRegenerationPressureCost = 0.24;
 
 export const updateWorld = (state: GameState, deltaMs: number): void => {
   if (state.world.status !== 'playing') {
@@ -30,6 +31,7 @@ export const updateWorld = (state: GameState, deltaMs: number): void => {
   world.lifePulse = (Math.sin(world.windPhase * 2.1) + 1) / 2;
   world.mood = clamp(0.35 + localNightPressure * 0.45 + dawnDuskGlow * 0.16 + world.lifePulse * 0.12, 0, 1);
   updateBehaviorMemory(state, deltaMs);
+  updateEcosystemWorldEventInfluence(state, seconds);
   updateEcosystemLifecycle(state);
 
   updateCold(state, seconds);
@@ -48,9 +50,18 @@ export const updateWorld = (state: GameState, deltaMs: number): void => {
   }
 };
 
+const updateEcosystemWorldEventInfluence = (state: GameState, seconds: number): void => {
+  const world = state.world;
+  const pressureGain = seconds * (world.rawNightPressure * 0.18 + world.dawnDuskGlow * 0.04);
+  state.ecosystem.windfallPressure = clamp(state.ecosystem.windfallPressure + pressureGain, 0, 1);
+};
+
 const updateEcosystemLifecycle = (state: GameState): void => {
   const world = state.world;
   if (world.day <= state.ecosystem.lastRegenerationDay || world.timeOfDay < ecosystemRegenerationTime) {
+    return;
+  }
+  if (state.ecosystem.windfallPressure < ecosystemRegenerationPressureCost) {
     return;
   }
 
@@ -69,6 +80,12 @@ const updateEcosystemLifecycle = (state: GameState): void => {
     state.resources.push({ ...seed });
   }
 
+  state.ecosystem.lastRegenerationPressure = state.ecosystem.windfallPressure;
+  state.ecosystem.windfallPressure = clamp(
+    state.ecosystem.windfallPressure - ecosystemRegenerationPressureCost,
+    0,
+    1
+  );
   state.ecosystem.lastRegenerationDay = world.day;
 };
 

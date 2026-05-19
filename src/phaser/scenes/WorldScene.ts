@@ -72,6 +72,7 @@ export class WorldScene extends Phaser.Scene {
   private combatFx!: Phaser.GameObjects.Graphics;
   private occlusionRevealFx!: Phaser.GameObjects.Graphics;
   private collisionDebug!: Phaser.GameObjects.Graphics;
+  private ecosystemDebugText!: Phaser.GameObjects.Text;
   private collisionDebugVisible = false;
   private wasPrimaryPointerDown = false;
   private pausedViewActive = false;
@@ -194,6 +195,16 @@ export class WorldScene extends Phaser.Scene {
     this.collisionDebug = this.add.graphics();
     this.collisionDebug.setDepth(90);
     this.collisionDebug.setVisible(false);
+    this.ecosystemDebugText = this.add.text(18, 158, '', {
+      fontFamily: 'monospace',
+      fontSize: '12px',
+      color: '#fff3a3',
+      backgroundColor: 'rgba(10, 18, 18, 0.72)',
+      padding: { x: 8, y: 6 }
+    });
+    this.ecosystemDebugText.setScrollFactor(0);
+    this.ecosystemDebugText.setDepth(106);
+    this.ecosystemDebugText.setVisible(false);
   }
 
   private createTerrainBase(): void {
@@ -532,6 +543,7 @@ export class WorldScene extends Phaser.Scene {
   private drawCollisionDebug(): void {
     this.collisionDebug.clear();
     this.collisionDebug.setVisible(this.collisionDebugVisible);
+    this.ecosystemDebugText.setVisible(this.collisionDebugVisible);
     if (!this.collisionDebugVisible) {
       return;
     }
@@ -568,6 +580,24 @@ export class WorldScene extends Phaser.Scene {
       this.collisionDebug.fillCircle(node.x, node.y, 3);
       this.collisionDebug.strokeCircle(parentTree.x, parentTree.y, 5);
     }
+
+    this.ecosystemDebugText.setText(this.getEcosystemDebugText());
+  }
+
+  private getEcosystemDebugText(): string {
+    const treeDependent = this.state.resources.filter((node) => node.source?.type === 'tree-dependent');
+    const active = treeDependent.filter((node) => node.amount > 0).length;
+    const depleted = treeDependent.length - active;
+    const ecosystem = this.state.ecosystem;
+    const world = this.state.world;
+
+    return [
+      `eco seed: ${ecosystem.seed}`,
+      `windfall: ${ecosystem.windfallPressure.toFixed(2)}`,
+      `last regen: day ${ecosystem.lastRegenerationDay} @ ${ecosystem.lastRegenerationPressure.toFixed(2)}`,
+      `tree resources: ${active} active / ${depleted} depleted`,
+      `world: day ${world.day} time ${world.timeOfDay.toFixed(2)} night ${world.rawNightPressure.toFixed(2)}`
+    ].join('\n');
   }
 
   private playPickupFeedback(node: ResourceNode, sprite: Phaser.GameObjects.Image): void {

@@ -1142,6 +1142,25 @@ Verification:
 - `npm.cmd test` passed: 66 tests.
 - `npm.cmd run build` passed.
 
+### Ecosystem Debug Readability v1
+
+Status: implemented.
+
+- Extended the hidden `K` debug overlay with a fixed ecosystem state panel.
+- The panel shows:
+  - active ecosystem seed
+  - accumulated windfall pressure
+  - last regeneration day and pressure
+  - active/depleted tree-dependent resource counts
+  - current day/time/night pressure
+- This keeps ecosystem tuning inspectable without adding player-facing tutorial UI.
+- The existing `K` overlay still shows tree trunk collision, canopy cover, player collision, and branch-parent links.
+
+Verification:
+
+- `npm.cmd test` passed: 66 tests.
+- `npm.cmd run build` passed.
+
 ### Trunk Body Mask Refinement v2
 
 Status: implemented.

@@ -1,8 +1,10 @@
 import type { ActionState } from '../../input/actions';
+import { getCraftingRecipes } from '../../content/craftingRecipes';
 import { createGameState, type GameState } from '../state';
 import { updateEvolution } from '../rules/evolutionRules';
 import { updateCombat } from './combatSystem';
 import { updateEnemies } from './enemySystem';
+import { selectOrUseHotbarSlot } from './hotbarSystem';
 import { updateInventory } from './inventorySystem';
 import { updatePlayer } from './playerSystem';
 import { updateWorld } from './worldSystem';
@@ -23,6 +25,14 @@ export const updateSimulation = (state: GameState, actions: ActionState, deltaMs
   }
   if (actions.toggleCrafting) {
     state.ui.craftingOpen = !state.ui.craftingOpen;
+  }
+  if (state.ui.craftingOpen && (actions.craftRecipeNext || actions.craftRecipePrevious)) {
+    const recipeCount = getCraftingRecipes().length;
+    const offset = actions.craftRecipeNext ? 1 : -1;
+    state.ui.selectedCraftingRecipeIndex = (state.ui.selectedCraftingRecipeIndex + offset + recipeCount) % recipeCount;
+  }
+  if (actions.hotbarSlot !== undefined) {
+    selectOrUseHotbarSlot(state, actions.hotbarSlot);
   }
   if (state.world.paused) {
     return;

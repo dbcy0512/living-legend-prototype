@@ -53,7 +53,8 @@ describe('crafting registry', () => {
     expect(craftRecipe(state, 'simple-poultice')).toBe(true);
     expect(state.inventory.herbs).toBe(0);
     expect(state.inventory.bark).toBe(0);
-    expect(state.player.health).toBe(74);
+    expect(state.inventory.poultices).toBe(1);
+    expect(state.player.health).toBe(50);
   });
 
   it('creates crude tool items from early materials', () => {

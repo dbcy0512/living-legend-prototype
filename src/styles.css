@@ -131,7 +131,12 @@ body {
 
 .satchel {
   left: 20px;
-  padding: 12px;
+  padding: 22px 24px;
+  border: 0;
+  background:
+    linear-gradient(rgba(35, 24, 17, 0.22), rgba(35, 24, 17, 0.22)),
+    url('/assets/ui/satchel-panel-v1.png') center / 100% 100% no-repeat;
+  box-shadow: none;
 }
 
 .crafting {
@@ -168,8 +173,8 @@ body {
   justify-content: space-between;
   min-height: 30px;
   padding: 6px 8px;
-  border: 1px solid rgba(245, 239, 216, 0.24);
-  background: rgba(5, 8, 12, 0.38);
+  border: 1px solid rgba(75, 48, 30, 0.34);
+  background: rgba(33, 21, 14, 0.2);
   font-size: 12px;
   line-height: 1.2;
 }
@@ -189,17 +194,25 @@ body {
   gap: 8px;
   align-items: center;
   min-height: 64px;
-  padding: 8px;
-  border: 1px solid rgba(245, 239, 216, 0.24);
-  background: rgba(5, 8, 12, 0.38);
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgba(24, 16, 10, 0.18), rgba(24, 16, 10, 0.18)),
+    url('/assets/ui/recipe-card-v1.png') center / 100% 100% no-repeat;
 }
 
 .crafting__recipe--ready {
-  border-color: rgba(248, 209, 108, 0.72);
+  filter: saturate(1.12);
 }
 
 .crafting__recipe--blocked {
-  color: rgba(245, 239, 216, 0.6);
+  color: rgba(52, 35, 24, 0.64);
+  filter: grayscale(0.25);
+}
+
+.crafting__recipe--selected {
+  border-color: rgba(248, 209, 108, 0.88);
+  box-shadow: 0 0 0 2px rgba(248, 209, 108, 0.16);
 }
 
 .crafting__key {
@@ -212,6 +225,69 @@ body {
   background: rgba(0, 0, 0, 0.26);
   font-size: 13px;
   font-weight: 800;
+}
+
+.hotbar {
+  position: absolute;
+  left: 50%;
+  bottom: 50px;
+  display: grid;
+  grid-template-columns: repeat(6, 58px);
+  gap: 6px;
+  transform: translateX(-50%);
+}
+
+.hotbar__slot {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  background: url('/assets/ui/hotbar-slot-empty-v1.png') center / 100% 100% no-repeat;
+}
+
+.hotbar__slot--locked {
+  background-image: url('/assets/ui/hotbar-slot-locked-v1.png');
+}
+
+.hotbar__slot--empty .hotbar__icon {
+  opacity: 0.34;
+}
+
+.hotbar__key {
+  position: absolute;
+  top: 5px;
+  left: 7px;
+  color: rgba(245, 239, 216, 0.82);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+}
+
+.hotbar__icon {
+  position: absolute;
+  inset: 11px;
+  background: var(--icon) center / contain no-repeat;
+  image-rendering: pixelated;
+}
+
+.hotbar__count {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  min-width: 15px;
+  color: #f8d16c;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  text-align: right;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.8);
+}
+
+.hotbar__selected {
+  position: absolute;
+  inset: -7px;
+  background: url('/assets/ui/hotbar-selected-overlay-v1.png') center / 100% 100% no-repeat;
+  pointer-events: none;
 }
 
 .crafting__name {
@@ -321,6 +397,17 @@ body {
 
   .crafting {
     top: 330px;
+  }
+
+  .hotbar {
+    bottom: 44px;
+    grid-template-columns: repeat(6, 46px);
+    gap: 3px;
+  }
+
+  .hotbar__slot {
+    width: 46px;
+    height: 46px;
   }
 
   .pause__title {

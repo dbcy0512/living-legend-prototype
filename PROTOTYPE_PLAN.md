@@ -1332,3 +1332,32 @@ Verification:
 
 - `npm.cmd test` passed: 50 tests.
 - `npm.cmd run build` passed.
+
+### Hotbar UI And Crafting Input Refactor v1
+
+Status: implemented.
+
+- Added a six-slot beginner hotbar driven by simulation state.
+- Number keys now select/use hotbar slots instead of crafting recipes.
+- Current slot plan:
+  - 1: Simple Poultice.
+  - 2: Food.
+  - 3: Branch Club.
+  - 4: Stone Edge.
+  - 5-6: locked future growth slots.
+- Simple Poultice now crafts into a carried poultice item instead of healing immediately.
+- Poultice use now happens from the hotbar and consumes one poultice.
+- Branch Club and Stone Edge can be equipped from hotbar slots after crafting.
+- Crafting input now uses bracket keys to move selection and Enter to craft the selected recipe while the Making panel is open.
+- The HUD now uses the generated PixelLab UI assets for hotbar slots, selected slot overlay, satchel panel, and recipe cards.
+
+Design reason:
+
+The hotbar protects number keys for moment-to-moment play. Crafting becomes a deliberate panel action, while carried items and crude tools start feeling like things the player owns and chooses under pressure.
+
+Verification:
+
+- `npm.cmd test` passed: 81 tests.
+- `npm.cmd run build` passed.
+- Local server check at `http://127.0.0.1:5173/` returned 200.
+- Browser smoke confirmed six hotbar slots render with no console errors.

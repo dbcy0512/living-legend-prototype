@@ -60,10 +60,14 @@ export const craftRecipe = (state: GameState, recipeId: CraftingRecipeId): boole
     state.player.health = clamp(state.player.health + recipe.effect.health, 0, state.player.maxHealth);
   } else {
     state.inventory[recipe.effect.item] += recipe.effect.amount;
-    if (recipe.effect.item === 'branchClubs') {
+    if (recipe.effect.item === 'poultices') {
+      state.ui.hotbarMessage = 'Poultice ready.';
+    } else if (recipe.effect.item === 'branchClubs') {
       state.evolution.equippedMeleeSeed = 'branch-club';
+      state.ui.selectedHotbarSlot = 2;
     } else if (recipe.effect.item === 'stoneEdges') {
       state.evolution.equippedMeleeSeed = 'stone-edge';
+      state.ui.selectedHotbarSlot = 3;
     }
   }
 

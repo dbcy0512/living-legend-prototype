@@ -1,6 +1,7 @@
 import type { GameState } from '../game/simulation/state';
 import { getMeleeSeedProfile } from '../game/content/meleeSeeds';
 import { getAvailableCraftingRecipes, getCraftingCostText } from '../game/simulation/systems/craftingSystem';
+import { getHotbarSlots, type HotbarItemId } from '../game/simulation/systems/hotbarSystem';
 import { getFirstFirePreview } from '../game/simulation/systems/inventorySystem';
 
 export type HudApi = {
@@ -42,7 +43,8 @@ export const createHud = (root: Element | null): HudApi => {
       <div class="crafting__list" data-hud="craftingList"></div>
       <div class="crafting__message" data-hud="craftingMessage"></div>
     </div>
-    <div class="hud__hint" data-hud="hint">Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, I satchel, Tab making, F eats food.</div>
+    <div class="hotbar" data-hud="hotbar"></div>
+    <div class="hud__hint" data-hud="hint">Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-6 hotbar, I satchel, Tab making.</div>
   `;
 
   const lookup = (key: string): HTMLElement => {
@@ -68,6 +70,7 @@ export const createHud = (root: Element | null): HudApi => {
   const craftingPanel = lookup('craftingPanel');
   const craftingList = lookup('craftingList');
   const craftingMessage = lookup('craftingMessage');
+  const hotbar = lookup('hotbar');
 
   return {
     render: (state: GameState): void => {
@@ -88,6 +91,7 @@ export const createHud = (root: Element | null): HudApi => {
       inventoryGrid.innerHTML = getInventoryPanelHtml(state);
       craftingList.innerHTML = getCraftingPanelHtml(state);
       craftingMessage.textContent = state.ui.craftMessage;
+      hotbar.innerHTML = getHotbarHtml(state);
       if (state.world.paused) {
         hint.textContent = 'Paused. Press P to return.';
       } else if (state.world.status === 'playing') {
@@ -146,8 +150,9 @@ const getHintText = (state: GameState): string => {
     return 'The spark catches. Stay close.';
   }
 
-  const craftHint = state.ui.craftingOpen ? 'Number keys make ready recipes.' : 'Tab opens making.';
-  return `Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, I satchel, F eats food. ${craftHint}`;
+  const craftHint = state.ui.craftingOpen ? '[ ] choose making. Enter makes.' : 'Tab opens making.';
+  const hotbarHint = state.ui.hotbarMessage ? `${state.ui.hotbarMessage} ` : '';
+  return `${hotbarHint}Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-6 hotbar, I satchel. ${craftHint}`;
 };
 
 const getInventoryPanelHtml = (state: GameState): string => {
@@ -159,6 +164,7 @@ const getInventoryPanelHtml = (state: GameState): string => {
     ['Stone', state.inventory.stone],
     ['Herbs', state.inventory.herbs],
     ['Food', state.inventory.food],
+    ['Poultices', state.inventory.poultices],
     ['Stone Edges', state.inventory.stoneEdges],
     ['Branch Clubs', state.inventory.branchClubs],
     ['Held', getMeleeSeedProfile(state.evolution.equippedMeleeSeed).name],
@@ -172,10 +178,11 @@ const getCraftingPanelHtml = (state: GameState): string =>
   getAvailableCraftingRecipes(state)
     .map(({ recipe, availability }, index) => {
       const stateClass = availability.canCraft ? 'crafting__recipe--ready' : 'crafting__recipe--blocked';
+      const selectedClass = index === state.ui.selectedCraftingRecipeIndex ? 'crafting__recipe--selected' : '';
       const reason = availability.canCraft ? 'Ready' : getCraftingReasonText(availability.reason);
       return `
-        <div class="crafting__recipe ${stateClass}">
-          <div class="crafting__key">${index + 1}</div>
+        <div class="crafting__recipe ${stateClass} ${selectedClass}">
+          <div class="crafting__key">${index === state.ui.selectedCraftingRecipeIndex ? '>' : ''}</div>
           <div class="crafting__body">
             <div class="crafting__name">${recipe.name}</div>
             <div class="crafting__cost">${getCraftingCostText(recipe.cost)}</div>
@@ -186,6 +193,39 @@ const getCraftingPanelHtml = (state: GameState): string =>
       `;
     })
     .join('');
+
+const getHotbarHtml = (state: GameState): string =>
+  getHotbarSlots(state)
+    .map((slot) => {
+      const selected = slot.index === state.ui.selectedHotbarSlot;
+      const lockedClass = slot.locked ? 'hotbar__slot--locked' : '';
+      const readyClass = slot.ready ? 'hotbar__slot--ready' : 'hotbar__slot--empty';
+      const icon = slot.itemId ? getHotbarIcon(slot.itemId) : '';
+      const count = slot.count > 0 ? `<span class="hotbar__count">${slot.count}</span>` : '';
+      const iconStyle = icon ? ` style="--icon: url('${icon}')"` : '';
+      return `
+        <div class="hotbar__slot ${lockedClass} ${readyClass}">
+          <span class="hotbar__key">${slot.index + 1}</span>
+          <span class="hotbar__icon"${iconStyle}></span>
+          ${count}
+          ${selected ? '<span class="hotbar__selected"></span>' : ''}
+        </div>
+      `;
+    })
+    .join('');
+
+const getHotbarIcon = (itemId: HotbarItemId): string => {
+  switch (itemId) {
+    case 'simple-poultice':
+      return '/assets/crafting/simple-poultice-v1.png';
+    case 'food':
+      return '/assets/environment/resource-fruit-v1.png';
+    case 'branch-club':
+      return '/assets/crafting/branch-club-v1.png';
+    case 'stone-edge':
+      return '/assets/crafting/stone-edge-v1.png';
+  }
+};
 
 const getCraftingReasonText = (reason: ReturnType<typeof getAvailableCraftingRecipes>[number]['availability']['reason']): string => {
   switch (reason) {

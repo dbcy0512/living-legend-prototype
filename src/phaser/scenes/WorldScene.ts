@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { idleActions, type ActionState } from '../../game/input/actions';
 import { animationKeys, assetKeys } from '../../game/assets/manifest';
-import { getCraftingRecipes } from '../../game/content/craftingRecipes';
 import { startingArea, viewportSize } from '../../game/content/maps/startingArea';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
 import type { CampfireState, GameState, ResourceNode } from '../../game/simulation/state';
@@ -44,10 +43,15 @@ type Keys = Record<
   | 'pause'
   | 'inventory'
   | 'crafting'
-  | 'recipe1'
-  | 'recipe2'
-  | 'recipe3'
-  | 'recipe4'
+  | 'craftNext'
+  | 'craftPrevious'
+  | 'craftConfirm'
+  | 'hotbar1'
+  | 'hotbar2'
+  | 'hotbar3'
+  | 'hotbar4'
+  | 'hotbar5'
+  | 'hotbar6'
   | 'debugCollision',
   Phaser.Input.Keyboard.Key
 >;
@@ -146,10 +150,15 @@ export class WorldScene extends Phaser.Scene {
       pause: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P),
       inventory: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I),
       crafting: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TAB),
-      recipe1: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE),
-      recipe2: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO),
-      recipe3: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE),
-      recipe4: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR),
+      craftNext: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CLOSED_BRACKET),
+      craftPrevious: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.OPEN_BRACKET),
+      craftConfirm: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER),
+      hotbar1: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE),
+      hotbar2: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO),
+      hotbar3: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE),
+      hotbar4: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR),
+      hotbar5: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FIVE),
+      hotbar6: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SIX),
       debugCollision: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K)
     };
   }
@@ -168,7 +177,10 @@ export class WorldScene extends Phaser.Scene {
     actions.pause = Phaser.Input.Keyboard.JustDown(this.keys.pause);
     actions.toggleInventory = Phaser.Input.Keyboard.JustDown(this.keys.inventory);
     actions.toggleCrafting = Phaser.Input.Keyboard.JustDown(this.keys.crafting);
-    actions.craftRecipe = this.readCraftingRecipeAction();
+    actions.craftRecipeNext = Phaser.Input.Keyboard.JustDown(this.keys.craftNext);
+    actions.craftRecipePrevious = Phaser.Input.Keyboard.JustDown(this.keys.craftPrevious);
+    actions.craftRecipeConfirm = Phaser.Input.Keyboard.JustDown(this.keys.craftConfirm);
+    actions.hotbarSlot = this.readHotbarSlotAction();
     if (Phaser.Input.Keyboard.JustDown(this.keys.debugCollision)) {
       this.collisionDebugVisible = !this.collisionDebugVisible;
     }
@@ -176,25 +188,25 @@ export class WorldScene extends Phaser.Scene {
     return actions;
   }
 
-  private readCraftingRecipeAction(): ActionState['craftRecipe'] {
-    if (!this.state.ui.craftingOpen) {
-      return undefined;
-    }
-
+  private readHotbarSlotAction(): ActionState['hotbarSlot'] {
     const slot =
-      Phaser.Input.Keyboard.JustDown(this.keys.recipe1)
+      Phaser.Input.Keyboard.JustDown(this.keys.hotbar1)
         ? 0
-        : Phaser.Input.Keyboard.JustDown(this.keys.recipe2)
+        : Phaser.Input.Keyboard.JustDown(this.keys.hotbar2)
           ? 1
-          : Phaser.Input.Keyboard.JustDown(this.keys.recipe3)
+          : Phaser.Input.Keyboard.JustDown(this.keys.hotbar3)
             ? 2
-            : Phaser.Input.Keyboard.JustDown(this.keys.recipe4)
+            : Phaser.Input.Keyboard.JustDown(this.keys.hotbar4)
               ? 3
-              : -1;
+              : Phaser.Input.Keyboard.JustDown(this.keys.hotbar5)
+                ? 4
+                : Phaser.Input.Keyboard.JustDown(this.keys.hotbar6)
+                  ? 5
+                  : -1;
     if (slot < 0) {
       return undefined;
     }
-    return getCraftingRecipes()[slot]?.id;
+    return slot;
   }
 
   private createWorld(): void {

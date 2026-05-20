@@ -21,7 +21,7 @@ export type CraftingRecipe = {
       }
     | {
         type: 'create-item';
-        item: keyof Pick<Inventory, 'stoneEdges' | 'branchClubs'>;
+        item: keyof Pick<Inventory, 'poultices' | 'stoneEdges' | 'branchClubs'>;
         amount: number;
       };
 };
@@ -41,7 +41,7 @@ export const craftingRecipes = [
     description: 'Bind bitter leaves against broken skin.',
     cost: { herbs: 1, bark: 1 },
     context: 'anywhere',
-    effect: { type: 'heal-player', health: 24 }
+    effect: { type: 'create-item', item: 'poultices', amount: 1 }
   },
   {
     id: 'stone-edge',

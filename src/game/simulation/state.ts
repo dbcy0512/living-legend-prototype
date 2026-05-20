@@ -16,6 +16,7 @@ export type Inventory = {
   herbs: number;
   food: number;
   campfires: number;
+  poultices: number;
   stoneEdges: number;
   branchClubs: number;
 };
@@ -159,6 +160,9 @@ export type EcosystemState = {
 export type UiState = {
   inventoryOpen: boolean;
   craftingOpen: boolean;
+  selectedCraftingRecipeIndex: number;
+  selectedHotbarSlot: number;
+  hotbarMessage: string;
   lastCraftedRecipeId?: string;
   craftMessage: string;
 };
@@ -233,6 +237,7 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       herbs: 0,
       food: 0,
       campfires: 0,
+      poultices: 0,
       stoneEdges: 0,
       branchClubs: 0
     },
@@ -252,6 +257,9 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
     ui: {
       inventoryOpen: false,
       craftingOpen: false,
+      selectedCraftingRecipeIndex: 0,
+      selectedHotbarSlot: 0,
+      hotbarMessage: '',
       craftMessage: ''
     },
     respawnPoint: {

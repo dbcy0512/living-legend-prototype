@@ -23,6 +23,7 @@ describe('inventory crafting', () => {
       herbs: 0,
       food: 0,
       campfires: 0,
+      poultices: 0,
       stoneEdges: 0,
       branchClubs: 0
     };
@@ -37,6 +38,7 @@ describe('inventory crafting', () => {
       herbs: 0,
       food: 0,
       campfires: 1,
+      poultices: 0,
       stoneEdges: 0,
       branchClubs: 0
     });

@@ -1,4 +1,5 @@
 import type { ActionState } from '../../input/actions';
+import { getCraftingRecipes } from '../../content/craftingRecipes';
 import type { GameState, Inventory, PlayerState, ResourceNode } from '../state';
 import { clamp, distance } from '../rules/math';
 import { craftRecipe } from './craftingSystem';
@@ -70,8 +71,11 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
     }
   }
 
-  if (actions.craftRecipe) {
-    craftRecipe(state, actions.craftRecipe);
+  if (actions.craftRecipeConfirm && state.ui.craftingOpen) {
+    const recipe = getCraftingRecipes()[state.ui.selectedCraftingRecipeIndex];
+    if (recipe) {
+      craftRecipe(state, recipe.id);
+    }
   }
 
   if (actions.useFood) {

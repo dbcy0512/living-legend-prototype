@@ -41,8 +41,9 @@ PixelLab generation date: 2026-05-20.
 
 - `badge-binding-v1.png`
   - Source: PixelLab map object `98fcfd1f-315d-41ac-996b-a880506a30ab`.
-  - Use: binding station requirement badge.
+  - Use: Basic Workbench binding-context badge, not a separate binding station badge.
   - Reason accepted: strong twine/binding read.
+  - Rule: show binding as a workbench capability or recipe context, not as its own early station.
 
 - `badge-stone-working-v1.png`
   - Source: PixelLab map object `02a8efe6-9a30-42c5-8a89-27670f4b87ae`.

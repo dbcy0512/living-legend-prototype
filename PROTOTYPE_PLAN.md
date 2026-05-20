@@ -1361,3 +1361,16 @@ Verification:
 - `npm.cmd run build` passed.
 - Local server check at `http://127.0.0.1:5173/` returned 200.
 - Browser smoke confirmed six hotbar slots render with no console errors.
+
+### Basic Workbench Station Direction v1
+
+Status: design correction recorded.
+
+- Binding Spot should not become its own early crafted station.
+- Binding, twine, poultice-adjacent work, and other simple assembly actions should be integrated into a Basic Workbench station.
+- The existing `binding-spot-v1.png` asset remains available as a visual reference or ingredient-cluster candidate, but not as a standalone station target.
+- The `badge-binding-v1.png` UI asset should represent a Basic Workbench binding capability or recipe context.
+
+Design reason:
+
+Early station growth should stay understandable. A Basic Workbench can carry multiple primitive making actions without fragmenting Zone 1 into too many tiny station types.

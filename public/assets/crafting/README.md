@@ -26,8 +26,9 @@ PixelLab generation date: 2026-05-20.
 
 - `binding-spot-v1.png`
   - Source: PixelLab map object `30ccdca9-c44d-4ca7-9a97-1d25b0eb2e63`.
-  - Use: first crafted station candidate for binding/twine/poultice-adjacent recipes.
+  - Use: reference/ingredient-cluster candidate for Basic Workbench binding actions, not a standalone station.
   - Reason accepted: loose objects, transparent background, no baked dirt/grass island.
+  - Rule: binding belongs inside the Basic Workbench station path so early crafting does not split into too many station types.
 
 - `stone-working-place-v1.png`
   - Source: PixelLab map object `b807a3f7-868a-41ce-8241-27951b80e61f`.

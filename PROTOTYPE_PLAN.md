@@ -1460,3 +1460,29 @@ Next gate:
 - Approve, reject, or revise the V3-state silhouette.
 - If approved, normalize south/east/north/west into the runtime frame and wire a first static player replacement.
 - If rejected, iterate from V3-state instead of starting over, preserving identity while pushing posture, clothing, or scale.
+
+### Role-Locked Hotbar Contract v1
+
+Status: implemented.
+
+- Reworked the six-slot hotbar into fixed role lanes:
+  - 1-4: ability slots.
+  - 5: healing slot.
+  - 6: utility, mobility, or defensive slot.
+- Moved Branch Club and Stone Edge into the first two ability lanes for now.
+- Moved poultice use into the dedicated heal lane.
+- Removed food from the combat hotbar so eating does not compete with ability/heal/utility muscle memory.
+- Added `hotbar.utilityCooldownMs` as the first dedicated cooldown foundation for the utility lane.
+- Added `updateHotbar` so the utility cooldown ticks separately from combat cooldown and roll cooldown.
+- Added HUD role labels: `A1`, `A2`, `A3`, `A4`, `HEAL`, `UTIL`.
+- Updated crafting auto-selection so newly made crude melee seeds point at their new ability slots.
+
+Alive-world cross-check:
+
+The hotbar is no longer just a bag shortcut. It now describes the player's emerging body of responses: what they can do, how they recover, and what special answer they have under pressure. This keeps room for evolution because future learned behaviors can enter ability lanes without rewriting inventory or equipment.
+
+Verification:
+
+- `npm.cmd test` passed: 89 tests.
+- `npm.cmd run build` passed.
+- Browser visual smoke was attempted, but Playwright is not installed in this environment. Runtime UI still needs eyeball verification in the open local browser.

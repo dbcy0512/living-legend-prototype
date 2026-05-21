@@ -4,7 +4,7 @@ import { createGameState, type GameState } from '../state';
 import { updateEvolution } from '../rules/evolutionRules';
 import { updateCombat } from './combatSystem';
 import { updateEnemies } from './enemySystem';
-import { selectOrUseHotbarSlot } from './hotbarSystem';
+import { selectOrUseHotbarSlot, updateHotbar } from './hotbarSystem';
 import { updateInventory } from './inventorySystem';
 import { updatePlayer } from './playerSystem';
 import { updateWorld } from './worldSystem';
@@ -41,6 +41,7 @@ export const updateSimulation = (state: GameState, actions: ActionState, deltaMs
   const clampedDelta = Math.min(deltaMs, 50);
   updateWorld(state, clampedDelta);
   updateInventory(state, actions, clampedDelta);
+  updateHotbar(state, clampedDelta);
   updatePlayer(state, actions, clampedDelta);
   updateCombat(state, actions, clampedDelta);
   updateEnemies(state, clampedDelta);
@@ -55,6 +56,7 @@ const resetGameState = (state: GameState): void => {
   Object.assign(state.inventory, fresh.inventory);
   Object.assign(state.evolution, fresh.evolution);
   Object.assign(state.equipment, fresh.equipment);
+  Object.assign(state.hotbar, fresh.hotbar);
   Object.assign(state.ecosystem, fresh.ecosystem);
   Object.assign(state.ui, fresh.ui);
   Object.assign(state.behaviorMemory.body, fresh.behaviorMemory.body);

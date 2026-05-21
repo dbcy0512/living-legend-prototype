@@ -11,6 +11,7 @@ describe('simulation status', () => {
     state.player.health = 0;
     state.inventory.food = 4;
     state.equipment.mainHand = 'stone-edge';
+    state.hotbar.utilityCooldownMs = 1200;
     actions.restart = true;
 
     updateSimulation(state, actions, 16);
@@ -21,6 +22,7 @@ describe('simulation status', () => {
     expect(state.equipment.mainHand).toBe('bare-hands');
     expect(state.equipment.tool).toBe('none');
     expect(state.equipment.body).toBe('worn-cloth');
+    expect(state.hotbar.utilityCooldownMs).toBe(0);
   });
 
   it('preserves the active ecosystem seed when restarting', () => {
@@ -89,5 +91,21 @@ describe('simulation status', () => {
 
     expect(state.ui.inventoryOpen).toBe(true);
     expect(state.ui.craftingOpen).toBe(true);
+  });
+
+  it('ticks utility hotbar cooldown only while simulation is running', () => {
+    const state = createGameState();
+    state.hotbar.utilityCooldownMs = 500;
+
+    updateSimulation(state, idleActions(), 100);
+
+    expect(state.hotbar.utilityCooldownMs).toBe(450);
+
+    const pause = idleActions();
+    pause.pause = true;
+    updateSimulation(state, pause, 16);
+    updateSimulation(state, idleActions(), 100);
+
+    expect(state.hotbar.utilityCooldownMs).toBe(450);
   });
 });

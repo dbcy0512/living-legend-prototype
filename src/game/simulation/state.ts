@@ -155,6 +155,10 @@ export type EquipmentState = {
   body: 'worn-cloth';
 };
 
+export type HotbarState = {
+  utilityCooldownMs: number;
+};
+
 export type EcosystemState = {
   seed: string;
   lastRegenerationDay: number;
@@ -180,6 +184,7 @@ export type GameState = {
   behaviorMemory: BehaviorMemory;
   evolution: EvolutionState;
   equipment: EquipmentState;
+  hotbar: HotbarState;
   ecosystem: EcosystemState;
   ui: UiState;
   respawnPoint: RespawnPointState;
@@ -257,6 +262,9 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       mainHand: 'bare-hands',
       tool: 'none',
       body: 'worn-cloth'
+    },
+    hotbar: {
+      utilityCooldownMs: 0
     },
     ecosystem: {
       seed: ecosystemSeed,

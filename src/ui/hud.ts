@@ -152,7 +152,7 @@ const getHintText = (state: GameState): string => {
 
   const craftHint = state.ui.craftingOpen ? '[ ] choose making. Enter makes.' : 'Tab opens making.';
   const hotbarHint = state.ui.hotbarMessage ? `${state.ui.hotbarMessage} ` : '';
-  return `${hotbarHint}Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-6 hotbar, I satchel. ${craftHint}`;
+  return `${hotbarHint}Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-4 abilities, 5 heal, 6 utility, I satchel. ${craftHint}`;
 };
 
 const getInventoryPanelHtml = (state: GameState): string => {
@@ -203,10 +203,16 @@ const getHotbarHtml = (state: GameState): string =>
       const icon = slot.itemId ? getHotbarIcon(slot.itemId) : '';
       const count = slot.count > 0 ? `<span class="hotbar__count">${slot.count}</span>` : '';
       const iconStyle = icon ? ` style="--icon: url('${icon}')"` : '';
+      const cooldown =
+        slot.cooldownDurationMs > 0 && slot.cooldownMs > 0
+          ? `<span class="hotbar__cooldown" style="--cooldown: ${(slot.cooldownMs / slot.cooldownDurationMs) * 100}%"></span>`
+          : '';
       return `
         <div class="hotbar__slot ${lockedClass} ${readyClass}">
           <span class="hotbar__key">${slot.index + 1}</span>
           <span class="hotbar__icon"${iconStyle}></span>
+          <span class="hotbar__role">${slot.roleLabel}</span>
+          ${cooldown}
           ${count}
           ${selected ? '<span class="hotbar__selected"></span>' : ''}
         </div>
@@ -218,8 +224,6 @@ const getHotbarIcon = (itemId: HotbarItemId): string => {
   switch (itemId) {
     case 'simple-poultice':
       return '/assets/crafting/simple-poultice-v1.png';
-    case 'food':
-      return '/assets/environment/resource-fruit-v1.png';
     case 'branch-club':
       return '/assets/crafting/branch-club-v1.png';
     case 'stone-edge':

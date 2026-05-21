@@ -64,10 +64,10 @@ export const craftRecipe = (state: GameState, recipeId: CraftingRecipeId): boole
       state.ui.hotbarMessage = 'Poultice ready.';
     } else if (recipe.effect.item === 'branchClubs') {
       state.equipment.mainHand = 'branch-club';
-      state.ui.selectedHotbarSlot = 2;
+      state.ui.selectedHotbarSlot = 0;
     } else if (recipe.effect.item === 'stoneEdges') {
       state.equipment.mainHand = 'stone-edge';
-      state.ui.selectedHotbarSlot = 3;
+      state.ui.selectedHotbarSlot = 1;
     }
   }
 

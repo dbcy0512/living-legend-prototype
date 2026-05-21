@@ -260,6 +260,7 @@ body {
   position: absolute;
   top: 5px;
   left: 7px;
+  z-index: 2;
   color: rgba(245, 239, 216, 0.82);
   font-size: 11px;
   font-weight: 800;
@@ -270,14 +271,41 @@ body {
 .hotbar__icon {
   position: absolute;
   inset: 11px;
+  z-index: 1;
   background: var(--icon) center / contain no-repeat;
   image-rendering: pixelated;
+}
+
+.hotbar__role {
+  position: absolute;
+  left: 7px;
+  bottom: 6px;
+  z-index: 2;
+  color: rgba(245, 239, 216, 0.78);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.72);
+}
+
+.hotbar__cooldown {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  z-index: 1;
+  height: var(--cooldown);
+  border-radius: 3px;
+  background: rgba(14, 20, 25, 0.66);
+  pointer-events: none;
 }
 
 .hotbar__count {
   position: absolute;
   right: 8px;
   bottom: 6px;
+  z-index: 2;
   min-width: 15px;
   color: #f8d16c;
   font-size: 12px;
@@ -290,6 +318,7 @@ body {
 .hotbar__selected {
   position: absolute;
   inset: -7px;
+  z-index: 3;
   background: url('/assets/ui/hotbar-selected-overlay-v1.png') center / 100% 100% no-repeat;
   pointer-events: none;
 }

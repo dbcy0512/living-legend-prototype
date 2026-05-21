@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createGameState } from '../src/game/simulation/state';
 import { craftRecipe } from '../src/game/simulation/systems/craftingSystem';
 import {
+  getHotbarMobilityFrame,
   getHotbarSlots,
   selectOrUseHotbarSlot,
   updateHotbar,
@@ -69,5 +70,28 @@ describe('hotbar system', () => {
     updateHotbar(state, 1000);
 
     expect(state.hotbar.utilityCooldownMs).toBe(utilitySlotCooldownMs - 1000);
+  });
+
+  it('exposes Shift mobility as a separate evolution-monitored frame', () => {
+    const state = createGameState();
+    state.combat.rollCooldownMs = 210;
+
+    const baseline = getHotbarMobilityFrame(state);
+
+    expect(baseline.keyLabel).toBe('Shift');
+    expect(baseline.label).toBe('Dodge Roll');
+    expect(baseline.roleLabel).toBe('MOB');
+    expect(baseline.ready).toBe(false);
+    expect(baseline.cooldownMs).toBe(210);
+
+    state.combat.rollCooldownMs = 0;
+    state.evolution.cleanerRoll = true;
+    const evolved = getHotbarMobilityFrame(state);
+
+    expect(evolved.label).toBe('Cleaner Roll');
+    expect(evolved.roleLabel).toBe('MOB+');
+    expect(evolved.staminaCost).toBeLessThan(baseline.staminaCost);
+    expect(evolved.cooldownDurationMs).toBeLessThan(baseline.cooldownDurationMs);
+    expect(evolved.ready).toBe(true);
   });
 });

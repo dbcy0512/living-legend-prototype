@@ -1,5 +1,6 @@
 import type { GameState } from '../state';
 import { clamp } from '../rules/math';
+import { getMobilityFrame, type MobilityFrame } from '../rules/mobility';
 
 export const utilitySlotCooldownMs = 4800;
 
@@ -90,6 +91,8 @@ export const getHotbarSlots = (state: GameState): HotbarSlot[] => [
     cooldownDurationMs: utilitySlotCooldownMs
   }
 ];
+
+export const getHotbarMobilityFrame = (state: GameState): MobilityFrame => getMobilityFrame(state);
 
 export const updateHotbar = (state: GameState, deltaMs: number): void => {
   state.hotbar.utilityCooldownMs = Math.max(0, state.hotbar.utilityCooldownMs - deltaMs);

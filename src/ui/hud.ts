@@ -1,7 +1,7 @@
 import type { GameState } from '../game/simulation/state';
 import { getMeleeSeedProfile } from '../game/content/meleeSeeds';
 import { getAvailableCraftingRecipes, getCraftingCostText } from '../game/simulation/systems/craftingSystem';
-import { getHotbarSlots, type HotbarItemId } from '../game/simulation/systems/hotbarSystem';
+import { getHotbarMobilityFrame, getHotbarSlots, type HotbarItemId } from '../game/simulation/systems/hotbarSystem';
 import {
   getBeginnerInventorySummary,
   getBeginnerInventorySlots,
@@ -57,7 +57,7 @@ export const createHud = (root: Element | null): HudApi => {
       </div>
     </div>
     <div class="hotbar" data-hud="hotbar"></div>
-    <div class="hud__hint" data-hud="hint">Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-4 abilities, 5 heal, 6 utility. Tab opens satchel.</div>
+    <div class="hud__hint" data-hud="hint">Move WASD/Arrows. Left mouse/J attacks, Shift mobility, E gathers, 1-4 abilities, 5 heal, 6 utility. Tab opens satchel.</div>
   `;
 
   const lookup = (key: string): HTMLElement => {
@@ -174,7 +174,7 @@ const getHintText = (state: GameState): string => {
       ? 'M hides making. [ ] choose. Enter makes.'
       : 'M opens making.'
     : 'Tab opens satchel.';
-  return `Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-4 abilities, 5 heal, 6 utility. ${craftHint}`;
+  return `Move WASD/Arrows. Left mouse/J attacks, Shift mobility, E gathers, 1-4 abilities, 5 heal, 6 utility. ${craftHint}`;
 };
 
 const getInventoryPanelHtml = (state: GameState): string => {
@@ -228,8 +228,8 @@ const getCraftingPanelHtml = (state: GameState): string =>
     })
     .join('');
 
-const getHotbarHtml = (state: GameState): string =>
-  getHotbarSlots(state)
+const getHotbarHtml = (state: GameState): string => {
+  const slotsHtml = getHotbarSlots(state)
     .map((slot) => {
       const selected = slot.index === state.ui.selectedHotbarSlot;
       const lockedClass = slot.locked ? 'hotbar__slot--locked' : '';
@@ -253,6 +253,24 @@ const getHotbarHtml = (state: GameState): string =>
       `;
     })
     .join('');
+  const mobility = getHotbarMobilityFrame(state);
+  const mobilityReadyClass = mobility.ready ? 'hotbar__mobility--ready' : 'hotbar__mobility--empty';
+  const evolvedClass = mobility.evolved ? 'hotbar__mobility--evolved' : '';
+  const mobilityCooldown =
+    mobility.cooldownDurationMs > 0 && mobility.cooldownMs > 0
+      ? `<span class="hotbar__cooldown" style="--cooldown: ${(mobility.cooldownMs / mobility.cooldownDurationMs) * 100}%"></span>`
+      : '';
+
+  return `${slotsHtml}
+    <div class="hotbar__mobility ${mobilityReadyClass} ${evolvedClass}">
+      <span class="hotbar__key">${mobility.keyLabel}</span>
+      <span class="hotbar__mobility-icon"></span>
+      <span class="hotbar__role">${mobility.roleLabel}</span>
+      <span class="hotbar__mobility-cost">${mobility.staminaCost}</span>
+      ${mobilityCooldown}
+    </div>
+  `;
+};
 
 const getHotbarIcon = (itemId: HotbarItemId): string => {
   switch (itemId) {

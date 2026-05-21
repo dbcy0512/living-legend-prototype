@@ -3,12 +3,7 @@ import { startingArea } from '../../content/maps/startingArea';
 import type { GameState } from '../state';
 import { resolveWorldCollisions } from '../rules/collision';
 import { clamp, normalizeAxis } from '../rules/math';
-
-const rollCost = 26;
-const cleanerRollCost = 22;
-const rollDurationMs = 280;
-const rollCooldownMs = 420;
-const cleanerRollCooldownMs = 360;
+import { dodgeRollDurationMs, getDodgeRollCooldownMs, getDodgeRollCost } from '../rules/mobility';
 
 export const updatePlayer = (state: GameState, actions: ActionState, deltaMs: number): void => {
   if (state.world.status !== 'playing') {
@@ -25,14 +20,14 @@ export const updatePlayer = (state: GameState, actions: ActionState, deltaMs: nu
 
   const recovering = combat.phase === 'recovery' || combat.phase === 'windup' || combat.phase === 'active';
   const rolling = combat.phase === 'rolling';
-  const currentRollCost = state.evolution.cleanerRoll ? cleanerRollCost : rollCost;
-  const currentRollCooldownMs = state.evolution.cleanerRoll ? cleanerRollCooldownMs : rollCooldownMs;
+  const currentRollCost = getDodgeRollCost(state);
+  const currentRollCooldownMs = getDodgeRollCooldownMs(state);
 
   if (actions.dodge && combat.rollCooldownMs <= 0 && combat.phase === 'idle' && player.stamina >= currentRollCost) {
     player.stamina -= currentRollCost;
-    player.invulnerableMs = rollDurationMs;
+    player.invulnerableMs = dodgeRollDurationMs;
     combat.phase = 'rolling';
-    combat.timerMs = rollDurationMs;
+    combat.timerMs = dodgeRollDurationMs;
     combat.rollCooldownMs = currentRollCooldownMs;
     state.behaviorMemory.combat.dodgesUsed += 1;
   }

@@ -93,6 +93,30 @@ describe('simulation status', () => {
     expect(state.ui.craftingOpen).toBe(true);
   });
 
+  it('opens crafting as a subset of inventory', () => {
+    const state = createGameState();
+    const actions = idleActions();
+    actions.toggleCrafting = true;
+
+    updateSimulation(state, actions, 16);
+
+    expect(state.ui.inventoryOpen).toBe(true);
+    expect(state.ui.craftingOpen).toBe(true);
+  });
+
+  it('closes crafting when the inventory parent closes', () => {
+    const state = createGameState();
+    state.ui.inventoryOpen = true;
+    state.ui.craftingOpen = true;
+    const actions = idleActions();
+    actions.toggleInventory = true;
+
+    updateSimulation(state, actions, 16);
+
+    expect(state.ui.inventoryOpen).toBe(false);
+    expect(state.ui.craftingOpen).toBe(false);
+  });
+
   it('ticks utility hotbar cooldown only while simulation is running', () => {
     const state = createGameState();
     state.hotbar.utilityCooldownMs = 500;

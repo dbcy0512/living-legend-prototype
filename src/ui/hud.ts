@@ -35,16 +35,21 @@ export const createHud = (root: Element | null): HudApi => {
       </div>
     </div>
     <div class="satchel" data-hud="inventoryPanel" aria-hidden="true">
-      <div class="satchel__title">Satchel</div>
-      <div class="satchel__grid" data-hud="inventoryGrid"></div>
-    </div>
-    <div class="crafting" data-hud="craftingPanel" aria-hidden="true">
-      <div class="crafting__title">Making</div>
-      <div class="crafting__list" data-hud="craftingList"></div>
-      <div class="crafting__message" data-hud="craftingMessage"></div>
+      <div class="satchel__header">
+        <div class="satchel__title">Satchel</div>
+        <div class="satchel__mode" data-hud="inventoryMode"></div>
+      </div>
+      <div class="satchel__body">
+        <div class="satchel__grid" data-hud="inventoryGrid"></div>
+        <div class="crafting" data-hud="craftingPanel" aria-hidden="true">
+          <div class="crafting__title">Making</div>
+          <div class="crafting__list" data-hud="craftingList"></div>
+          <div class="crafting__message" data-hud="craftingMessage"></div>
+        </div>
+      </div>
     </div>
     <div class="hotbar" data-hud="hotbar"></div>
-    <div class="hud__hint" data-hud="hint">Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-6 hotbar, I satchel, Tab making.</div>
+    <div class="hud__hint" data-hud="hint">Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-4 abilities, 5 heal, 6 utility, I satchel, Tab making.</div>
   `;
 
   const lookup = (key: string): HTMLElement => {
@@ -66,6 +71,7 @@ export const createHud = (root: Element | null): HudApi => {
   const hint = lookup('hint');
   const pause = lookup('pause');
   const inventoryPanel = lookup('inventoryPanel');
+  const inventoryMode = lookup('inventoryMode');
   const inventoryGrid = lookup('inventoryGrid');
   const craftingPanel = lookup('craftingPanel');
   const craftingList = lookup('craftingList');
@@ -76,8 +82,11 @@ export const createHud = (root: Element | null): HudApi => {
     render: (state: GameState): void => {
       pause.classList.toggle('pause--active', state.world.paused);
       pause.setAttribute('aria-hidden', state.world.paused ? 'false' : 'true');
-      inventoryPanel.classList.toggle('satchel--active', state.ui.inventoryOpen);
-      inventoryPanel.setAttribute('aria-hidden', state.ui.inventoryOpen ? 'false' : 'true');
+      const inventoryVisible = state.ui.inventoryOpen || state.ui.craftingOpen;
+      inventoryPanel.classList.toggle('satchel--active', inventoryVisible);
+      inventoryPanel.classList.toggle('satchel--making', state.ui.craftingOpen);
+      inventoryPanel.setAttribute('aria-hidden', inventoryVisible ? 'false' : 'true');
+      inventoryMode.textContent = state.ui.craftingOpen ? 'Making' : 'Inventory';
       craftingPanel.classList.toggle('crafting--active', state.ui.craftingOpen);
       craftingPanel.setAttribute('aria-hidden', state.ui.craftingOpen ? 'false' : 'true');
       health.style.setProperty('--value', `${(state.player.health / state.player.maxHealth) * 100}%`);
@@ -150,7 +159,7 @@ const getHintText = (state: GameState): string => {
     return 'The spark catches. Stay close.';
   }
 
-  const craftHint = state.ui.craftingOpen ? '[ ] choose making. Enter makes.' : 'Tab opens making.';
+  const craftHint = state.ui.craftingOpen ? '[ ] choose. Enter makes. Tab hides making.' : 'Tab opens making inside satchel.';
   const hotbarHint = state.ui.hotbarMessage ? `${state.ui.hotbarMessage} ` : '';
   return `${hotbarHint}Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-4 abilities, 5 heal, 6 utility, I satchel. ${craftHint}`;
 };

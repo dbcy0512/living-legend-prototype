@@ -22,9 +22,15 @@ export const updateSimulation = (state: GameState, actions: ActionState, deltaMs
   }
   if (actions.toggleInventory) {
     state.ui.inventoryOpen = !state.ui.inventoryOpen;
+    if (!state.ui.inventoryOpen) {
+      state.ui.craftingOpen = false;
+    }
   }
   if (actions.toggleCrafting) {
     state.ui.craftingOpen = !state.ui.craftingOpen;
+    if (state.ui.craftingOpen) {
+      state.ui.inventoryOpen = true;
+    }
   }
   if (state.ui.craftingOpen && (actions.craftRecipeNext || actions.craftRecipePrevious)) {
     const recipeCount = getCraftingRecipes().length;

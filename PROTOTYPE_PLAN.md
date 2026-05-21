@@ -1486,3 +1486,22 @@ Verification:
 - `npm.cmd test` passed: 89 tests.
 - `npm.cmd run build` passed.
 - Browser visual smoke was attempted, but Playwright is not installed in this environment. Runtime UI still needs eyeball verification in the open local browser.
+
+### Inventory-Owned Making UI v1
+
+Status: implemented.
+
+- Moved Making from a separate right-side panel into the Satchel UI.
+- Satchel is now the parent surface for both carried items and basic crafting choices.
+- `Tab` opens the Making subset inside Satchel.
+- Closing the Satchel also closes Making, so crafting cannot float as an independent panel.
+- The current inventory UI remains compact and early-stage instead of becoming a full RPG inventory screen.
+
+Alive-world cross-check:
+
+Crafting now reads more like the child looking into what they carry and deciding what can be made from it. That keeps the action grounded in the survival loop instead of turning Making into a separate menu mode detached from the world.
+
+Verification:
+
+- `npm.cmd test` passed: 92 tests.
+- Browser visual smoke still needs manual eyeball review in the open local browser because Playwright is not installed in this environment.

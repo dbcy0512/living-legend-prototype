@@ -53,7 +53,16 @@ describe('resource registry', () => {
     ]);
     expect(fixed.length).toBeGreaterThan(0);
     expect(
-      fixed.some((resource) => resource.source?.type === 'fixed-zone' && resource.source.zoneId === 'wolf-territory-edge')
+      fixed.some((resource) => resource.source?.type === 'fixed-zone' && resource.source.zoneId === 'stone-outcrop')
+    ).toBe(true);
+    expect(
+      resources.every(
+        (resource) =>
+          (resource.source?.type === 'opening' || resource.source?.type === 'fixed-zone') &&
+          (resource.source.zoneId === 'camp-clearing-hub' ||
+            resource.source.zoneId === 'herb-berry-patch' ||
+            resource.source.zoneId === 'stone-outcrop')
+      )
     ).toBe(true);
     expect(fixed.every((resource) => resource.source?.placementNote)).toBe(true);
   });

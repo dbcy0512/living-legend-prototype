@@ -2,6 +2,7 @@ import {
   createEcosystemResourceSeeds,
   type EcosystemResourceSource
 } from './ecosystem';
+import type { ZoneOneRegionId } from './maps/zoneOneConcept';
 
 export type ResourceKind = 'twigs' | 'dryGrass' | 'bark' | 'wood' | 'stone' | 'herbs' | 'food';
 export type ResourceCategory = 'kindling' | 'crafting' | 'medicine' | 'food';
@@ -17,7 +18,7 @@ export type ResourceEcologyTag =
 
 export type StaticResourceSource = {
   type: 'opening' | 'fixed-zone';
-  zoneId: 'first-clearing' | 'first-shelter-edge' | 'wolf-territory-edge';
+  zoneId: ZoneOneRegionId;
   purpose: ResourceSourcePurpose;
   ecology: ResourceEcologyTag;
   placementNote: string;
@@ -172,11 +173,11 @@ const staticStartingResources = [
   openingResource('dry-grass-handful', 'dryGrass', 1540, 818, 'dry-clearing-edge', 'Dry grass caught on the sun-exposed clearing edge.'),
   openingResource('curl-of-bark', 'bark', 1318, 1000, 'tree-shed', 'Loose bark near deadfall and root litter, not open grass.'),
   openingResource('striking-stone', 'stone', 1508, 976, 'exposed-stone', 'A usable stone from the exposed dirt and fire ring.'),
-  fixedZoneResource('elder-branch', 'wood', 1138, 740, 'first-shelter-edge', 'early-crafting', 'tree-shed', 'A fallen branch under the shelter tree.', 3),
-  fixedZoneResource('moon-stone', 'stone', 470, 780, 'wolf-territory-edge', 'early-crafting', 'exposed-stone', 'Loose stone near the western outcrop and erosion line.', 2),
-  fixedZoneResource('sun-herb', 'herbs', 610, 420, 'first-shelter-edge', 'medicine', 'damp-shade', 'Herbs in the lower damp shade of the herb and berry patch.', 2),
-  fixedZoneResource('wild-fruit', 'food', 640, 360, 'wolf-territory-edge', 'food', 'edge-growth', 'Fruit tucked into dense edge growth, not open field.', 2),
-  fixedZoneResource('silver-herb', 'herbs', 510, 510, 'first-shelter-edge', 'medicine', 'damp-shade', 'A shaded herb pocket near the first western path.', 2)
+  fixedZoneResource('elder-branch', 'wood', 1138, 740, 'camp-clearing-hub', 'early-crafting', 'tree-shed', 'A fallen branch under the shelter tree.', 3),
+  fixedZoneResource('moon-stone', 'stone', 470, 780, 'stone-outcrop', 'early-crafting', 'exposed-stone', 'Loose stone near the western outcrop and erosion line.', 2),
+  fixedZoneResource('sun-herb', 'herbs', 610, 420, 'herb-berry-patch', 'medicine', 'damp-shade', 'Herbs in the lower damp shade of the herb and berry patch.', 2),
+  fixedZoneResource('wild-fruit', 'food', 640, 360, 'herb-berry-patch', 'food', 'edge-growth', 'Fruit tucked into dense edge growth, not open field.', 2),
+  fixedZoneResource('silver-herb', 'herbs', 510, 510, 'herb-berry-patch', 'medicine', 'damp-shade', 'A shaded herb pocket near the first western path.', 2)
 ] as const satisfies readonly ResourceSeed[];
 
 export const getResourceProfile = (kind: ResourceKind): ResourceProfile => resourceProfiles[kind];
@@ -229,7 +230,7 @@ function openingResource(
     respawnMs: 0,
     source: {
       type: 'opening',
-      zoneId: 'first-clearing',
+      zoneId: 'camp-clearing-hub',
       purpose: 'first-fire',
       ecology,
       placementNote

@@ -7,9 +7,11 @@ import {
   getResourceParentTrees,
   getTreeDependentResourceParent,
   getTreeDependentResourceRules,
+  isInsideZoneDependentRegion,
   getValidZoneDependentSpawnCandidates,
   getZoneDependentResourceRules,
   getValidTreeDependentSpawnCandidates,
+  isZoneDependentRuleAllowedByRegion,
   isInsideTreeBranchSpawnBand,
   isOutsideParentTrunkCollision,
   isTreeDependentResourceSeed,
@@ -33,22 +35,24 @@ describe('zone one ecosystem rules', () => {
 
   it('defines zone-dependent herb rules as inspectable data', () => {
     const rules = getZoneDependentResourceRules();
-    const herbRule = rules.find((rule) => rule.id === 'dew-herb-near-first-shelter');
+    const herbRule = rules.find((rule) => rule.id === 'dew-herb-herb-berry-patch');
 
     expect(herbRule).toBeDefined();
     expect(herbRule?.kind).toBe('herbs');
-    expect(herbRule?.zoneId).toBe('first-shelter-edge');
+    expect(herbRule?.zoneId).toBe('herb-berry-patch');
     expect(herbRule?.maxActive).toBe(2);
     expect(herbRule?.ecology).toBe('damp-shade');
     expect(herbRule?.candidates.length).toBeGreaterThan(herbRule?.maxActive ?? 0);
+    expect(herbRule && isZoneDependentRuleAllowedByRegion(herbRule)).toBe(true);
   });
 
   it('defines zone-dependent resource rules for more than herbs', () => {
     const rules = getZoneDependentResourceRules();
 
     expect(rules.map((rule) => rule.kind)).toEqual(['herbs', 'stone', 'dryGrass']);
-    expect(rules.find((rule) => rule.id === 'loose-stone-near-wolf-edge')?.zoneId).toBe('wolf-territory-edge');
-    expect(rules.find((rule) => rule.id === 'wind-dry-grass-first-clearing')?.zoneId).toBe('first-clearing');
+    expect(rules.find((rule) => rule.id === 'loose-stone-stone-outcrop')?.zoneId).toBe('stone-outcrop');
+    expect(rules.find((rule) => rule.id === 'wind-dry-grass-camp-clearing')?.zoneId).toBe('camp-clearing-hub');
+    expect(rules.every((rule) => isZoneDependentRuleAllowedByRegion(rule))).toBe(true);
   });
 
   it('uses resource-parent trees as fallen branch parents', () => {
@@ -114,6 +118,7 @@ describe('zone one ecosystem rules', () => {
       expect(herb.kind).toBe('herbs');
       expect(isZoneDependentResourceSeed(herb)).toBe(true);
       expect(herb.source.type).toBe('zone-dependent');
+      expect(isInsideZoneDependentRegion(herbRule, herb.x, herb.y)).toBe(true);
       expect(candidates.some((candidate) => candidate.x === herb.x && candidate.y === herb.y)).toBe(true);
     }
   });
@@ -136,6 +141,7 @@ describe('zone one ecosystem rules', () => {
             resource.source.placementNote === rule.placementNote
         )
       ).toBe(true);
+      expect(byRule.every((resource) => isInsideZoneDependentRegion(rule, resource.x, resource.y))).toBe(true);
     }
   });
 

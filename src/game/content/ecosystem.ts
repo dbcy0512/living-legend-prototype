@@ -1,11 +1,12 @@
 import { startingArea, type TreeInstance, type TreePlacementRole } from './maps/startingArea';
+import { getZoneOneRegion, type ZoneOneRegionId } from './maps/zoneOneConcept';
 import type { ResourceEcologyTag, ResourceKind } from './resources';
 
 export type EcosystemResourceRuleId =
   | 'fallen-branch-near-resource-parent'
-  | 'dew-herb-near-first-shelter'
-  | 'loose-stone-near-wolf-edge'
-  | 'wind-dry-grass-first-clearing';
+  | 'dew-herb-herb-berry-patch'
+  | 'loose-stone-stone-outcrop'
+  | 'wind-dry-grass-camp-clearing';
 
 export type EcosystemResourceSource =
   | {
@@ -17,7 +18,7 @@ export type EcosystemResourceSource =
     }
   | {
       type: 'zone-dependent';
-      zoneId: string;
+      zoneId: ZoneOneRegionId;
       rule: EcosystemResourceRuleId;
       ecology: ResourceEcologyTag;
       placementNote: string;
@@ -45,7 +46,7 @@ export type ZoneDependentResourceRule = {
   seedKey: string;
   seedIdPrefix: string;
   kind: ResourceKind;
-  zoneId: string;
+  zoneId: ZoneOneRegionId;
   amount: number;
   respawnMs: number;
   maxActive: number;
@@ -102,17 +103,17 @@ const treeDependentResourceRules = [
 
 const zoneDependentResourceRules = [
   {
-    id: 'dew-herb-near-first-shelter',
+    id: 'dew-herb-herb-berry-patch',
     seedKey: 'zone-1-dew-herbs',
     seedIdPrefix: 'dew-herb',
     kind: 'herbs',
-    zoneId: 'first-shelter-edge',
+    zoneId: 'herb-berry-patch',
     amount: 1,
     respawnMs: 0,
     maxActive: 2,
     collisionClearance: 20,
     ecology: 'damp-shade',
-    placementNote: 'Dew herbs prefer lower, shaded shelter edges where cold moisture would linger.',
+    placementNote: 'Dew herbs prefer the bright damp edge of the herb and berry patch where low plant life is already established.',
     candidates: [
       { x: 560, y: 420 },
       { x: 650, y: 470 },
@@ -122,17 +123,17 @@ const zoneDependentResourceRules = [
     ]
   },
   {
-    id: 'loose-stone-near-wolf-edge',
+    id: 'loose-stone-stone-outcrop',
     seedKey: 'zone-1-loose-stones',
     seedIdPrefix: 'loose-stone',
     kind: 'stone',
-    zoneId: 'wolf-territory-edge',
+    zoneId: 'stone-outcrop',
     amount: 1,
     respawnMs: 0,
     maxActive: 2,
     collisionClearance: 24,
     ecology: 'exposed-stone',
-    placementNote: 'Loose stones appear near exposed northern dirt, roots, and rock edges.',
+    placementNote: 'Loose stones appear on exposed outcrop ground, erosion marks, and rock edges.',
     candidates: [
       { x: 380, y: 720 },
       { x: 490, y: 768 },
@@ -142,11 +143,11 @@ const zoneDependentResourceRules = [
     ]
   },
   {
-    id: 'wind-dry-grass-first-clearing',
+    id: 'wind-dry-grass-camp-clearing',
     seedKey: 'zone-1-dry-grass',
     seedIdPrefix: 'dry-grass',
     kind: 'dryGrass',
-    zoneId: 'first-clearing',
+    zoneId: 'camp-clearing-hub',
     amount: 1,
     respawnMs: 0,
     maxActive: 2,
@@ -259,7 +260,25 @@ export const getValidZoneDependentSpawnCandidates = (
       x: candidate.x,
       y: candidate.y
     }))
-    .filter((candidate) => isOutsideMapCollision(candidate.x, candidate.y, rule.collisionClearance));
+    .filter((candidate) => isValidZoneDependentSpawn(rule, candidate.x, candidate.y));
+
+export const isInsideZoneDependentRegion = (rule: ZoneDependentResourceRule, x: number, y: number): boolean => {
+  const region = getZoneOneRegion(rule.zoneId);
+  const dx = Math.abs(x - region.center.x);
+  const dy = Math.abs(y - region.center.y);
+
+  return dx <= region.radius.x && dy <= region.radius.y;
+};
+
+export const isZoneDependentRuleAllowedByRegion = (rule: ZoneDependentResourceRule): boolean => {
+  const region = getZoneOneRegion(rule.zoneId);
+
+  return (
+    region.resourceKinds.includes(rule.kind) &&
+    region.ecologyTags.includes(rule.ecology) &&
+    region.resourceProfile.density !== 'none'
+  );
+};
 
 export const isInsideTreeBranchSpawnBand = (tree: TreeInstance, x: number, y: number): boolean => {
   return isInsideTreeDependentSpawnBand(fallenBranchRule, tree, x, y);
@@ -296,6 +315,11 @@ const isValidTreeDependentSpawn = (
 ): boolean =>
   isInsideTreeDependentSpawnBand(rule, tree, x, y) &&
   (!rule.excludeParentTrunkCollision || isOutsideParentTrunkCollision(tree, x, y));
+
+const isValidZoneDependentSpawn = (rule: ZoneDependentResourceRule, x: number, y: number): boolean =>
+  isZoneDependentRuleAllowedByRegion(rule) &&
+  isInsideZoneDependentRegion(rule, x, y) &&
+  isOutsideMapCollision(x, y, rule.collisionClearance);
 
 const selectStableSpawnCandidates = (
   rule: TreeDependentResourceRule | ZoneDependentResourceRule,

@@ -1569,3 +1569,32 @@ The UI still feels handmade and grounded, but it no longer lets decorative asset
 Verification:
 
 - Browser visual check confirmed Satchel and Making no longer overlap their own assets.
+
+### Beginner Satchel Rule Layer v1
+
+Status: implemented.
+
+- Added a shared satchel rule module for beginner carried capacity.
+- The six-slot satchel is now an actual rule layer, not only a UI presentation.
+- Current rule:
+  - Same item kind stacks into its existing slot.
+  - A new item kind needs an empty satchel slot.
+  - A seventh unique carried kind is refused.
+- Gathering now checks satchel room before mutating inventory or depleting the resource node.
+- Failed pickup leaves the world resource intact and shows `No room in the satchel.`
+- Crafting now checks whether its output can fit before consuming materials.
+- Crafting can still succeed when its ingredients are consumed down to zero and free room for the output.
+- HUD now has a `No Room` recipe state for blocked crafting outputs.
+
+Scaling reason:
+
+This gives future inventory growth a clean extension point. Bigger satchels, tool belts, station storage, pack upgrades, and special containers can grow from the same accept-or-refuse rule instead of letting every system mutate inventory directly.
+
+Alive-world cross-check:
+
+The child has limited carried capacity now. The world can still offer useful things, but the player must decide what can actually be carried. That makes usefulness more physical and gives future upgrades real meaning.
+
+Verification:
+
+- `npm.cmd test` passed: 101 tests.
+- `npm.cmd run build` passed.

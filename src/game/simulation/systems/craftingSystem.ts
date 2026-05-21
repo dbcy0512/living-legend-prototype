@@ -1,12 +1,13 @@
 import { getCraftingRecipe, getCraftingRecipes, type CraftingInputKind, type CraftingRecipeId } from '../../content/craftingRecipes';
 import type { CampfireState, GameState } from '../state';
+import { canAddSatchelItem } from '../rules/satchel';
 import { clamp, distance } from '../rules/math';
 
 const activeFireCraftingReach = 118;
 
 export type CraftingAvailability = {
   canCraft: boolean;
-  reason: 'ready' | 'missing-items' | 'needs-active-fire' | 'unknown-recipe';
+  reason: 'ready' | 'missing-items' | 'needs-active-fire' | 'satchel-full' | 'unknown-recipe';
 };
 
 export const getAvailableCraftingRecipes = (state: GameState) =>
@@ -25,6 +26,14 @@ export const getCraftingAvailability = (state: GameState, recipeId: CraftingReci
   }
   if (recipe.context === 'near-active-fire' && !getNearbyActiveFire(state)) {
     return { canCraft: false, reason: 'needs-active-fire' };
+  }
+  if (
+    recipe.effect.type === 'create-item' &&
+    state.inventory[recipe.effect.item] <= 0 &&
+    !willCraftingCostFreeSlot(state, recipe.cost) &&
+    !canAddSatchelItem(state.inventory, recipe.effect.item)
+  ) {
+    return { canCraft: false, reason: 'satchel-full' };
   }
   return { canCraft: true, reason: 'ready' };
 };
@@ -60,6 +69,7 @@ export const craftRecipe = (state: GameState, recipeId: CraftingRecipeId): boole
     state.player.health = clamp(state.player.health + recipe.effect.health, 0, state.player.maxHealth);
   } else {
     state.inventory[recipe.effect.item] += recipe.effect.amount;
+    state.ui.inventoryMessage = `${recipe.name} tucked into the satchel.`;
     if (recipe.effect.item === 'poultices') {
       state.ui.hotbarMessage = 'Poultice ready.';
     } else if (recipe.effect.item === 'branchClubs') {
@@ -101,6 +111,11 @@ export const getCraftingItemLabel = (kind: CraftingInputKind): string => {
 const hasCraftingCost = (state: GameState, cost: Partial<Record<CraftingInputKind, number>>): boolean =>
   (Object.entries(cost) as [CraftingInputKind, number][]).every(([kind, amount]) => state.inventory[kind] >= amount);
 
+const willCraftingCostFreeSlot = (state: GameState, cost: Partial<Record<CraftingInputKind, number>>): boolean =>
+  (Object.entries(cost) as [CraftingInputKind, number][]).some(
+    ([kind, amount]) => state.inventory[kind] > 0 && state.inventory[kind] <= amount
+  );
+
 const getNearbyActiveFire = (state: GameState): CampfireState | undefined =>
   state.campfires.find(
     (campfire) =>
@@ -114,6 +129,8 @@ const getCraftingFailureMessage = (recipeName: string, reason: CraftingAvailabil
       return `${recipeName} needs more pieces.`;
     case 'needs-active-fire':
       return `${recipeName} needs a living flame.`;
+    case 'satchel-full':
+      return `${recipeName} needs room in the satchel.`;
     case 'unknown-recipe':
       return 'That thought has no shape yet.';
     case 'ready':

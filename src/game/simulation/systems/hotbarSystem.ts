@@ -103,6 +103,7 @@ export const selectOrUseHotbarSlot = (state: GameState, slotIndex: number): bool
   }
 
   state.ui.selectedHotbarSlot = clamp(slotIndex, 0, slots.length - 1);
+  state.ui.inventoryMessage = '';
   if (slot.locked) {
     state.ui.hotbarMessage = 'That space is not ready.';
     return false;

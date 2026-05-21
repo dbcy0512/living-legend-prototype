@@ -1,6 +1,16 @@
 import type { ActionState } from '../../input/actions';
 import { getCraftingRecipes } from '../../content/craftingRecipes';
 import type { GameState, Inventory, PlayerState, ResourceNode } from '../state';
+import {
+  addSatchelItem,
+  beginnerSatchelSlotCount,
+  canAddSatchelItem,
+  getSatchelSlots,
+  getSatchelSummary,
+  type SatchelItemKind,
+  type SatchelSlot,
+  type SatchelSummary
+} from '../rules/satchel';
 import { clamp, distance } from '../rules/math';
 import { craftRecipe } from './craftingSystem';
 
@@ -26,78 +36,13 @@ export type FirstFirePreview = {
   reason: 'ready' | 'needs-kindling' | 'too-far' | 'already-lit';
 };
 
-type InventorySlotItemKind = keyof Pick<
-  Inventory,
-  'twigs' | 'dryGrass' | 'bark' | 'wood' | 'stone' | 'herbs' | 'food' | 'poultices' | 'stoneEdges' | 'branchClubs'
->;
-
-export type BeginnerInventorySlot = {
-  index: number;
-  kind?: InventorySlotItemKind;
-  label: string;
-  count: number;
-  empty: boolean;
-};
-
-export type BeginnerInventorySummary = {
-  occupiedSlots: number;
-  slotCount: number;
-  hiddenItemKinds: number;
-  full: boolean;
-};
-
-export const beginnerInventorySlotCount = 6;
-
-const beginnerInventoryItemOrder: { kind: InventorySlotItemKind; label: string }[] = [
-  { kind: 'twigs', label: 'Twigs' },
-  { kind: 'dryGrass', label: 'Dry Grass' },
-  { kind: 'bark', label: 'Bark' },
-  { kind: 'stone', label: 'Stone' },
-  { kind: 'wood', label: 'Wood' },
-  { kind: 'herbs', label: 'Herbs' },
-  { kind: 'food', label: 'Food' },
-  { kind: 'poultices', label: 'Poultice' },
-  { kind: 'stoneEdges', label: 'Stone Edge' },
-  { kind: 'branchClubs', label: 'Branch Club' }
-];
-
-const getCarriedBeginnerInventoryItems = (state: GameState) =>
-  beginnerInventoryItemOrder.filter(({ kind }) => state.inventory[kind] > 0);
-
-export const getBeginnerInventorySlots = (state: GameState): BeginnerInventorySlot[] => {
-  const carriedItems = getCarriedBeginnerInventoryItems(state);
-  const carried: BeginnerInventorySlot[] = carriedItems
-    .slice(0, beginnerInventorySlotCount)
-    .map((item, index) => ({
-      index,
-      kind: item.kind,
-      label: item.label,
-      count: state.inventory[item.kind],
-      empty: false
-    }));
-
-  while (carried.length < beginnerInventorySlotCount) {
-    carried.push({
-      index: carried.length,
-      label: 'Empty',
-      count: 0,
-      empty: true
-    });
-  }
-
-  return carried;
-};
-
-export const getBeginnerInventorySummary = (state: GameState): BeginnerInventorySummary => {
-  const carriedItemCount = getCarriedBeginnerInventoryItems(state).length;
-  const occupiedSlots = Math.min(carriedItemCount, beginnerInventorySlotCount);
-  return {
-    occupiedSlots,
-    slotCount: beginnerInventorySlotCount,
-    hiddenItemKinds: Math.max(0, carriedItemCount - beginnerInventorySlotCount),
-    full: occupiedSlots >= beginnerInventorySlotCount
-  };
-};
+export type BeginnerInventorySlot = SatchelSlot;
+export type BeginnerInventorySummary = SatchelSummary;
+export const beginnerInventorySlotCount = beginnerSatchelSlotCount;
+export const getBeginnerInventorySlots = (state: GameState): BeginnerInventorySlot[] => getSatchelSlots(state.inventory);
+export const getBeginnerInventorySummary = (state: GameState): BeginnerInventorySummary => getSatchelSummary(state.inventory);
+export const canCarryInventoryKind = (state: GameState, kind: SatchelItemKind): boolean =>
+  canAddSatchelItem(state.inventory, kind);
 
 export const updateInventory = (state: GameState, actions: ActionState, deltaMs: number): void => {
   if (state.world.status !== 'playing') {
@@ -123,7 +68,12 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
   if (actions.gather) {
     const node = getNearestGatherableResource(state);
     if (node) {
-      state.inventory[node.kind] += 1;
+      if (!addSatchelItem(state.inventory, node.kind, 1)) {
+        state.ui.inventoryMessage = 'No room in the satchel.';
+        syncOpeningPrompt(state);
+        return;
+      }
+      state.ui.inventoryMessage = `${getInventoryKindLabel(node.kind)} gathered.`;
       state.behaviorMemory.tools.gathered[node.kind] += 1;
       node.amount -= 1;
       if (node.amount <= 0) {
@@ -273,6 +223,31 @@ export const getCampfirePlacementPreview = (state: GameState): CampfirePlacement
 };
 
 const getFirstFire = (state: GameState) => state.campfires.find((campfire) => campfire.id === 'first-fire');
+
+const getInventoryKindLabel = (kind: SatchelItemKind): string => {
+  switch (kind) {
+    case 'twigs':
+      return 'Twig';
+    case 'dryGrass':
+      return 'Dry grass';
+    case 'bark':
+      return 'Bark';
+    case 'wood':
+      return 'Wood';
+    case 'stone':
+      return 'Stone';
+    case 'herbs':
+      return 'Herb';
+    case 'food':
+      return 'Food';
+    case 'poultices':
+      return 'Poultice';
+    case 'stoneEdges':
+      return 'Stone Edge';
+    case 'branchClubs':
+      return 'Branch Club';
+  }
+};
 
 const hasCampfireResources = (inventory: Inventory): boolean =>
   inventory.wood >= campfireWoodCost && inventory.stone >= campfireStoneCost;

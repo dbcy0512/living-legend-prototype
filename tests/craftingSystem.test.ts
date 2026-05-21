@@ -72,4 +72,38 @@ describe('crafting registry', () => {
     expect(state.inventory.branchClubs).toBe(1);
     expect(state.inventory.bark).toBe(0);
   });
+
+  it('allows crafting output when consumed ingredients free satchel space', () => {
+    const state = createGameState();
+    state.inventory.twigs = 1;
+    state.inventory.dryGrass = 1;
+    state.inventory.bark = 1;
+    state.inventory.stone = 1;
+    state.inventory.wood = 1;
+    state.inventory.herbs = 1;
+
+    expect(craftRecipe(state, 'simple-poultice')).toBe(true);
+    expect(state.inventory.poultices).toBe(1);
+    expect(state.inventory.herbs).toBe(0);
+    expect(state.inventory.bark).toBe(0);
+  });
+
+  it('rejects crafting output when the beginner satchel has no free slot', () => {
+    const state = createGameState();
+    state.inventory.twigs = 1;
+    state.inventory.dryGrass = 1;
+    state.inventory.bark = 2;
+    state.inventory.stone = 1;
+    state.inventory.wood = 2;
+    state.inventory.herbs = 1;
+
+    expect(getCraftingAvailability(state, 'branch-club')).toEqual({
+      canCraft: false,
+      reason: 'satchel-full'
+    });
+    expect(craftRecipe(state, 'branch-club')).toBe(false);
+    expect(state.inventory.branchClubs).toBe(0);
+    expect(state.inventory.bark).toBe(2);
+    expect(state.inventory.wood).toBe(2);
+  });
 });

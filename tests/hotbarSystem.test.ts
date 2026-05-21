@@ -36,12 +36,14 @@ describe('hotbar system', () => {
 
   it('equips crude melee seeds from their hotbar slots', () => {
     const state = createGameState();
+    state.ui.inventoryMessage = 'Twig gathered.';
     state.inventory.branchClubs = 1;
     state.inventory.stoneEdges = 1;
 
     expect(selectOrUseHotbarSlot(state, 0)).toBe(true);
     expect(state.equipment.mainHand).toBe('branch-club');
     expect(state.ui.selectedHotbarSlot).toBe(0);
+    expect(state.ui.inventoryMessage).toBe('');
 
     expect(selectOrUseHotbarSlot(state, 1)).toBe(true);
     expect(state.equipment.mainHand).toBe('stone-edge');

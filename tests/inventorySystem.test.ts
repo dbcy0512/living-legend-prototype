@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createGameState } from '../src/game/simulation/state';
 import {
   beginnerInventorySlotCount,
+  canCarryInventoryKind,
   craftCampfire,
   getBeginnerInventorySummary,
   getBeginnerInventorySlots,
@@ -57,6 +58,30 @@ describe('inventory crafting', () => {
       hiddenItemKinds: 1,
       full: true
     });
+  });
+
+  it('allows stacking an already-carried kind when the satchel is full', () => {
+    const state = createGameState();
+    state.inventory.twigs = 1;
+    state.inventory.dryGrass = 1;
+    state.inventory.bark = 1;
+    state.inventory.stone = 1;
+    state.inventory.wood = 1;
+    state.inventory.herbs = 1;
+
+    expect(canCarryInventoryKind(state, 'wood')).toBe(true);
+  });
+
+  it('refuses a new carried kind when all six beginner satchel slots are filled', () => {
+    const state = createGameState();
+    state.inventory.twigs = 1;
+    state.inventory.dryGrass = 1;
+    state.inventory.bark = 1;
+    state.inventory.stone = 1;
+    state.inventory.wood = 1;
+    state.inventory.herbs = 1;
+
+    expect(canCarryInventoryKind(state, 'food')).toBe(false);
   });
 
   it('crafts campfire only when resource costs are available', () => {
@@ -196,6 +221,31 @@ describe('inventory crafting', () => {
 
     expect(state.inventory[resource.kind]).toBe(1);
     expect(resource.amount).toBe(0);
+  });
+
+  it('does not destroy a resource when the satchel has no room for its kind', () => {
+    const state = createGameState();
+    const actions = idleActions();
+    const resource = state.resources.find((node) => node.kind === 'food');
+    if (!resource) {
+      throw new Error('food resource fixture missing');
+    }
+    state.inventory.twigs = 1;
+    state.inventory.dryGrass = 1;
+    state.inventory.bark = 1;
+    state.inventory.stone = 1;
+    state.inventory.wood = 1;
+    state.inventory.herbs = 1;
+    state.resources.splice(0, state.resources.length, resource);
+    state.player.x = resource.x;
+    state.player.y = resource.y;
+    actions.gather = true;
+
+    updateInventory(state, actions, 16);
+
+    expect(state.inventory.food).toBe(0);
+    expect(resource.amount).toBeGreaterThan(0);
+    expect(state.ui.inventoryMessage).toBe('No room in the satchel.');
   });
 
   it('gathers dry grass as a first-fire material', () => {

@@ -172,8 +172,9 @@ const getHintText = (state: GameState): string => {
       ? 'M hides making. [ ] choose. Enter makes.'
       : 'M opens making.'
     : 'Tab opens satchel.';
-  const hotbarHint = state.ui.hotbarMessage ? `${state.ui.hotbarMessage} ` : '';
-  return `${hotbarHint}Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-4 abilities, 5 heal, 6 utility. ${craftHint}`;
+  const stateHint = state.ui.inventoryMessage || state.ui.hotbarMessage;
+  const prompt = stateHint ? `${stateHint} ` : '';
+  return `${prompt}Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-4 abilities, 5 heal, 6 utility. ${craftHint}`;
 };
 
 const getInventoryPanelHtml = (state: GameState): string => {
@@ -199,7 +200,8 @@ const getInventoryPanelHtml = (state: GameState): string => {
 
 const getInventoryControlsHtml = (state: GameState): string => {
   const makingControls = state.ui.craftingOpen ? '<span>[ ] Select</span><span>Enter Make</span>' : '';
-  return `<span>Tab Close</span><span>M ${state.ui.craftingOpen ? 'Inventory' : 'Making'}</span>${makingControls}`;
+  const message = state.ui.inventoryMessage && !state.ui.craftingOpen ? `<span>${state.ui.inventoryMessage}</span>` : '';
+  return `<span>Tab Close</span><span>M ${state.ui.craftingOpen ? 'Inventory' : 'Making'}</span>${makingControls}${message}`;
 };
 
 const getInventoryCapacityText = (state: GameState): string => {
@@ -270,6 +272,8 @@ const getCraftingReasonText = (reason: ReturnType<typeof getAvailableCraftingRec
       return 'Missing';
     case 'needs-active-fire':
       return 'Needs Fire';
+    case 'satchel-full':
+      return 'No Room';
     case 'unknown-recipe':
       return 'Unknown';
     case 'ready':

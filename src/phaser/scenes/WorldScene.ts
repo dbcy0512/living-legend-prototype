@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { idleActions, type ActionState } from '../../game/input/actions';
 import { animationKeys, assetKeys } from '../../game/assets/manifest';
 import { getEnemyDefinition } from '../../game/content/enemies';
-import { startingArea, viewportSize } from '../../game/content/maps/startingArea';
+import { startingArea, startingAreaLayout, viewportSize } from '../../game/content/maps/startingArea';
 import { getZoneOneHabitatAnchors } from '../../game/content/maps/zoneOneConcept';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
 import { getResourceProfile, isEcosystemResourceSource } from '../../game/content/resources';
@@ -274,28 +274,46 @@ export class WorldScene extends Phaser.Scene {
     this.terrainBase.setOrigin(0);
     this.terrainBase.setDepth(-10);
 
-    this.clearingBase = this.add.tileSprite(710, 542, 430, 172, assetKeys.dirtClearing);
+    this.clearingBase = this.add.tileSprite(startingAreaLayout.campCenter.x, startingAreaLayout.campCenter.y, 500, 230, assetKeys.dirtClearing);
     this.clearingBase.setDepth(-9);
 
     const clearingMaskSource = this.add.graphics();
     clearingMaskSource.setVisible(false);
     clearingMaskSource.fillStyle(0xffffff, 1);
-    clearingMaskSource.fillEllipse(710, 542, 425, 166);
+    clearingMaskSource.fillEllipse(startingAreaLayout.campCenter.x, startingAreaLayout.campCenter.y, 500, 220);
     this.clearingBase.setMask(clearingMaskSource.createGeometryMask());
   }
 
   private drawGround(): void {
     this.ground.clear();
+    this.ground.fillStyle(0x19382f, 0.28);
+    this.ground.fillEllipse(590, 450, 520, 250);
+    this.ground.fillStyle(0x263f35, 0.25);
+    this.ground.fillEllipse(470, 790, 470, 210);
+    this.ground.fillStyle(0x132823, 0.34);
+    this.ground.fillEllipse(450, 1240, 620, 320);
+    this.ground.fillStyle(0x2a332b, 0.3);
+    this.ground.fillEllipse(860, 1285, 390, 210);
     this.ground.fillStyle(0x16312d, 0.34);
-    this.ground.fillEllipse(1080, 230, 560, 150);
+    this.ground.fillEllipse(1400, 390, 650, 230);
     this.ground.fillStyle(0x101f22, 0.32);
-    this.ground.fillEllipse(1230, 232, 390, 122);
-    this.ground.fillStyle(0x33251e, 0.18);
-    this.ground.fillEllipse(704, 542, 392, 160);
+    this.ground.fillEllipse(2180, 440, 720, 250);
+    this.ground.fillStyle(0x1f2c25, 0.38);
+    this.ground.fillEllipse(2180, 850, 620, 260);
     this.ground.fillStyle(0x263f35, 0.26);
-    this.ground.fillEllipse(1110, 742, 360, 86);
-    this.ground.lineStyle(3, 0xf5efd8, 0.24);
-    this.ground.lineBetween(948, 740, 1292, 766);
+    this.ground.fillEllipse(2180, 1120, 620, 220);
+    this.ground.fillStyle(0x111c20, 0.34);
+    this.ground.fillEllipse(1400, 1450, 470, 250);
+    this.ground.fillStyle(0x33251e, 0.18);
+    this.ground.fillEllipse(startingAreaLayout.campCenter.x, startingAreaLayout.campCenter.y, 470, 205);
+    this.ground.lineStyle(4, 0xf5efd8, 0.18);
+    this.ground.lineBetween(740, 530, 1140, 725);
+    this.ground.lineBetween(630, 835, 1150, 820);
+    this.ground.lineBetween(600, 1160, 1160, 930);
+    this.ground.lineBetween(1660, 710, 2020, 540);
+    this.ground.lineBetween(1660, 850, 1960, 850);
+    this.ground.lineBetween(1660, 965, 2010, 1115);
+    this.ground.lineBetween(1400, 1005, 1400, 1345);
   }
 
   private createLivingDetails(): void {

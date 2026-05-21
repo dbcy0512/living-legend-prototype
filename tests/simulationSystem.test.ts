@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { idleActions } from '../src/game/input/actions';
+import { startingArea } from '../src/game/content/maps/startingArea';
 import { createGameState } from '../src/game/simulation/state';
 import { updateSimulation } from '../src/game/simulation/systems/simulationSystem';
 
@@ -62,7 +63,7 @@ describe('simulation status', () => {
 
     expect(state.world.timeOfDay).toBe(pausedTime);
     expect(state.world.windPhase).toBe(pausedWind);
-    expect(state.player.x).toBe(710);
+    expect(state.player.x).toBe(startingArea.playerStart.x);
   });
 
   it('resumes simulation when pause is toggled again', () => {

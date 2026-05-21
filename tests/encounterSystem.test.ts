@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { idleActions } from '../src/game/input/actions';
+import { startingAreaLayout } from '../src/game/content/maps/startingArea';
 import { createGameState, type ResourceNode } from '../src/game/simulation/state';
 import {
   getEncounterPocket,
@@ -23,8 +24,8 @@ describe('encounter pockets', () => {
   it('wakes the deadwood pocket when a player gathers a resource inside it', () => {
     const state = createGameState();
     state.world.openingStage = 'open';
-    const triggerResource = resourceFixture('deadwood-loose-branch', 1050, 492);
-    const lockedResource = resourceFixture('deadwood-second-branch', 1120, 500);
+    const triggerResource = resourceFixture('deadwood-loose-branch', 2098, 868);
+    const lockedResource = resourceFixture('deadwood-second-branch', 2200, 900);
     state.resources.splice(0, state.resources.length, triggerResource, lockedResource);
     state.player.x = triggerResource.x;
     state.player.y = triggerResource.y;
@@ -45,8 +46,8 @@ describe('encounter pockets', () => {
   it('keeps active pocket resources unavailable until all spawned enemies are dead', () => {
     const state = createGameState();
     state.world.openingStage = 'open';
-    const triggerResource = resourceFixture('deadwood-loose-branch', 1050, 492);
-    const lockedResource = resourceFixture('deadwood-second-branch', 1120, 500);
+    const triggerResource = resourceFixture('deadwood-loose-branch', 2098, 868);
+    const lockedResource = resourceFixture('deadwood-second-branch', 2200, 900);
     state.resources.splice(0, state.resources.length, triggerResource, lockedResource);
     state.player.x = triggerResource.x;
     state.player.y = triggerResource.y;
@@ -70,7 +71,7 @@ describe('encounter pockets', () => {
   it('lets the camp sanctuary break small encounter pursuit without clearing the pocket', () => {
     const state = createGameState();
     state.world.openingStage = 'open';
-    const triggerResource = resourceFixture('deadwood-loose-branch', 1050, 492);
+    const triggerResource = resourceFixture('deadwood-loose-branch', 2098, 868);
     state.resources.splice(0, state.resources.length, triggerResource);
     state.player.x = triggerResource.x;
     state.player.y = triggerResource.y;
@@ -82,8 +83,8 @@ describe('encounter pockets', () => {
     enemy.y = state.player.y;
     enemy.aggression = 72;
 
-    state.player.x = 710;
-    state.player.y = 542;
+    state.player.x = startingAreaLayout.campCenter.x;
+    state.player.y = startingAreaLayout.campCenter.y;
     updateEnemies(state, 500);
 
     expect(isPlayerInsideCampSanctuary(state)).toBe(true);

@@ -1,6 +1,7 @@
 import type { CampfireState, EnemyState, GameState } from '../state';
 import { clamp, distance, normalizeAxis } from '../rules/math';
 import { applyCreatureDamageResponse } from '../rules/creatureResponses';
+import { startingAreaLayout } from '../../content/maps/startingArea';
 import { getWorldCyclePhase, isNightAssaultPhase } from '../rules/dayNight';
 import { setPlayerThought } from '../rules/thoughts';
 import { getEnemyCollisionRadius, resolveWorldCollisions } from '../rules/collision';
@@ -440,7 +441,7 @@ const getFireDefenseTarget = (state: GameState): CampfireState | undefined =>
   state.campfires.find((campfire) => campfire.fuelMs > 0 && campfire.integrity > 0);
 
 const getTerritoryPressure = (state: GameState): number => {
-  const northPressure = clamp((350 - state.player.y) / 170, 0, 1);
-  const eastPressure = clamp((state.player.x - 1010) / 280, 0, 1);
+  const northPressure = clamp((startingAreaLayout.campCenter.y - 250 - state.player.y) / 220, 0, 1);
+  const eastPressure = clamp((state.player.x - (startingAreaLayout.campCenter.x + 520)) / 360, 0, 1);
   return Math.max(northPressure, eastPressure) * 42;
 };

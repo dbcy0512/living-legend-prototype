@@ -114,11 +114,11 @@ const zoneDependentResourceRules = [
     ecology: 'damp-shade',
     placementNote: 'Dew herbs prefer lower, shaded shelter edges where cold moisture would linger.',
     candidates: [
-      { x: 456, y: 680 },
-      { x: 610, y: 704 },
-      { x: 344, y: 736 },
-      { x: 570, y: 760 },
-      { x: 470, y: 748 }
+      { x: 560, y: 420 },
+      { x: 650, y: 470 },
+      { x: 470, y: 500 },
+      { x: 720, y: 380 },
+      { x: 520, y: 560 }
     ]
   },
   {
@@ -134,11 +134,11 @@ const zoneDependentResourceRules = [
     ecology: 'exposed-stone',
     placementNote: 'Loose stones appear near exposed northern dirt, roots, and rock edges.',
     candidates: [
-      { x: 1006, y: 552 },
-      { x: 1144, y: 612 },
-      { x: 1248, y: 580 },
-      { x: 1334, y: 660 },
-      { x: 918, y: 642 }
+      { x: 380, y: 720 },
+      { x: 490, y: 768 },
+      { x: 560, y: 860 },
+      { x: 315, y: 830 },
+      { x: 635, y: 720 }
     ]
   },
   {
@@ -154,11 +154,11 @@ const zoneDependentResourceRules = [
     ecology: 'dry-clearing-edge',
     placementNote: 'Dry grass gathers on exposed clearing edges where wind and weak sun can dry it.',
     candidates: [
-      { x: 548, y: 558 },
-      { x: 718, y: 604 },
-      { x: 770, y: 456 },
-      { x: 622, y: 696 },
-      { x: 858, y: 552 }
+      { x: 1248, y: 838 },
+      { x: 1420, y: 958 },
+      { x: 1536, y: 782 },
+      { x: 1320, y: 1030 },
+      { x: 1650, y: 890 }
     ]
   }
 ] as const satisfies readonly ZoneDependentResourceRule[];

@@ -32,8 +32,8 @@ const enemyDefinitions = {
     habitatTags: ['damp-shade', 'deadwood'],
     firstEncounterUse: 'A small fast creature for teaching spacing, fear, and movement without the inevitability of a wolf.',
     home: {
-      x: 1010,
-      y: 620
+      x: 2098,
+      y: 868
     }
   },
   'violet-moss-blob': {
@@ -47,8 +47,8 @@ const enemyDefinitions = {
     habitatTags: ['damp-shade', 'dense-forest-edge'],
     firstEncounterUse: 'A slow pressure enemy for testing readable approach, knockback, and fire attraction.',
     home: {
-      x: 1180,
-      y: 540
+      x: 2248,
+      y: 922
     }
   },
   'thorn-shell-mite': {
@@ -62,8 +62,8 @@ const enemyDefinitions = {
     habitatTags: ['animal-trail', 'deadwood'],
     firstEncounterUse: 'A small armored nuisance that can guard paths or resource pockets without feeling like a predator.',
     home: {
-      x: 1268,
-      y: 670
+      x: 2180,
+      y: 1120
     }
   }
 } as const satisfies Record<EnemyKind, EnemyDefinition>;
@@ -71,4 +71,3 @@ const enemyDefinitions = {
 export const getEnemyDefinition = (kind: EnemyKind): EnemyDefinition => enemyDefinitions[kind];
 
 export const getEnemyDefinitions = (): readonly EnemyDefinition[] => Object.values(enemyDefinitions);
-

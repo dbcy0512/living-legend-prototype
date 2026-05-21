@@ -3,6 +3,7 @@ import { getCraftingRecipes } from '../../content/craftingRecipes';
 import { createGameState, type GameState } from '../state';
 import { updateEvolution } from '../rules/evolutionRules';
 import { tickPlayerThought } from '../rules/thoughts';
+import { tryStartWeaponAbility, updateAbility } from './abilitySystem';
 import { updateCombat } from './combatSystem';
 import { updateEnemies } from './enemySystem';
 import { selectOrUseHotbarSlot, updateHotbar } from './hotbarSystem';
@@ -35,7 +36,7 @@ export const updateSimulation = (state: GameState, actions: ActionState, deltaMs
     const offset = actions.craftRecipeNext ? 1 : -1;
     state.ui.selectedCraftingRecipeIndex = (state.ui.selectedCraftingRecipeIndex + offset + recipeCount) % recipeCount;
   }
-  if (actions.hotbarSlot !== undefined) {
+  if (actions.hotbarSlot !== undefined && !tryStartWeaponAbility(state, actions.hotbarSlot)) {
     selectOrUseHotbarSlot(state, actions.hotbarSlot);
   }
   if (state.world.paused) {
@@ -48,6 +49,7 @@ export const updateSimulation = (state: GameState, actions: ActionState, deltaMs
   updateInventory(state, actions, clampedDelta);
   updateHotbar(state, clampedDelta);
   updatePlayer(state, actions, clampedDelta);
+  updateAbility(state, clampedDelta);
   updateCombat(state, actions, clampedDelta);
   updateEnemies(state, clampedDelta);
   updateEvolution(state);
@@ -57,6 +59,7 @@ const resetGameState = (state: GameState): void => {
   const fresh = createGameState({ ecosystemSeed: state.ecosystem.seed });
   Object.assign(state.player, fresh.player);
   Object.assign(state.combat, fresh.combat);
+  Object.assign(state.ability, fresh.ability);
   Object.assign(state.world, fresh.world);
   Object.assign(state.inventory, fresh.inventory);
   Object.assign(state.evolution, fresh.evolution);
@@ -66,6 +69,8 @@ const resetGameState = (state: GameState): void => {
   Object.assign(state.ui, fresh.ui);
   Object.assign(state.behaviorMemory.body, fresh.behaviorMemory.body);
   Object.assign(state.behaviorMemory.combat, fresh.behaviorMemory.combat);
+  Object.assign(state.behaviorMemory.abilities.used, fresh.behaviorMemory.abilities.used);
+  Object.assign(state.behaviorMemory.abilities.hits, fresh.behaviorMemory.abilities.hits);
   Object.assign(state.behaviorMemory.tools.gathered, fresh.behaviorMemory.tools.gathered);
   Object.assign(state.behaviorMemory.tools.usedAsWeapon, fresh.behaviorMemory.tools.usedAsWeapon);
   Object.assign(state.behaviorMemory.tools.usedAsFuel, fresh.behaviorMemory.tools.usedAsFuel);

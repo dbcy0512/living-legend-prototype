@@ -6,6 +6,7 @@ import {
   type EcosystemResourceSource
 } from '../content/ecosystem';
 import type { MeleeSeed } from '../content/meleeSeeds';
+import type { WeaponAbilityId, WeaponAbilityStatusTag } from '../content/weaponAbilities';
 import type { WorldCyclePhase } from './rules/dayNight';
 
 export type Inventory = {
@@ -45,6 +46,22 @@ export type CombatState = {
   rollCooldownMs: number;
   hitStopMs: number;
   lastHitFlashMs: number;
+};
+
+export type AbilityState = {
+  activeId?: WeaponAbilityId;
+  linkedWeapon?: MeleeSeed;
+  animationKey: string;
+  statusTags: WeaponAbilityStatusTag[];
+  damage: number;
+  staminaCost: number;
+  reach: number;
+  width: number;
+  cooldownMs: number;
+  cooldownDurationMs: number;
+  timerMs: number;
+  hasAppliedHit: boolean;
+  lastUsedId?: WeaponAbilityId;
 };
 
 export type WorldState = {
@@ -128,6 +145,10 @@ export type BehaviorMemory = {
     branchClubAttacks: number;
     stoneEdgeAttacks: number;
   };
+  abilities: {
+    used: Record<WeaponAbilityId, number>;
+    hits: Record<WeaponAbilityId, number>;
+  };
   tools: {
     gathered: ItemMemory;
     usedAsWeapon: ItemMemory;
@@ -186,6 +207,7 @@ export type UiState = {
 export type GameState = {
   player: PlayerState;
   combat: CombatState;
+  ability: AbilityState;
   world: WorldState;
   inventory: Inventory;
   behaviorMemory: BehaviorMemory;
@@ -228,6 +250,18 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       rollCooldownMs: 0,
       hitStopMs: 0,
       lastHitFlashMs: 0
+    },
+    ability: {
+      animationKey: '',
+      statusTags: [],
+      damage: 0,
+      staminaCost: 0,
+      reach: 0,
+      width: 0,
+      cooldownMs: 0,
+      cooldownDurationMs: 0,
+      timerMs: 0,
+      hasAppliedHit: false
     },
     world: {
       timeOfDay: 0.42,
@@ -367,6 +401,10 @@ const createBehaviorMemory = (): BehaviorMemory => ({
     branchClubAttacks: 0,
     stoneEdgeAttacks: 0
   },
+  abilities: {
+    used: createAbilityMemory(),
+    hits: createAbilityMemory()
+  },
   tools: {
     gathered: createItemMemory(),
     usedAsWeapon: createItemMemory(),
@@ -384,4 +422,10 @@ const createBehaviorMemory = (): BehaviorMemory => ({
     wolfLungesFaced: 0,
     wolfLungesAvoided: 0
   }
+});
+
+const createAbilityMemory = (): Record<WeaponAbilityId, number> => ({
+  'unarmed-survival-swipe': 0,
+  'branch-club-heavy-swing': 0,
+  'stone-edge-cleaving-cut': 0
 });

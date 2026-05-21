@@ -37,24 +37,26 @@ export type HotbarSlot = {
   cooldownDurationMs: number;
 };
 
-export const getHotbarSlots = (state: GameState): HotbarSlot[] => [
-  {
-    index: 0,
-    role: 'ability',
-    roleLabel: 'A1',
-    abilityId: getPrimaryWeaponAbility(state.equipment.mainHand).id,
-    abilityLabel: getPrimaryWeaponAbility(state.equipment.mainHand).shortLabel,
-    linkedWeapon: state.equipment.mainHand,
-    animationKey: getPrimaryWeaponAbility(state.equipment.mainHand).animationKey,
-    statusTags: getPrimaryWeaponAbility(state.equipment.mainHand).statusTags,
-    damage: getPrimaryWeaponAbility(state.equipment.mainHand).damage,
-    label: getPrimaryWeaponAbility(state.equipment.mainHand).name,
-    count: 0,
-    locked: false,
-    ready: true,
-    cooldownMs: 0,
-    cooldownDurationMs: 0
-  },
+export const getHotbarSlots = (state: GameState): HotbarSlot[] => {
+  const primaryAbility = getPrimaryWeaponAbility(state.equipment.mainHand);
+  return [
+    {
+      index: 0,
+      role: 'ability',
+      roleLabel: 'A1',
+      abilityId: primaryAbility.id,
+      abilityLabel: primaryAbility.shortLabel,
+      linkedWeapon: state.equipment.mainHand,
+      animationKey: primaryAbility.animationKey,
+      statusTags: primaryAbility.statusTags,
+      damage: primaryAbility.damage,
+      label: primaryAbility.name,
+      count: 0,
+      locked: false,
+      ready: state.ability.cooldownMs <= 0 && state.combat.phase === 'idle' && state.player.stamina >= primaryAbility.staminaCost,
+      cooldownMs: state.ability.cooldownMs,
+      cooldownDurationMs: primaryAbility.cooldownMs
+    },
   {
     index: 1,
     role: 'ability',
@@ -110,8 +112,9 @@ export const getHotbarSlots = (state: GameState): HotbarSlot[] => [
     ready: state.hotbar.utilityCooldownMs <= 0,
     cooldownMs: state.hotbar.utilityCooldownMs,
     cooldownDurationMs: utilitySlotCooldownMs
-  }
-];
+    }
+  ];
+};
 
 export const getHotbarMobilityFrame = (state: GameState): MobilityFrame => getMobilityFrame(state);
 

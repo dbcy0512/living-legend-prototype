@@ -14,6 +14,13 @@ export type WeaponAbilityDefinition = {
   statusTags: WeaponAbilityStatusTag[];
   damage: number;
   staminaCost: number;
+  reach: number;
+  width: number;
+  windupMs: number;
+  activeMs: number;
+  recoveryMs: number;
+  cooldownMs: number;
+  hitStopMs: number;
   evolutionTrack: 'body' | 'blade' | 'axe';
 };
 
@@ -34,8 +41,15 @@ const createPrimaryAbility = (
     shortLabel,
     animationKey,
     statusTags,
-    damage: profile.damage,
-    staminaCost: profile.staminaCost,
+    damage: Math.round(profile.damage * 1.22),
+    staminaCost: profile.staminaCost + 4,
+    reach: Math.round(profile.reach * 1.05),
+    width: Math.round(profile.width * 1.08),
+    windupMs: profile.windupMs + 40,
+    activeMs: profile.activeMs + 20,
+    recoveryMs: profile.recoveryMs + 55,
+    cooldownMs: profile.windupMs + profile.activeMs + profile.recoveryMs + 320,
+    hitStopMs: profile.hitStopMs + 20,
     evolutionTrack: profile.lineage
   };
 };

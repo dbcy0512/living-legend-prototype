@@ -1053,13 +1053,30 @@ export class WorldScene extends Phaser.Scene {
 
     const player = this.state.player;
     const arc = this.getFacingArc(player.facing);
-    const radius = combat.phase === 'active' ? 58 : 48;
-    const alpha = combat.phase === 'active' ? 0.82 : 0.34;
-    const lineWidth = combat.phase === 'active' ? 6 : 3;
-    this.combatFx.lineStyle(lineWidth, combat.phase === 'active' ? 0xfff3a3 : 0x8ff7ff, alpha);
+    const abilityActive = this.state.ability.activeId !== undefined;
+    const radius = abilityActive
+      ? combat.phase === 'active'
+        ? Math.max(62, this.state.ability.reach)
+        : Math.max(52, this.state.ability.reach * 0.68)
+      : combat.phase === 'active'
+        ? 58
+        : 48;
+    const alpha = combat.phase === 'active' ? 0.82 : abilityActive ? 0.46 : 0.34;
+    const lineWidth = abilityActive ? (combat.phase === 'active' ? 8 : 4) : combat.phase === 'active' ? 6 : 3;
+    const abilityColor = this.state.ability.statusTags.includes('bleed-seed')
+      ? 0xfb7185
+      : this.state.ability.statusTags.includes('stagger')
+        ? 0xffb84d
+        : 0x8ff7ff;
+    this.combatFx.lineStyle(lineWidth, abilityActive ? abilityColor : combat.phase === 'active' ? 0xfff3a3 : 0x8ff7ff, alpha);
     this.combatFx.beginPath();
     this.combatFx.arc(player.x, player.y + 2, radius, arc.start, arc.end, false);
     this.combatFx.strokePath();
+
+    if (abilityActive) {
+      this.combatFx.lineStyle(2, 0xf5efd8, combat.phase === 'active' ? 0.58 : 0.24);
+      this.combatFx.strokeEllipse(player.x, player.y + 5, radius * 1.25, Math.max(32, this.state.ability.width * 0.72));
+    }
 
     if (combat.lastHitFlashMs > 0) {
       const flashAlpha = combat.lastHitFlashMs / 150;

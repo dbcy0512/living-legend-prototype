@@ -2,6 +2,7 @@ import type { ActionState } from '../../input/actions';
 import { getMeleeForwardAxis, getMeleeSeedProfile, type MeleeSeedProfile } from '../../content/meleeSeeds';
 import type { EnemyState, GameState, PlayerState } from '../state';
 import { distance } from '../rules/math';
+import { isWeaponAbilityActive } from './abilitySystem';
 import { applyEnemyDamageResponse } from './enemySystem';
 
 const hitFlashMs = 150;
@@ -14,6 +15,10 @@ export const updateCombat = (state: GameState, actions: ActionState, deltaMs: nu
   const combat = state.combat;
   const player = state.player;
   const profile = getMeleeSeedProfile(state.equipment.mainHand);
+  if (isWeaponAbilityActive(state)) {
+    return;
+  }
+
   combat.hitStopMs = Math.max(0, combat.hitStopMs - deltaMs);
   combat.lastHitFlashMs = Math.max(0, combat.lastHitFlashMs - deltaMs);
 

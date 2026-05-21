@@ -26,11 +26,11 @@ describe('hotbar system', () => {
     state.inventory.stoneEdges = 1;
 
     expect(selectOrUseHotbarSlot(state, 2)).toBe(true);
-    expect(state.evolution.equippedMeleeSeed).toBe('branch-club');
+    expect(state.equipment.mainHand).toBe('branch-club');
     expect(state.ui.selectedHotbarSlot).toBe(2);
 
     expect(selectOrUseHotbarSlot(state, 3)).toBe(true);
-    expect(state.evolution.equippedMeleeSeed).toBe('stone-edge');
+    expect(state.equipment.mainHand).toBe('stone-edge');
     expect(state.ui.selectedHotbarSlot).toBe(3);
   });
 

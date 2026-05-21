@@ -10,6 +10,7 @@ describe('simulation status', () => {
     state.world.status = 'lost';
     state.player.health = 0;
     state.inventory.food = 4;
+    state.equipment.mainHand = 'stone-edge';
     actions.restart = true;
 
     updateSimulation(state, actions, 16);
@@ -17,6 +18,9 @@ describe('simulation status', () => {
     expect(state.world.status).toBe('playing');
     expect(state.player.health).toBe(state.player.maxHealth);
     expect(state.inventory.food).toBe(0);
+    expect(state.equipment.mainHand).toBe('bare-hands');
+    expect(state.equipment.tool).toBe('none');
+    expect(state.equipment.body).toBe('worn-cloth');
   });
 
   it('preserves the active ecosystem seed when restarting', () => {

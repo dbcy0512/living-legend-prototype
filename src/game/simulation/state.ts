@@ -145,9 +145,14 @@ export type BehaviorMemory = {
 
 export type EvolutionState = {
   cleanerRoll: boolean;
-  equippedMeleeSeed: MeleeSeed;
   bladeSeedAffinity: number;
   axeSeedAffinity: number;
+};
+
+export type EquipmentState = {
+  mainHand: MeleeSeed;
+  tool: 'none';
+  body: 'worn-cloth';
 };
 
 export type EcosystemState = {
@@ -174,6 +179,7 @@ export type GameState = {
   inventory: Inventory;
   behaviorMemory: BehaviorMemory;
   evolution: EvolutionState;
+  equipment: EquipmentState;
   ecosystem: EcosystemState;
   ui: UiState;
   respawnPoint: RespawnPointState;
@@ -244,9 +250,13 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
     behaviorMemory: createBehaviorMemory(),
     evolution: {
       cleanerRoll: false,
-      equippedMeleeSeed: 'bare-hands',
       bladeSeedAffinity: 0,
       axeSeedAffinity: 0
+    },
+    equipment: {
+      mainHand: 'bare-hands',
+      tool: 'none',
+      body: 'worn-cloth'
     },
     ecosystem: {
       seed: ecosystemSeed,

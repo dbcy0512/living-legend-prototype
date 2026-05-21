@@ -1,5 +1,7 @@
 export const assetKeys = {
   player: 'character:wayfinder',
+  playerHeldBranchClub: 'character:held-branch-club',
+  playerHeldStoneEdge: 'character:held-stone-edge',
   enemy: 'character:hollow-wolf',
   wolfIdleWatch: 'character:wolf-idle-watch',
   grassBase: 'environment:grass-base',

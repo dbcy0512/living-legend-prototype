@@ -1374,3 +1374,29 @@ Status: design correction recorded.
 Design reason:
 
 Early station growth should stay understandable. A Basic Workbench can carry multiple primitive making actions without fragmenting Zone 1 into too many tiny station types.
+
+### Alive Character Condition And Equipment Foundation v1
+
+Status: implemented.
+
+- Split current held-weapon state out of evolution and into `equipment.mainHand`.
+- Added starter equipment slots:
+  - `mainHand`: current melee seed or held weapon/tool seed.
+  - `tool`: reserved for future non-weapon tools.
+  - `body`: reserved for future worn gear/clothing.
+- Combat, crafting, hotbar use, and HUD held-item text now read from equipment state.
+- Evolution remains responsible for earned capability, affinities, and body/combat growth.
+- Player presentation now has named body, shadow, and held-item layers so future gear/tool sprites can attach cleanly.
+- Cold pressure now changes the player's posture/tint/shadow as a condition response instead of using placeholder shaking.
+- Branch Club and Stone Edge now have small generated held-item presentation textures for the current prototype.
+- Crafting panel readability was improved with stronger backing opacity and darker recipe text so survival choices remain legible over the living world.
+
+Alive-world cross-check:
+
+The world is still the pressure source. Cold affects how the body reads. Fire and survival choices remain visible around the UI, but decision panels no longer let the environment interfere with critical text. Equipment is now separate from evolution so future tools and gear can change what the player carries without overwriting who the player is becoming.
+
+Verification:
+
+- `npm.cmd test` passed: 81 tests.
+- `npm.cmd run build` passed.
+- Browser smoke loaded `http://127.0.0.1:5173/`, rendered one canvas, six hotbar slots, the active Making panel, and no console errors.

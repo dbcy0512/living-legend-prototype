@@ -13,7 +13,7 @@ export const updateCombat = (state: GameState, actions: ActionState, deltaMs: nu
 
   const combat = state.combat;
   const player = state.player;
-  const profile = getMeleeSeedProfile(state.evolution.equippedMeleeSeed);
+  const profile = getMeleeSeedProfile(state.equipment.mainHand);
   combat.hitStopMs = Math.max(0, combat.hitStopMs - deltaMs);
   combat.lastHitFlashMs = Math.max(0, combat.lastHitFlashMs - deltaMs);
 

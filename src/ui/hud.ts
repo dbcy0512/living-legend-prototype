@@ -125,7 +125,7 @@ const getInventoryText = (state: GameState): string => {
 };
 
 const getCombatText = (state: GameState): string => {
-  const seed = getMeleeSeedProfile(state.evolution.equippedMeleeSeed);
+  const seed = getMeleeSeedProfile(state.equipment.mainHand);
   if (seed.id === 'bare-hands') {
     return state.combat.phase;
   }
@@ -167,7 +167,7 @@ const getInventoryPanelHtml = (state: GameState): string => {
     ['Poultices', state.inventory.poultices],
     ['Stone Edges', state.inventory.stoneEdges],
     ['Branch Clubs', state.inventory.branchClubs],
-    ['Held', getMeleeSeedProfile(state.evolution.equippedMeleeSeed).name],
+    ['Held', getMeleeSeedProfile(state.equipment.mainHand).name],
     ['Blade Seed', state.evolution.bladeSeedAffinity],
     ['Axe Seed', state.evolution.axeSeedAffinity]
   ];

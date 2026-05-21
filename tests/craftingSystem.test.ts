@@ -65,9 +65,9 @@ describe('crafting registry', () => {
     state.inventory.wood = 1;
 
     expect(craftRecipe(state, 'stone-edge')).toBe(true);
-    expect(state.evolution.equippedMeleeSeed).toBe('stone-edge');
+    expect(state.equipment.mainHand).toBe('stone-edge');
     expect(craftRecipe(state, 'branch-club')).toBe(true);
-    expect(state.evolution.equippedMeleeSeed).toBe('branch-club');
+    expect(state.equipment.mainHand).toBe('branch-club');
     expect(state.inventory.stoneEdges).toBe(1);
     expect(state.inventory.branchClubs).toBe(1);
     expect(state.inventory.bark).toBe(0);

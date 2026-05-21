@@ -61,6 +61,7 @@ export class BootScene extends Phaser.Scene {
   private createGeneratedTextures(): void {
     this.makeCircleTexture(assetKeys.shadow, 36, 0x111827, 0.34);
     this.makeHeroTexture();
+    this.makeHeroEquipmentTextures();
     this.makeGrassTexture();
     this.makeTreeTexture();
     this.makeFlowerTexture();
@@ -91,6 +92,26 @@ export class BootScene extends Phaser.Scene {
     graphics.fillStyle(0x38bdf8, 1);
     graphics.fillRect(20, 16, 8, 3);
     graphics.generateTexture(assetKeys.player, 32, 36);
+    graphics.destroy();
+  }
+
+  private makeHeroEquipmentTextures(): void {
+    const graphics = this.add.graphics();
+
+    graphics.lineStyle(5, 0x5a341f, 1);
+    graphics.lineBetween(5, 25, 24, 5);
+    graphics.lineStyle(2, 0xd8a15c, 0.72);
+    graphics.lineBetween(8, 22, 18, 11);
+    graphics.generateTexture(assetKeys.playerHeldBranchClub, 30, 30);
+    graphics.clear();
+
+    graphics.lineStyle(4, 0x5a341f, 1);
+    graphics.lineBetween(8, 24, 21, 10);
+    graphics.fillStyle(0x475569, 1);
+    graphics.fillTriangle(17, 4, 27, 12, 18, 17);
+    graphics.lineStyle(1, 0xdaf7ff, 0.74);
+    graphics.lineBetween(19, 6, 25, 11);
+    graphics.generateTexture(assetKeys.playerHeldStoneEdge, 30, 30);
     graphics.destroy();
   }
 

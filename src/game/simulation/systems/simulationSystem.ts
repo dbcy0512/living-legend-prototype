@@ -54,6 +54,7 @@ const resetGameState = (state: GameState): void => {
   Object.assign(state.world, fresh.world);
   Object.assign(state.inventory, fresh.inventory);
   Object.assign(state.evolution, fresh.evolution);
+  Object.assign(state.equipment, fresh.equipment);
   Object.assign(state.ecosystem, fresh.ecosystem);
   Object.assign(state.ui, fresh.ui);
   Object.assign(state.behaviorMemory.body, fresh.behaviorMemory.body);

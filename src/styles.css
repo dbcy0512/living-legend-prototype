@@ -142,6 +142,8 @@ body {
 .crafting {
   right: 20px;
   padding: 12px;
+  background: rgba(10, 15, 22, 0.9);
+  backdrop-filter: blur(8px);
 }
 
 .satchel--active,
@@ -174,7 +176,8 @@ body {
   min-height: 30px;
   padding: 6px 8px;
   border: 1px solid rgba(75, 48, 30, 0.34);
-  background: rgba(33, 21, 14, 0.2);
+  color: #2d2017;
+  background: rgba(245, 230, 188, 0.56);
   font-size: 12px;
   line-height: 1.2;
 }
@@ -197,7 +200,7 @@ body {
   padding: 10px 12px;
   border: 1px solid transparent;
   background:
-    linear-gradient(rgba(24, 16, 10, 0.18), rgba(24, 16, 10, 0.18)),
+    linear-gradient(rgba(255, 244, 210, 0.7), rgba(255, 236, 190, 0.66)),
     url('/assets/ui/recipe-card-v1.png') center / 100% 100% no-repeat;
 }
 
@@ -206,7 +209,8 @@ body {
 }
 
 .crafting__recipe--blocked {
-  color: rgba(52, 35, 24, 0.64);
+  opacity: 0.74;
+  color: rgba(52, 35, 24, 0.82);
   filter: grayscale(0.25);
 }
 
@@ -291,6 +295,7 @@ body {
 }
 
 .crafting__name {
+  color: #2a1a10;
   font-size: 13px;
   font-weight: 800;
   line-height: 1.15;
@@ -306,16 +311,18 @@ body {
 
 .crafting__cost {
   margin-top: 3px;
-  color: #f8d16c;
+  color: #7a4a18;
 }
 
 .crafting__desc {
   margin-top: 2px;
-  color: rgba(245, 239, 216, 0.7);
+  color: rgba(54, 38, 26, 0.82);
 }
 
 .crafting__state {
   min-width: 58px;
+  color: #4b2f1b;
+  font-weight: 800;
   text-align: right;
   text-transform: uppercase;
 }

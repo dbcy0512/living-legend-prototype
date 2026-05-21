@@ -88,12 +88,12 @@ export const selectOrUseHotbarSlot = (state: GameState, slotIndex: number): bool
     return used;
   }
   if (slot.itemId === 'branch-club') {
-    state.evolution.equippedMeleeSeed = 'branch-club';
+    state.equipment.mainHand = 'branch-club';
     state.ui.hotbarMessage = 'Branch Club held.';
     return true;
   }
 
-  state.evolution.equippedMeleeSeed = 'stone-edge';
+  state.equipment.mainHand = 'stone-edge';
   state.ui.hotbarMessage = 'Stone Edge held.';
   return true;
 };

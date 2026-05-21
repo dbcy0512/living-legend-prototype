@@ -422,8 +422,13 @@ export class WorldScene extends Phaser.Scene {
 
   private createActor(textureKey: string, x: number, y: number): Phaser.GameObjects.Container {
     const shadow = this.add.image(0, 13, assetKeys.shadow);
+    shadow.setName('player-shadow');
     const body = this.add.image(0, 0, textureKey);
-    const container = this.add.container(x, y, [shadow, body]);
+    body.setName('player-body');
+    const heldItem = this.add.image(12, 0, assetKeys.playerHeldBranchClub);
+    heldItem.setName('player-held-item');
+    heldItem.setVisible(false);
+    const container = this.add.container(x, y, [shadow, body, heldItem]);
     container.setDepth(actorDepthBase + y * 0.001);
     return container;
   }
@@ -445,8 +450,7 @@ export class WorldScene extends Phaser.Scene {
     const coldPressure = this.getColdPressure();
     this.player.setPosition(this.state.player.x, this.state.player.y);
     this.player.setDepth(actorDepthBase + this.state.player.y * 0.001);
-    this.player.setScale(this.state.combat.phase === 'rolling' ? 0.9 : 1 - coldPressure * 0.04);
-    this.player.rotation = this.state.combat.phase === 'rolling' ? Math.sin(world.windPhase * 18) * 0.14 : 0;
+    this.syncPlayerView(coldPressure);
 
     for (const enemy of this.state.enemies) {
       const sprite = this.enemySprites.get(enemy.id);
@@ -488,6 +492,76 @@ export class WorldScene extends Phaser.Scene {
     this.drawColdFx();
     this.drawCombatFx();
     this.drawCollisionDebug();
+  }
+
+  private syncPlayerView(coldPressure: number): void {
+    const body = this.player.getByName('player-body') as Phaser.GameObjects.Image | undefined;
+    const shadow = this.player.getByName('player-shadow') as Phaser.GameObjects.Image | undefined;
+    const heldItem = this.player.getByName('player-held-item') as Phaser.GameObjects.Image | undefined;
+    const rolling = this.state.combat.phase === 'rolling';
+
+    this.player.setScale(rolling ? 0.9 : 1);
+    this.player.rotation = rolling ? Math.sin(this.state.world.windPhase * 18) * 0.14 : 0;
+
+    if (body) {
+      body.setScale(1 - coldPressure * 0.07, 1 + coldPressure * 0.08);
+      body.setY(coldPressure * 2);
+      if (coldPressure > 0.18) {
+        body.setTint(0xc7eeff);
+      } else {
+        body.clearTint();
+      }
+    }
+
+    if (shadow) {
+      shadow.setScale(1 - coldPressure * 0.12, 1);
+      shadow.setAlpha(0.34 - coldPressure * 0.08);
+    }
+
+    this.syncPlayerEquipmentView(heldItem, coldPressure);
+  }
+
+  private syncPlayerEquipmentView(heldItem: Phaser.GameObjects.Image | undefined, coldPressure: number): void {
+    if (!heldItem) {
+      return;
+    }
+
+    if (this.state.equipment.mainHand === 'bare-hands') {
+      heldItem.setVisible(false);
+      return;
+    }
+
+    heldItem.setVisible(true);
+    heldItem.setTexture(
+      this.state.equipment.mainHand === 'branch-club'
+        ? assetKeys.playerHeldBranchClub
+        : assetKeys.playerHeldStoneEdge
+    );
+    heldItem.setAlpha(1);
+    heldItem.setScale(0.78 - coldPressure * 0.04);
+
+    switch (this.state.player.facing) {
+      case 'north':
+        heldItem.setPosition(-11, 2 + coldPressure * 2);
+        heldItem.setAngle(-118);
+        heldItem.setDepth(-0.01);
+        break;
+      case 'south':
+        heldItem.setPosition(12, 3 + coldPressure * 2);
+        heldItem.setAngle(34);
+        heldItem.setDepth(0.01);
+        break;
+      case 'west':
+        heldItem.setPosition(-13, 1 + coldPressure * 2);
+        heldItem.setAngle(-34);
+        heldItem.setDepth(0.01);
+        break;
+      case 'east':
+        heldItem.setPosition(13, 1 + coldPressure * 2);
+        heldItem.setAngle(34);
+        heldItem.setDepth(0.01);
+        break;
+    }
   }
 
   private syncTreeOcclusion(): void {

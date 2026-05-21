@@ -4,6 +4,7 @@ import { createGameState } from '../src/game/simulation/state';
 import { getGatherThought, setPlayerThought } from '../src/game/simulation/rules/thoughts';
 import { updateInventory } from '../src/game/simulation/systems/inventorySystem';
 import { updateSimulation } from '../src/game/simulation/systems/simulationSystem';
+import { selectOrUseHotbarSlot } from '../src/game/simulation/systems/hotbarSystem';
 
 describe('player thoughts', () => {
   it('uses subtle gather thoughts instead of literal pickup logs', () => {
@@ -51,6 +52,16 @@ describe('player thoughts', () => {
 
     expect(state.ui.inventoryMessage).toBe('No room in the satchel.');
     expect(state.ui.thoughtMessage).toBe('No room in the satchel.');
+  });
+
+  it('does not show thoughts for ordinary hotbar feedback', () => {
+    const state = createGameState();
+
+    expect(selectOrUseHotbarSlot(state, 2)).toBe(false);
+
+    expect(state.ui.hotbarMessage).toBe('Ability 3 is not learned yet.');
+    expect(state.ui.thoughtMessage).toBe('');
+    expect(state.ui.thoughtTimerMs).toBe(0);
   });
 
   it('expires thoughts through simulation time', () => {

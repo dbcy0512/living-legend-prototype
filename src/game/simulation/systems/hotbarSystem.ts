@@ -1,6 +1,5 @@
 import type { GameState } from '../state';
 import { clamp } from '../rules/math';
-import { setPlayerThought } from '../rules/thoughts';
 
 export const utilitySlotCooldownMs = 4800;
 
@@ -107,27 +106,22 @@ export const selectOrUseHotbarSlot = (state: GameState, slotIndex: number): bool
   state.ui.inventoryMessage = '';
   if (slot.locked) {
     state.ui.hotbarMessage = 'That space is not ready.';
-    setPlayerThought(state, 'That space is not ready.');
     return false;
   }
   if (slot.role === 'utility') {
     if (slot.cooldownMs > 0) {
       state.ui.hotbarMessage = 'Utility is cooling down.';
-      setPlayerThought(state, 'Still catching my breath.');
       return false;
     }
     state.ui.hotbarMessage = 'No utility move learned.';
-    setPlayerThought(state, "I don't know how yet.");
     return false;
   }
   if (!slot.itemId && slot.role === 'ability') {
     state.ui.hotbarMessage = `${slot.label} is not learned yet.`;
-    setPlayerThought(state, "I don't know that yet.");
     return false;
   }
   if (!slot.ready || !slot.itemId) {
     state.ui.hotbarMessage = `${slot.label} is not in the satchel.`;
-    setPlayerThought(state, "I don't have that.");
     return false;
   }
 
@@ -137,31 +131,26 @@ export const selectOrUseHotbarSlot = (state: GameState, slotIndex: number): bool
   if (slot.itemId === 'branch-club') {
     state.equipment.mainHand = 'branch-club';
     state.ui.hotbarMessage = 'Branch Club held.';
-    setPlayerThought(state, 'Heavier in the hand.');
     return true;
   }
 
   state.equipment.mainHand = 'stone-edge';
   state.ui.hotbarMessage = 'Stone Edge held.';
-  setPlayerThought(state, 'A sharper thought.');
   return true;
 };
 
 export const usePoultice = (state: GameState): boolean => {
   if (state.inventory.poultices <= 0) {
     state.ui.hotbarMessage = 'No poultice ready.';
-    setPlayerThought(state, 'Nothing soft enough.');
     return false;
   }
   if (state.player.health >= state.player.maxHealth) {
     state.ui.hotbarMessage = 'No wound needs binding.';
-    setPlayerThought(state, 'No wound needs binding.');
     return false;
   }
 
   state.inventory.poultices -= 1;
   state.player.health = clamp(state.player.health + 24, 0, state.player.maxHealth);
   state.ui.hotbarMessage = 'Poultice used.';
-  setPlayerThought(state, 'The sting settles.');
   return true;
 };

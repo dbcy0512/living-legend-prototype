@@ -1,6 +1,7 @@
 import type { GameState } from '../state';
 import { createEcosystemResourceSeeds } from '../../content/ecosystem';
 import { clamp, distance } from '../rules/math';
+import { getWorldCyclePhase } from '../rules/dayNight';
 import { forceEnemyRespawnGrace, isPlayerUnderThreat } from './enemySystem';
 
 const ecosystemRegenerationTime = 0.28;
@@ -20,6 +21,7 @@ export const updateWorld = (state: GameState, deltaMs: number): void => {
     world.timeOfDay -= 1;
     world.day += 1;
   }
+  world.cyclePhase = getWorldCyclePhase(world.timeOfDay);
 
   const nightPressure = getNightPressure(world.timeOfDay);
   const dawnDuskGlow = getDawnDuskGlow(world.timeOfDay);
@@ -45,8 +47,6 @@ export const updateWorld = (state: GameState, deltaMs: number): void => {
 
   if (player.health <= 0) {
     respawnPlayer(state);
-  } else if (world.openingStage === 'open' && world.day > 1 && world.timeOfDay >= 0.28 && world.timeOfDay <= 0.36) {
-    world.status = 'won';
   }
 };
 
@@ -106,6 +106,7 @@ export const getLocalNightPressure = (state: GameState, nightPressure: number): 
   const activeCampfire = state.campfires.find(
     (campfire) =>
       campfire.fuelMs > 0 &&
+      campfire.integrity > 0 &&
       distance(state.player.x, state.player.y, campfire.x, campfire.y) <= campfire.radius
   );
   return activeCampfire ? nightPressure * 0.32 : nightPressure;
@@ -122,6 +123,7 @@ const updateCold = (state: GameState, seconds: number): void => {
   const nearActiveFire = state.campfires.some(
     (campfire) =>
       campfire.fuelMs > 0 &&
+      campfire.integrity > 0 &&
       distance(state.player.x, state.player.y, campfire.x, campfire.y) <= campfire.radius
   );
 
@@ -173,6 +175,7 @@ const updateBehaviorMemory = (state: GameState, deltaMs: number): void => {
   const nearActiveFire = state.campfires.some(
     (campfire) =>
       campfire.fuelMs > 0 &&
+      campfire.integrity > 0 &&
       distance(state.player.x, state.player.y, campfire.x, campfire.y) <= campfire.radius
   );
   if (nearActiveFire) {

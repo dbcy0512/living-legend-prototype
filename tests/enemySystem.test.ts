@@ -6,6 +6,7 @@ describe('enemy telegraph', () => {
   it('telegraphs before a committed lunge can damage the player', () => {
     const state = createGameState();
     state.world.openingStage = 'open';
+    state.world.timeOfDay = 0.9;
     const enemy = state.enemies[0];
     enemy.x = state.player.x + 20;
     enemy.y = state.player.y;
@@ -23,6 +24,7 @@ describe('enemy telegraph', () => {
   it('applies one damage event during the committed lunge', () => {
     const state = createGameState();
     state.world.openingStage = 'open';
+    state.world.timeOfDay = 0.9;
     const enemy = state.enemies[0];
     enemy.x = state.player.x + 20;
     enemy.y = state.player.y;
@@ -52,45 +54,47 @@ describe('enemy telegraph', () => {
     expect(state.player.health).toBe(state.player.maxHealth);
   });
 
-  it('makes enemies more cautious while the player is protected by active fire', () => {
+  it('makes night enemies target the fire before the player', () => {
     const state = createGameState();
     state.world.openingStage = 'open';
+    state.world.timeOfDay = 0.9;
     state.campfires[0].fuelMs = 10000;
     const enemy = state.enemies[0];
-    enemy.x = state.player.x + 48;
-    enemy.y = state.player.y;
+    enemy.x = state.campfires[0].x + 90;
+    enemy.y = state.campfires[0].y;
     enemy.hunger = 100;
     enemy.fear = 0;
+    const playerHealth = state.player.health;
+    const startX = enemy.x;
 
-    updateEnemies(state, 16);
+    updateEnemies(state, 1000);
 
     expect(enemy.mode).toBe('stalking');
-    expect(state.player.health).toBe(state.player.maxHealth);
+    expect(enemy.x).toBeLessThan(startX);
+    expect(state.player.health).toBe(playerHealth);
   });
 
-  it('slows enemy stalking near active fire compared with exposed ground', () => {
-    const exposed = createGameState();
-    exposed.world.openingStage = 'open';
-    const exposedEnemy = exposed.enemies[0];
-    exposedEnemy.x = exposed.player.x + 120;
-    exposedEnemy.y = exposed.player.y;
+  it('damages fire integrity during a night assault without reducing fuel directly', () => {
+    const state = createGameState();
+    state.world.openingStage = 'open';
+    state.world.timeOfDay = 0.9;
+    state.campfires[0].fuelMs = 10000;
+    const enemy = state.enemies[0];
+    enemy.x = state.campfires[0].x + 20;
+    enemy.y = state.campfires[0].y;
+    const fuel = state.campfires[0].fuelMs;
 
-    const protectedState = createGameState();
-    protectedState.world.openingStage = 'open';
-    protectedState.campfires[0].fuelMs = 10000;
-    const protectedEnemy = protectedState.enemies[0];
-    protectedEnemy.x = protectedState.player.x + 120;
-    protectedEnemy.y = protectedState.player.y;
+    updateEnemies(state, 16);
+    updateEnemies(state, 520);
 
-    updateEnemies(exposed, 1000);
-    updateEnemies(protectedState, 1000);
-
-    expect(exposedEnemy.x).toBeLessThan(protectedEnemy.x);
+    expect(state.campfires[0].integrity).toBeLessThan(state.campfires[0].maxIntegrity);
+    expect(state.campfires[0].fuelMs).toBe(fuel);
   });
 
   it('adds fear and recovery after a missed lunge', () => {
     const state = createGameState();
     state.world.openingStage = 'open';
+    state.world.timeOfDay = 0.9;
     const enemy = state.enemies[0];
     enemy.x = state.player.x + 80;
     enemy.y = state.player.y;

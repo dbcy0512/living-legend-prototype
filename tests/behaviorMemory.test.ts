@@ -59,6 +59,7 @@ describe('behavior memory', () => {
   it('records wolf lunge faced and avoided', () => {
     const state = createGameState();
     state.world.openingStage = 'open';
+    state.world.timeOfDay = 0.9;
     const enemy = state.enemies[0];
     enemy.x = state.player.x + 80;
     enemy.y = state.player.y;

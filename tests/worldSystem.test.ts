@@ -6,6 +6,7 @@ import {
   getNightPressure,
   updateWorld
 } from '../src/game/simulation/systems/worldSystem';
+import { getWorldCyclePhase } from '../src/game/simulation/rules/dayNight';
 
 describe('living world pressure', () => {
   it('raises pressure at night and lowers it during safe daylight', () => {
@@ -17,6 +18,13 @@ describe('living world pressure', () => {
     expect(getDawnDuskGlow(0.31)).toBe(1);
     expect(getDawnDuskGlow(0.68)).toBe(1);
     expect(getDawnDuskGlow(0.5)).toBe(0);
+  });
+
+  it('classifies the preparation and assault phases of a day', () => {
+    expect(getWorldCyclePhase(0.42)).toBe('day');
+    expect(getWorldCyclePhase(0.68)).toBe('dusk');
+    expect(getWorldCyclePhase(0.9)).toBe('night');
+    expect(getWorldCyclePhase(0.24)).toBe('dawn');
   });
 
   it('advances world pulse and drains hunger through simulation state', () => {
@@ -47,7 +55,9 @@ describe('living world pressure', () => {
       x: state.player.x,
       y: state.player.y,
       radius: 150,
-      fuelMs: 1000
+      fuelMs: 1000,
+      integrity: 100,
+      maxIntegrity: 100
     });
 
     expect(getLocalNightPressure(state, 1)).toBeLessThan(1);
@@ -154,14 +164,15 @@ describe('living world pressure', () => {
     expect(state.ecosystem.lastRegenerationDay).toBe(1);
   });
 
-  it('marks the run won after surviving into the next dawn window', () => {
+  it('keeps the survival loop running after surviving into the next dawn window', () => {
     const state = createGameState();
     state.world.openingStage = 'open';
     state.world.day = 2;
-    state.world.timeOfDay = 0.3;
+    state.world.timeOfDay = 0.329;
 
     updateWorld(state, 16);
 
-    expect(state.world.status).toBe('won');
+    expect(state.world.status).toBe('playing');
+    expect(state.world.cyclePhase).toBe('day');
   });
 });

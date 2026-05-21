@@ -130,7 +130,9 @@ export const placeCampfire = (state: GameState): boolean => {
     x: preview.x,
     y: preview.y,
     radius: campfireSafetyRadius,
-    fuelMs: campfireFuelMs
+    fuelMs: campfireFuelMs,
+    integrity: 80,
+    maxIntegrity: 80
   });
   return true;
 };
@@ -162,6 +164,7 @@ export const rebuildFirstFire = (state: GameState): boolean => {
     return false;
   }
   firstFire.fuelMs = 45000;
+  firstFire.integrity = firstFire.maxIntegrity;
   state.inventory.campfires += 1;
   state.behaviorMemory.fire.firstFireRebuilt = true;
   state.world.openingStage = 'first-flame';
@@ -217,7 +220,10 @@ export const getCampfirePlacementPreview = (state: GameState): CampfirePlacement
   }
 
   const tooClose = state.campfires.some(
-    (campfire) => campfire.fuelMs > 0 && distance(point.x, point.y, campfire.x, campfire.y) < campfireMinimumSpacing
+    (campfire) =>
+      campfire.fuelMs > 0 &&
+      campfire.integrity > 0 &&
+      distance(point.x, point.y, campfire.x, campfire.y) < campfireMinimumSpacing
   );
   if (tooClose) {
     return { ...point, canPlace: false, reason: 'too-close' };

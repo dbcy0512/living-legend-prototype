@@ -134,7 +134,9 @@ const getStatusText = (state: GameState): string => {
   if (state.world.openingStage === 'first-flame') {
     return `warming ${Math.round(state.world.cold)}%`;
   }
-  return 'playing';
+  const fire = state.campfires.find((campfire) => campfire.id === 'first-fire') ?? state.campfires[0];
+  const fireText = fire ? ` / fire ${Math.round((fire.integrity / fire.maxIntegrity) * 100)}%` : '';
+  return `${state.world.cyclePhase}${fireText}`;
 };
 
 const getInventoryText = (state: GameState): string => {

@@ -6,6 +6,7 @@ import {
   type EcosystemResourceSource
 } from '../content/ecosystem';
 import type { MeleeSeed } from '../content/meleeSeeds';
+import type { WorldCyclePhase } from './rules/dayNight';
 
 export type Inventory = {
   twigs: number;
@@ -48,6 +49,7 @@ export type CombatState = {
 
 export type WorldState = {
   timeOfDay: number;
+  cyclePhase: WorldCyclePhase;
   day: number;
   mood: number;
   windPhase: number;
@@ -80,7 +82,7 @@ export type EnemyState = {
   y: number;
   health: number;
   maxHealth: number;
-  mode: 'watching' | 'stalking' | 'telegraphing' | 'lunging' | 'recovering';
+  mode: 'watching' | 'stalking' | 'telegraphing' | 'lunging' | 'recovering' | 'attacking-fire';
   hunger: number;
   fear: number;
   territoryPressure: number;
@@ -99,6 +101,8 @@ export type CampfireState = {
   y: number;
   radius: number;
   fuelMs: number;
+  integrity: number;
+  maxIntegrity: number;
 };
 
 export type RespawnPointState = {
@@ -226,7 +230,8 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       lastHitFlashMs: 0
     },
     world: {
-      timeOfDay: 0.32,
+      timeOfDay: 0.42,
+      cyclePhase: 'day',
       day: 1,
       mood: 0.45,
       windPhase: 0,
@@ -296,7 +301,9 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
         x: startingArea.playerStart.x,
         y: startingArea.playerStart.y + 42,
         radius: 150,
-        fuelMs: 0
+        fuelMs: 0,
+        integrity: 100,
+        maxIntegrity: 100
       }
     ],
     resources: [

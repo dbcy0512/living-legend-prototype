@@ -125,6 +125,7 @@ const getNearbyActiveFire = (state: GameState): CampfireState | undefined =>
   state.campfires.find(
     (campfire) =>
       campfire.fuelMs > 0 &&
+      campfire.integrity > 0 &&
       distance(campfire.x, campfire.y, state.player.x, state.player.y) <= activeFireCraftingReach
   );
 

@@ -676,7 +676,7 @@ export class WorldScene extends Phaser.Scene {
       const deadLayer = sprite?.getByName('dead-fire') as Phaser.GameObjects.Image | undefined;
       const litLayer = sprite?.getByName('lit-fire') as Phaser.GameObjects.Image | undefined;
       const shadowLayer = sprite?.getByName('campfire-shadow') as Phaser.GameObjects.Image | undefined;
-      const isActive = campfire.fuelMs > 0;
+      const isActive = campfire.fuelMs > 0 && campfire.integrity > 0;
       const firstFlamePulse = campfire.id === 'first-fire' && this.state.world.openingStage === 'first-flame';
       sprite?.setAlpha(1);
       sprite?.setPosition(campfire.x, campfire.y);
@@ -690,8 +690,22 @@ export class WorldScene extends Phaser.Scene {
       this.syncCampfireFlameFx(campfire, isActive, firstFlamePulse);
       if (isActive) {
         this.drawFireSparks(campfire, firstFlamePulse);
+        this.drawCampfireIntegrity(campfire);
       }
     }
+  }
+
+  private drawCampfireIntegrity(campfire: CampfireState): void {
+    if (campfire.integrity >= campfire.maxIntegrity) {
+      return;
+    }
+
+    const integrityRatio = Phaser.Math.Clamp(campfire.integrity / campfire.maxIntegrity, 0, 1);
+    const warning = integrityRatio <= 0.35;
+    this.campfireGlow.lineStyle(3, warning ? 0xfb7185 : 0xffb84d, warning ? 0.72 : 0.48);
+    this.campfireGlow.beginPath();
+    this.campfireGlow.arc(campfire.x, campfire.y + 8, 34, Phaser.Math.DegToRad(-90), Phaser.Math.DegToRad(-90 + 360 * integrityRatio), false);
+    this.campfireGlow.strokePath();
   }
 
   private syncEnemyAnimation(sprite: Phaser.GameObjects.Container, mode: string): void {

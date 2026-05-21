@@ -1,14 +1,21 @@
 import type { CampfireState, EnemyState, GameState } from '../state';
 import { clamp, distance, normalizeAxis } from '../rules/math';
 import { applyCreatureDamageResponse } from '../rules/creatureResponses';
+import { getWorldCyclePhase, isNightAssaultPhase } from '../rules/dayNight';
+import { setPlayerThought } from '../rules/thoughts';
 
 const stalkDistance = 250;
 const fireStalkDistance = 155;
 const lungeStartDistance = 92;
 const fireLungeStartDistance = 46;
 const stalkSpeed = 54;
+const fireAssaultSpeed = 68;
 const fireStalkSpeedMultiplier = 0.45;
 const telegraphMs = 420;
+const fireAttackWindupMs = 520;
+const fireAttackDistance = 42;
+const fireAttackDamage = 16;
+const fireAttackRecoveryMs = 620;
 const lungeMs = 260;
 const lungeSpeed = 260;
 const lungeDamage = 32;
@@ -17,6 +24,8 @@ const recoveryAfterHitMs = 700;
 const recoveryAfterMissMs = 1100;
 const boldnessToLunge = 36;
 const respawnGraceMs = 1400;
+const enemyDenX = 1188;
+const enemyDenY = 214;
 
 export const updateEnemies = (state: GameState, deltaMs: number): void => {
   if (state.world.status !== 'playing') {
@@ -27,6 +36,9 @@ export const updateEnemies = (state: GameState, deltaMs: number): void => {
   }
 
   const seconds = deltaMs / 1000;
+  const cyclePhase = getWorldCyclePhase(state.world.timeOfDay);
+  const nightAssault = isNightAssaultPhase(cyclePhase);
+  const fireTarget = nightAssault ? getFireDefenseTarget(state) : undefined;
   const protectiveFire = getProtectiveFire(state);
   const fireProtected = protectiveFire !== undefined;
 
@@ -38,6 +50,16 @@ export const updateEnemies = (state: GameState, deltaMs: number): void => {
 
     updateWolfNeeds(state, enemy, protectiveFire, seconds);
     enemy.attackTimerMs = Math.max(0, enemy.attackTimerMs - deltaMs);
+
+    if (!nightAssault) {
+      updateDaytimeEnemy(enemy, seconds);
+      continue;
+    }
+
+    if (fireTarget) {
+      updateFireAssault(enemy, state, fireTarget, deltaMs, seconds);
+      continue;
+    }
 
     if (enemy.mode === 'recovering') {
       updateRecovery(enemy, state, deltaMs, seconds);
@@ -56,6 +78,23 @@ export const updateEnemies = (state: GameState, deltaMs: number): void => {
 
     updateStalkDecision(enemy, state, fireProtected, seconds);
   }
+};
+
+const updateDaytimeEnemy = (enemy: EnemyState, seconds: number): void => {
+  enemy.mode = 'watching';
+  enemy.telegraphMs = 0;
+  enemy.phaseTimerMs = 0;
+  enemy.hasDamagedThisLunge = false;
+  enemy.fear = clamp(enemy.fear + seconds * 12, 0, 100);
+  enemy.boldness = clamp(enemy.boldness - seconds * 22, 0, 100);
+
+  const dist = distance(enemy.x, enemy.y, enemyDenX, enemyDenY);
+  if (dist <= 3) {
+    return;
+  }
+  const axis = normalizeAxis(enemyDenX - enemy.x, enemyDenY - enemy.y);
+  enemy.x += axis.x * 38 * seconds;
+  enemy.y += axis.y * 38 * seconds;
 };
 
 const updateWolfNeeds = (
@@ -80,6 +119,70 @@ const updateWolfNeeds = (
   const playerWeakness = staminaWeakness + healthWeakness + coldWeakness + exposedWeakness;
 
   enemy.boldness = clamp(enemy.hunger * 0.55 + enemy.territoryPressure * 0.8 + playerWeakness - enemy.fear * 0.75, 0, 100);
+};
+
+const updateFireAssault = (
+  enemy: EnemyState,
+  state: GameState,
+  fireTarget: CampfireState,
+  deltaMs: number,
+  seconds: number
+): void => {
+  if (enemy.mode === 'recovering') {
+    updateRecovery(enemy, state, deltaMs, seconds);
+    return;
+  }
+
+  if (enemy.mode === 'attacking-fire') {
+    updateFireAttack(enemy, state, fireTarget, deltaMs);
+    return;
+  }
+
+  const dist = distance(enemy.x, enemy.y, fireTarget.x, fireTarget.y);
+  enemy.telegraphMs = 0;
+  if (dist > fireAttackDistance) {
+    enemy.mode = 'stalking';
+    const axis = normalizeAxis(fireTarget.x - enemy.x, fireTarget.y - enemy.y);
+    enemy.x += axis.x * fireAssaultSpeed * seconds;
+    enemy.y += axis.y * fireAssaultSpeed * seconds;
+    return;
+  }
+
+  if (enemy.attackTimerMs <= 0) {
+    enemy.mode = 'attacking-fire';
+    enemy.phaseTimerMs = fireAttackWindupMs;
+    enemy.telegraphMs = 1;
+  }
+};
+
+const updateFireAttack = (enemy: EnemyState, state: GameState, fireTarget: CampfireState, deltaMs: number): void => {
+  if (fireTarget.fuelMs <= 0 || fireTarget.integrity <= 0) {
+    enemy.mode = 'watching';
+    enemy.telegraphMs = 0;
+    return;
+  }
+
+  if (distance(enemy.x, enemy.y, fireTarget.x, fireTarget.y) > fireAttackDistance + 16) {
+    enemy.mode = 'stalking';
+    enemy.telegraphMs = 0;
+    return;
+  }
+
+  enemy.phaseTimerMs = Math.max(0, enemy.phaseTimerMs - deltaMs);
+  enemy.telegraphMs = fireAttackWindupMs - enemy.phaseTimerMs;
+  if (enemy.phaseTimerMs > 0) {
+    return;
+  }
+
+  fireTarget.integrity = clamp(fireTarget.integrity - fireAttackDamage, 0, fireTarget.maxIntegrity);
+  if (fireTarget.integrity <= 0) {
+    fireTarget.fuelMs = 0;
+    setPlayerThought(state, 'The fire is gone.');
+  } else if (fireTarget.integrity <= fireTarget.maxIntegrity * 0.35) {
+    setPlayerThought(state, 'The fire is breaking.');
+  }
+
+  startRecovery(enemy, fireAttackRecoveryMs);
 };
 
 const updateStalkDecision = (
@@ -182,6 +285,9 @@ export const isPlayerUnderThreat = (state: GameState): boolean => {
   if (state.world.openingStage !== 'open') {
     return false;
   }
+  if (isNightAssaultPhase(getWorldCyclePhase(state.world.timeOfDay)) && getFireDefenseTarget(state)) {
+    return state.enemies.some((enemy) => enemy.health > 0 && enemy.mode !== 'watching');
+  }
   return state.enemies.some((enemy) => {
     if (enemy.health <= 0) {
       return false;
@@ -210,8 +316,13 @@ const getProtectiveFire = (state: GameState) =>
   state.campfires.find(
     (campfire) =>
       campfire.fuelMs > 0 &&
+      campfire.integrity > 0 &&
       distance(state.player.x, state.player.y, campfire.x, campfire.y) <= campfire.radius
   );
+
+const getFireDefenseTarget = (state: GameState): CampfireState | undefined =>
+  state.campfires.find((campfire) => campfire.id === 'first-fire' && campfire.fuelMs > 0 && campfire.integrity > 0) ??
+  state.campfires.find((campfire) => campfire.fuelMs > 0 && campfire.integrity > 0);
 
 const getTerritoryPressure = (state: GameState): number => {
   const northPressure = clamp((350 - state.player.y) / 170, 0, 1);

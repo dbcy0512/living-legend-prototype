@@ -1505,3 +1505,28 @@ Verification:
 
 - `npm.cmd test` passed: 92 tests.
 - Browser visual smoke still needs manual eyeball review in the open local browser because Playwright is not installed in this environment.
+
+### Beginner Six-Slot Satchel v1
+
+Status: implemented.
+
+- Changed `Tab` into the Satchel open/close key.
+- Changed `M` into the Making subset toggle while the Satchel is open.
+- Limited the beginner Satchel to six visible slots.
+- Satchel slots now show carried items first and empty spaces after that, instead of listing every possible material in the game.
+- Changed the top HUD inventory readout to satchel capacity instead of a full material ledger.
+- Added compact in-panel controls:
+  - `Tab Close`
+  - `M Making`
+  - `[ ] Select`
+  - `Enter Make`
+- Added tests for the six-slot inventory rule and for Making staying dependent on the Satchel parent.
+
+Alive-world cross-check:
+
+The child does not begin with a complete material ledger. They begin with a small carried-space readout: what is actually in hand or in the satchel right now. The upgrade path can later make inventory knowledge broader without giving full-game legibility too early.
+
+Verification:
+
+- `npm.cmd test` passed: 95 tests.
+- `npm.cmd run build` passed.

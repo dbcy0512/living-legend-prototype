@@ -26,6 +26,58 @@ export type FirstFirePreview = {
   reason: 'ready' | 'needs-kindling' | 'too-far' | 'already-lit';
 };
 
+type InventorySlotItemKind = keyof Pick<
+  Inventory,
+  'twigs' | 'dryGrass' | 'bark' | 'wood' | 'stone' | 'herbs' | 'food' | 'poultices' | 'stoneEdges' | 'branchClubs'
+>;
+
+export type BeginnerInventorySlot = {
+  index: number;
+  kind?: InventorySlotItemKind;
+  label: string;
+  count: number;
+  empty: boolean;
+};
+
+export const beginnerInventorySlotCount = 6;
+
+const beginnerInventoryItemOrder: { kind: InventorySlotItemKind; label: string }[] = [
+  { kind: 'twigs', label: 'Twigs' },
+  { kind: 'dryGrass', label: 'Dry Grass' },
+  { kind: 'bark', label: 'Bark' },
+  { kind: 'stone', label: 'Stone' },
+  { kind: 'wood', label: 'Wood' },
+  { kind: 'herbs', label: 'Herbs' },
+  { kind: 'food', label: 'Food' },
+  { kind: 'poultices', label: 'Poultice' },
+  { kind: 'stoneEdges', label: 'Stone Edge' },
+  { kind: 'branchClubs', label: 'Branch Club' }
+];
+
+export const getBeginnerInventorySlots = (state: GameState): BeginnerInventorySlot[] => {
+  const carried: BeginnerInventorySlot[] = beginnerInventoryItemOrder
+    .filter(({ kind }) => state.inventory[kind] > 0)
+    .slice(0, beginnerInventorySlotCount)
+    .map((item, index) => ({
+      index,
+      kind: item.kind,
+      label: item.label,
+      count: state.inventory[item.kind],
+      empty: false
+    }));
+
+  while (carried.length < beginnerInventorySlotCount) {
+    carried.push({
+      index: carried.length,
+      label: 'Empty',
+      count: 0,
+      empty: true
+    });
+  }
+
+  return carried;
+};
+
 export const updateInventory = (state: GameState, actions: ActionState, deltaMs: number): void => {
   if (state.world.status !== 'playing') {
     return;

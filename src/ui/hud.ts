@@ -2,7 +2,11 @@ import type { GameState } from '../game/simulation/state';
 import { getMeleeSeedProfile } from '../game/content/meleeSeeds';
 import { getAvailableCraftingRecipes, getCraftingCostText } from '../game/simulation/systems/craftingSystem';
 import { getHotbarSlots, type HotbarItemId } from '../game/simulation/systems/hotbarSystem';
-import { getFirstFirePreview } from '../game/simulation/systems/inventorySystem';
+import {
+  beginnerInventorySlotCount,
+  getBeginnerInventorySlots,
+  getFirstFirePreview
+} from '../game/simulation/systems/inventorySystem';
 
 export type HudApi = {
   render: (state: GameState) => void;
@@ -46,6 +50,7 @@ export const createHud = (root: Element | null): HudApi => {
           <div class="crafting__list" data-hud="craftingList"></div>
           <div class="crafting__message" data-hud="craftingMessage"></div>
         </div>
+        <div class="satchel__controls" data-hud="inventoryControls"></div>
       </div>
     </div>
     <div class="hotbar" data-hud="hotbar"></div>
@@ -73,6 +78,7 @@ export const createHud = (root: Element | null): HudApi => {
   const inventoryPanel = lookup('inventoryPanel');
   const inventoryMode = lookup('inventoryMode');
   const inventoryGrid = lookup('inventoryGrid');
+  const inventoryControls = lookup('inventoryControls');
   const craftingPanel = lookup('craftingPanel');
   const craftingList = lookup('craftingList');
   const craftingMessage = lookup('craftingMessage');
@@ -87,6 +93,7 @@ export const createHud = (root: Element | null): HudApi => {
       inventoryPanel.classList.toggle('satchel--making', state.ui.craftingOpen);
       inventoryPanel.setAttribute('aria-hidden', inventoryVisible ? 'false' : 'true');
       inventoryMode.textContent = state.ui.craftingOpen ? 'Making' : 'Inventory';
+      inventoryControls.innerHTML = getInventoryControlsHtml(state);
       craftingPanel.classList.toggle('crafting--active', state.ui.craftingOpen);
       craftingPanel.setAttribute('aria-hidden', state.ui.craftingOpen ? 'false' : 'true');
       health.style.setProperty('--value', `${(state.player.health / state.player.maxHealth) * 100}%`);
@@ -126,11 +133,8 @@ const getStatusText = (state: GameState): string => {
 };
 
 const getInventoryText = (state: GameState): string => {
-  const survival = `W${state.inventory.wood} S${state.inventory.stone} H${state.inventory.herbs} F${state.inventory.food} E${state.inventory.stoneEdges} Cl${state.inventory.branchClubs}`;
-  if (state.world.openingStage === 'open') {
-    return survival;
-  }
-  return `Tw${state.inventory.twigs} G${state.inventory.dryGrass} B${state.inventory.bark} S${state.inventory.stone}`;
+  const occupiedSlots = getBeginnerInventorySlots(state).filter((slot) => !slot.empty).length;
+  return `Satchel ${occupiedSlots}/${beginnerInventorySlotCount}`;
 };
 
 const getCombatText = (state: GameState): string => {
@@ -159,28 +163,33 @@ const getHintText = (state: GameState): string => {
     return 'The spark catches. Stay close.';
   }
 
-  const craftHint = state.ui.craftingOpen ? '[ ] choose. Enter makes. Tab hides making.' : 'Tab opens making inside satchel.';
+  const craftHint = state.ui.inventoryOpen
+    ? state.ui.craftingOpen
+      ? 'M hides making. [ ] choose. Enter makes.'
+      : 'M opens making.'
+    : 'Tab opens satchel.';
   const hotbarHint = state.ui.hotbarMessage ? `${state.ui.hotbarMessage} ` : '';
-  return `${hotbarHint}Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-4 abilities, 5 heal, 6 utility, I satchel. ${craftHint}`;
+  return `${hotbarHint}Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-4 abilities, 5 heal, 6 utility. ${craftHint}`;
 };
 
 const getInventoryPanelHtml = (state: GameState): string => {
-  const rows = [
-    ['Twigs', state.inventory.twigs],
-    ['Dry Grass', state.inventory.dryGrass],
-    ['Bark', state.inventory.bark],
-    ['Wood', state.inventory.wood],
-    ['Stone', state.inventory.stone],
-    ['Herbs', state.inventory.herbs],
-    ['Food', state.inventory.food],
-    ['Poultices', state.inventory.poultices],
-    ['Stone Edges', state.inventory.stoneEdges],
-    ['Branch Clubs', state.inventory.branchClubs],
-    ['Held', getMeleeSeedProfile(state.equipment.mainHand).name],
-    ['Blade Seed', state.evolution.bladeSeedAffinity],
-    ['Axe Seed', state.evolution.axeSeedAffinity]
-  ];
-  return rows.map(([label, value]) => `<div class="satchel__item"><span>${label}</span><strong>${value}</strong></div>`).join('');
+  return getBeginnerInventorySlots(state)
+    .map((slot) => {
+      const emptyClass = slot.empty ? 'satchel__slot--empty' : '';
+      const count = slot.empty ? '' : `<strong>${slot.count}</strong>`;
+      return `
+        <div class="satchel__slot ${emptyClass}">
+          <span>${slot.label}</span>
+          ${count}
+        </div>
+      `;
+    })
+    .join('');
+};
+
+const getInventoryControlsHtml = (state: GameState): string => {
+  const makingControls = state.ui.craftingOpen ? '<span>[ ] Select</span><span>Enter Make</span>' : '';
+  return `<span>Tab Close</span><span>M Making</span>${makingControls}`;
 };
 
 const getCraftingPanelHtml = (state: GameState): string =>

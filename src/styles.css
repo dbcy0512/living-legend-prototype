@@ -183,14 +183,14 @@ body {
 }
 
 .satchel--making .satchel__grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.satchel__item {
+.satchel__slot {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 30px;
+  min-height: 42px;
   padding: 6px 8px;
   border: 1px solid rgba(75, 48, 30, 0.34);
   color: #2d2017;
@@ -199,8 +199,31 @@ body {
   line-height: 1.2;
 }
 
-.satchel__item strong {
+.satchel__slot--empty {
+  color: rgba(45, 32, 23, 0.48);
+  background: rgba(245, 230, 188, 0.28);
+}
+
+.satchel__slot strong {
   color: #f8d16c;
+}
+
+.satchel__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.satchel__controls span {
+  padding: 3px 6px;
+  border: 1px solid rgba(75, 48, 30, 0.26);
+  color: rgba(45, 32, 23, 0.82);
+  background: rgba(245, 230, 188, 0.38);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .crafting--active {
@@ -436,7 +459,7 @@ body {
 
   .hud__line,
   .hud__hint,
-  .satchel__item,
+  .satchel__slot,
   .crafting__name,
   .crafting__cost,
   .crafting__desc,

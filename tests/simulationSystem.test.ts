@@ -83,8 +83,22 @@ describe('simulation status', () => {
 
   it('toggles beginner inventory and crafting panels through simulation state', () => {
     const state = createGameState();
+    const openInventory = idleActions();
+    openInventory.toggleInventory = true;
+    const openCrafting = idleActions();
+    openCrafting.toggleCrafting = true;
+
+    updateSimulation(state, openInventory, 16);
+    updateSimulation(state, openCrafting, 16);
+
+    expect(state.ui.inventoryOpen).toBe(true);
+    expect(state.ui.craftingOpen).toBe(true);
+  });
+
+  it('opens crafting as a subset of inventory', () => {
+    const state = createGameState();
+    state.ui.inventoryOpen = true;
     const actions = idleActions();
-    actions.toggleInventory = true;
     actions.toggleCrafting = true;
 
     updateSimulation(state, actions, 16);
@@ -93,15 +107,15 @@ describe('simulation status', () => {
     expect(state.ui.craftingOpen).toBe(true);
   });
 
-  it('opens crafting as a subset of inventory', () => {
+  it('does not open crafting without the inventory parent', () => {
     const state = createGameState();
     const actions = idleActions();
     actions.toggleCrafting = true;
 
     updateSimulation(state, actions, 16);
 
-    expect(state.ui.inventoryOpen).toBe(true);
-    expect(state.ui.craftingOpen).toBe(true);
+    expect(state.ui.inventoryOpen).toBe(false);
+    expect(state.ui.craftingOpen).toBe(false);
   });
 
   it('closes crafting when the inventory parent closes', () => {

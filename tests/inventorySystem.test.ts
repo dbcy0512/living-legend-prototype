@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { createGameState } from '../src/game/simulation/state';
 import {
+  beginnerInventorySlotCount,
   craftCampfire,
+  getBeginnerInventorySlots,
   getCampfirePlacementPreview,
   getFirstFirePreview,
   getNearestGatherableResource,
@@ -13,6 +15,31 @@ import {
 import { idleActions } from '../src/game/input/actions';
 
 describe('inventory crafting', () => {
+  it('starts with six visible beginner inventory slots', () => {
+    const state = createGameState();
+    const slots = getBeginnerInventorySlots(state);
+
+    expect(slots).toHaveLength(beginnerInventorySlotCount);
+    expect(slots.every((slot) => slot.empty)).toBe(true);
+  });
+
+  it('shows carried items first instead of every possible material', () => {
+    const state = createGameState();
+    state.inventory.twigs = 2;
+    state.inventory.bark = 1;
+    state.inventory.stone = 4;
+    state.inventory.wood = 1;
+    state.inventory.herbs = 3;
+    state.inventory.food = 1;
+    state.inventory.poultices = 2;
+
+    const slots = getBeginnerInventorySlots(state);
+
+    expect(slots).toHaveLength(6);
+    expect(slots.map((slot) => slot.kind)).toEqual(['twigs', 'bark', 'stone', 'wood', 'herbs', 'food']);
+    expect(slots.some((slot) => slot.kind === 'poultices')).toBe(false);
+  });
+
   it('crafts campfire only when resource costs are available', () => {
     const inventory = {
       twigs: 0,

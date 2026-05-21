@@ -23,6 +23,12 @@ export type ResourceProfile = {
   openingMaterial: boolean;
   defaultRespawnMs: number;
   defaultAmount: number;
+  interactionRadius: number;
+  facingReach: number;
+  visualScale: number;
+  highlightColor: number;
+  highlightWidth: number;
+  highlightHeight: number;
 };
 
 export type ResourceSeed = {
@@ -42,7 +48,13 @@ const resourceProfiles = {
     category: 'kindling',
     openingMaterial: true,
     defaultRespawnMs: Number.POSITIVE_INFINITY,
-    defaultAmount: 1
+    defaultAmount: 1,
+    interactionRadius: 86,
+    facingReach: 38,
+    visualScale: 0.86,
+    highlightColor: 0xfff3a3,
+    highlightWidth: 46,
+    highlightHeight: 18
   },
   dryGrass: {
     kind: 'dryGrass',
@@ -50,7 +62,13 @@ const resourceProfiles = {
     category: 'kindling',
     openingMaterial: true,
     defaultRespawnMs: Number.POSITIVE_INFINITY,
-    defaultAmount: 1
+    defaultAmount: 1,
+    interactionRadius: 94,
+    facingReach: 42,
+    visualScale: 0.9,
+    highlightColor: 0xfff3a3,
+    highlightWidth: 58,
+    highlightHeight: 24
   },
   bark: {
     kind: 'bark',
@@ -58,7 +76,13 @@ const resourceProfiles = {
     category: 'kindling',
     openingMaterial: true,
     defaultRespawnMs: Number.POSITIVE_INFINITY,
-    defaultAmount: 1
+    defaultAmount: 1,
+    interactionRadius: 86,
+    facingReach: 38,
+    visualScale: 0.86,
+    highlightColor: 0xfff3a3,
+    highlightWidth: 48,
+    highlightHeight: 20
   },
   wood: {
     kind: 'wood',
@@ -66,7 +90,13 @@ const resourceProfiles = {
     category: 'crafting',
     openingMaterial: false,
     defaultRespawnMs: 12000,
-    defaultAmount: 3
+    defaultAmount: 3,
+    interactionRadius: 88,
+    facingReach: 38,
+    visualScale: 0.72,
+    highlightColor: 0x8ff7ff,
+    highlightWidth: 62,
+    highlightHeight: 24
   },
   stone: {
     kind: 'stone',
@@ -74,7 +104,13 @@ const resourceProfiles = {
     category: 'crafting',
     openingMaterial: true,
     defaultRespawnMs: 12000,
-    defaultAmount: 2
+    defaultAmount: 2,
+    interactionRadius: 80,
+    facingReach: 34,
+    visualScale: 0.78,
+    highlightColor: 0xfff3a3,
+    highlightWidth: 46,
+    highlightHeight: 20
   },
   herbs: {
     kind: 'herbs',
@@ -82,7 +118,13 @@ const resourceProfiles = {
     category: 'medicine',
     openingMaterial: false,
     defaultRespawnMs: 12000,
-    defaultAmount: 2
+    defaultAmount: 2,
+    interactionRadius: 82,
+    facingReach: 36,
+    visualScale: 0.7,
+    highlightColor: 0x9ef0a2,
+    highlightWidth: 44,
+    highlightHeight: 20
   },
   food: {
     kind: 'food',
@@ -90,7 +132,13 @@ const resourceProfiles = {
     category: 'food',
     openingMaterial: false,
     defaultRespawnMs: 12000,
-    defaultAmount: 2
+    defaultAmount: 2,
+    interactionRadius: 80,
+    facingReach: 34,
+    visualScale: 0.68,
+    highlightColor: 0xffc86f,
+    highlightWidth: 42,
+    highlightHeight: 20
   }
 } as const satisfies Record<ResourceKind, ResourceProfile>;
 

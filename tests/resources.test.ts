@@ -27,6 +27,13 @@ describe('resource registry', () => {
     expect(getResourceProfile('herbs').category).toBe('medicine');
   });
 
+  it('defines resource readability and interaction tuning on profiles', () => {
+    expect(getResourceProfile('dryGrass').interactionRadius).toBeGreaterThan(getResourceProfile('stone').interactionRadius);
+    expect(getResourceProfile('dryGrass').visualScale).toBeGreaterThan(getResourceProfile('food').visualScale);
+    expect(getResourceProfile('wood').highlightWidth).toBeGreaterThan(getResourceProfile('herbs').highlightWidth);
+    expect(getResourceProfiles().every((profile) => profile.facingReach > 0 && profile.highlightHeight > 0)).toBe(true);
+  });
+
   it('tags static opening resources separately from fixed zone resources', () => {
     const resources = getStaticStartingResourceSeeds();
     const opening = resources.filter((resource) => resource.source?.type === 'opening');

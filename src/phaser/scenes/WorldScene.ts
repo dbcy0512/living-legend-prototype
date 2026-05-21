@@ -3,7 +3,7 @@ import { idleActions, type ActionState } from '../../game/input/actions';
 import { animationKeys, assetKeys } from '../../game/assets/manifest';
 import { startingArea, viewportSize } from '../../game/content/maps/startingArea';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
-import { isEcosystemResourceSource } from '../../game/content/resources';
+import { getResourceProfile, isEcosystemResourceSource } from '../../game/content/resources';
 import type { CampfireState, GameState, ResourceNode } from '../../game/simulation/state';
 import { getCampfireCollisionObstacles, getPlayerCollisionRadius } from '../../game/simulation/rules/collision';
 import { isPlayerUnderThreat } from '../../game/simulation/systems/enemySystem';
@@ -393,19 +393,14 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private getResourceScale(node: ResourceNode): number {
+    const baseScale = getResourceProfile(node.kind).visualScale;
     if (node.kind === 'stone') {
-      return node.id === 'striking-stone' ? 0.82 : 0.78;
-    }
-    if (node.kind === 'dryGrass') {
-      return 0.86;
-    }
-    if (node.kind === 'twigs' || node.kind === 'bark') {
-      return 0.84;
+      return node.id === 'striking-stone' ? baseScale + 0.04 : baseScale;
     }
     if (node.kind === 'wood' && node.source?.type === 'tree-dependent') {
-      return [0.72, 0.68, 0.76][this.getStableResourceIndex(node.id) % 3];
+      return [baseScale, baseScale - 0.04, baseScale + 0.04][this.getStableResourceIndex(node.id) % 3];
     }
-    return 0.64;
+    return baseScale;
   }
 
   private getResourceRotation(node: ResourceNode): number {
@@ -485,9 +480,20 @@ export class WorldScene extends Phaser.Scene {
         const previousAmount = this.resourceAmounts.get(node.id) ?? node.amount;
         if (previousAmount > 0 && node.amount <= 0) {
           this.playPickupFeedback(node, sprite);
+          this.resourceAmounts.set(node.id, node.amount);
+          continue;
+        }
+        if (node.amount <= 0) {
+          sprite.setVisible(false);
+          this.resourceAmounts.set(node.id, node.amount);
+          continue;
+        }
+        if (previousAmount <= 0 && node.amount > 0) {
+          sprite.setPosition(node.x, node.y);
+          sprite.setVisible(true);
         }
         this.resourceAmounts.set(node.id, node.amount);
-        sprite.setAlpha(node.amount > 0 ? 1 : 0.25);
+        sprite.setAlpha(1);
         sprite.setScale(this.getResourceScale(node));
         sprite.setRotation(this.getResourceRotation(node));
       }
@@ -797,14 +803,13 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
-    const openingMaterial =
-      nearest.kind === 'twigs' || nearest.kind === 'dryGrass' || nearest.kind === 'bark' || nearest.id === 'striking-stone';
-    const color = openingMaterial ? 0xfff3a3 : 0x8ff7ff;
+    const profile = getResourceProfile(nearest.kind);
+    const color = profile.highlightColor;
     const pulse = 0.55 + this.state.world.lifePulse * 0.25;
     this.gatherPreview.fillStyle(color, 0.08);
-    this.gatherPreview.fillEllipse(nearest.x, nearest.y + 5, 54, 22);
+    this.gatherPreview.fillEllipse(nearest.x, nearest.y + 5, profile.highlightWidth, profile.highlightHeight);
     this.gatherPreview.lineStyle(2, color, pulse);
-    this.gatherPreview.strokeEllipse(nearest.x, nearest.y + 5, 54, 22);
+    this.gatherPreview.strokeEllipse(nearest.x, nearest.y + 5, profile.highlightWidth, profile.highlightHeight);
   }
 
   private drawCollisionDebug(): void {
@@ -872,8 +877,8 @@ export class WorldScene extends Phaser.Scene {
     const ecosystemResources = this.state.resources.filter((node) => isEcosystemResourceSource(node.source));
     const active = ecosystemResources.filter((node) => node.amount > 0).length;
     const depleted = ecosystemResources.length - active;
-    const activeBranches = ecosystemResources.filter((node) => node.source?.type === 'tree-dependent' && node.amount > 0).length;
-    const activeHerbs = ecosystemResources.filter((node) => node.source?.type === 'zone-dependent' && node.amount > 0).length;
+    const activeTreeAttached = ecosystemResources.filter((node) => node.source?.type === 'tree-dependent' && node.amount > 0).length;
+    const activeZoneSeeded = ecosystemResources.filter((node) => node.source?.type === 'zone-dependent' && node.amount > 0).length;
     const ecosystem = this.state.ecosystem;
     const world = this.state.world;
 
@@ -882,7 +887,7 @@ export class WorldScene extends Phaser.Scene {
       `windfall: ${ecosystem.windfallPressure.toFixed(2)}`,
       `last regen: day ${ecosystem.lastRegenerationDay} @ ${ecosystem.lastRegenerationPressure.toFixed(2)}`,
       `eco resources: ${active} active / ${depleted} depleted`,
-      `branches ${activeBranches} / herbs ${activeHerbs}`,
+      `tree ${activeTreeAttached} / zone ${activeZoneSeeded}`,
       `world: day ${world.day} time ${world.timeOfDay.toFixed(2)} night ${world.rawNightPressure.toFixed(2)}`
     ].join('\n');
   }
@@ -893,19 +898,22 @@ export class WorldScene extends Phaser.Scene {
     this.tweens.add({
       targets: sprite,
       y: node.y - 8,
-      alpha: 0.25,
+      alpha: 0,
       scale: this.getResourceScale(node) * 0.72,
       duration: 180,
       ease: 'Quad.easeOut',
       onComplete: () => {
         sprite.setPosition(node.x, node.y);
+        sprite.setAlpha(1);
+        sprite.setVisible(false);
       }
     });
 
     const ring = this.add.graphics();
     ring.setDepth(combatFxDepth);
-    ring.lineStyle(2, 0xfff3a3, 0.85);
-    ring.strokeEllipse(node.x, node.y + 5, 24, 10);
+    const profile = getResourceProfile(node.kind);
+    ring.lineStyle(2, profile.highlightColor, 0.85);
+    ring.strokeEllipse(node.x, node.y + 5, profile.highlightWidth * 0.45, profile.highlightHeight * 0.45);
     this.tweens.addCounter({
       from: 0,
       to: 1,
@@ -914,8 +922,13 @@ export class WorldScene extends Phaser.Scene {
       onUpdate: (tween) => {
         const value = tween.getValue() ?? 0;
         ring.clear();
-        ring.lineStyle(2, 0xfff3a3, 0.85 * (1 - value));
-        ring.strokeEllipse(node.x, node.y + 5, 24 + value * 34, 10 + value * 16);
+        ring.lineStyle(2, profile.highlightColor, 0.85 * (1 - value));
+        ring.strokeEllipse(
+          node.x,
+          node.y + 5,
+          profile.highlightWidth * 0.45 + value * profile.highlightWidth * 0.65,
+          profile.highlightHeight * 0.45 + value * profile.highlightHeight * 0.8
+        );
       },
       onComplete: () => {
         ring.destroy();

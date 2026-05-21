@@ -22,8 +22,6 @@ const campfirePlacementDistance = 42;
 const campfireMinimumSpacing = 96;
 const campfireSafetyRadius = 150;
 const campfireFuelMs = 90000;
-const gatherRadius = 78;
-const gatherFacingReach = 34;
 const firstFireReach = 96;
 
 export type CampfirePlacementPreview = {
@@ -89,7 +87,7 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
         node.respawnMs =
           isOpeningKindling(node) || node.source
             ? Number.POSITIVE_INFINITY
-            : 12000;
+            : getResourceProfile(node.kind).defaultRespawnMs;
       }
     }
   }
@@ -249,7 +247,6 @@ export const getFirstFireRelightPreview = (state: GameState): FirstFireRelightPr
 };
 
 export const getNearestGatherableResource = (state: GameState): ResourceNode | undefined => {
-  const facingPoint = getFacingPoint(state.player);
   let nearest: ResourceNode | undefined;
   let nearestDistance = Number.POSITIVE_INFINITY;
 
@@ -258,10 +255,12 @@ export const getNearestGatherableResource = (state: GameState): ResourceNode | u
       continue;
     }
 
+    const profile = getResourceProfile(candidate.kind);
+    const facingPoint = getFacingPoint(state.player, profile.facingReach);
     const directDistance = distance(candidate.x, candidate.y, state.player.x, state.player.y);
     const facingDistance = distance(candidate.x, candidate.y, facingPoint.x, facingPoint.y);
     const interactionDistance = Math.min(directDistance, facingDistance);
-    if (interactionDistance <= gatherRadius && interactionDistance < nearestDistance) {
+    if (interactionDistance <= profile.interactionRadius && interactionDistance < nearestDistance) {
       nearest = candidate;
       nearestDistance = interactionDistance;
     }
@@ -325,15 +324,15 @@ const getPlacementPoint = (player: PlayerState): { x: number; y: number } => {
   }
 };
 
-const getFacingPoint = (player: PlayerState): { x: number; y: number } => {
+const getFacingPoint = (player: PlayerState, reach: number): { x: number; y: number } => {
   switch (player.facing) {
     case 'north':
-      return { x: player.x, y: player.y - gatherFacingReach };
+      return { x: player.x, y: player.y - reach };
     case 'south':
-      return { x: player.x, y: player.y + gatherFacingReach };
+      return { x: player.x, y: player.y + reach };
     case 'west':
-      return { x: player.x - gatherFacingReach, y: player.y };
+      return { x: player.x - reach, y: player.y };
     case 'east':
-      return { x: player.x + gatherFacingReach, y: player.y };
+      return { x: player.x + reach, y: player.y };
   }
 };

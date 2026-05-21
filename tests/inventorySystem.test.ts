@@ -344,4 +344,17 @@ describe('inventory crafting', () => {
 
     expect(getNearestGatherableResource(state)?.id).toBe(resource.id);
   });
+
+  it('uses resource profile interaction tuning for small readable pickups', () => {
+    const state = createGameState();
+    const dryGrass = state.resources.find((node) => node.kind === 'dryGrass');
+    if (!dryGrass) {
+      throw new Error('dry grass fixture missing');
+    }
+    state.resources.splice(0, state.resources.length, dryGrass);
+    state.player.x = dryGrass.x + 90;
+    state.player.y = dryGrass.y;
+
+    expect(getNearestGatherableResource(state)?.id).toBe(dryGrass.id);
+  });
 });

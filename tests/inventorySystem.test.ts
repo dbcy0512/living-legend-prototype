@@ -3,6 +3,7 @@ import { createGameState } from '../src/game/simulation/state';
 import {
   beginnerInventorySlotCount,
   craftCampfire,
+  getBeginnerInventorySummary,
   getBeginnerInventorySlots,
   getCampfirePlacementPreview,
   getFirstFirePreview,
@@ -38,6 +39,24 @@ describe('inventory crafting', () => {
     expect(slots).toHaveLength(6);
     expect(slots.map((slot) => slot.kind)).toEqual(['twigs', 'bark', 'stone', 'wood', 'herbs', 'food']);
     expect(slots.some((slot) => slot.kind === 'poultices')).toBe(false);
+  });
+
+  it('summarizes hidden carried kinds when the beginner satchel overflows', () => {
+    const state = createGameState();
+    state.inventory.twigs = 2;
+    state.inventory.dryGrass = 1;
+    state.inventory.bark = 1;
+    state.inventory.stone = 4;
+    state.inventory.wood = 1;
+    state.inventory.herbs = 3;
+    state.inventory.food = 1;
+
+    expect(getBeginnerInventorySummary(state)).toEqual({
+      occupiedSlots: 6,
+      slotCount: 6,
+      hiddenItemKinds: 1,
+      full: true
+    });
   });
 
   it('crafts campfire only when resource costs are available', () => {

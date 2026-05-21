@@ -1530,3 +1530,23 @@ Verification:
 
 - `npm.cmd test` passed: 95 tests.
 - `npm.cmd run build` passed.
+
+### Inventory And Making UX Pass v1
+
+Status: implemented.
+
+- Added a reusable beginner inventory summary so the UI can report satchel fullness without exposing every material.
+- Added an in-panel satchel capacity readout beside the Inventory/Making mode label.
+- Added a packed-state notice when the player carries more item kinds than the six visible beginner slots can show.
+- Updated the initial static HUD hint so it no longer flashes old `I`/`Tab making` controls before the first render.
+- Tightened slot text overflow so longer carried item names do not break the satchel grid.
+- Added panel height constraints so the inventory/making surface stays within the viewport instead of expanding over the lower HUD.
+
+Alive-world cross-check:
+
+The satchel now reads like limited carried awareness rather than a debug ledger. The player can feel constrained by what the child can practically keep track of, while the UI still gives enough feedback to avoid confusion when the satchel is packed.
+
+Verification:
+
+- `npm.cmd test` passed: 96 tests.
+- `npm.cmd run build` passed.

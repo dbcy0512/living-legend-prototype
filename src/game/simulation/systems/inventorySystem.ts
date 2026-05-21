@@ -39,6 +39,13 @@ export type BeginnerInventorySlot = {
   empty: boolean;
 };
 
+export type BeginnerInventorySummary = {
+  occupiedSlots: number;
+  slotCount: number;
+  hiddenItemKinds: number;
+  full: boolean;
+};
+
 export const beginnerInventorySlotCount = 6;
 
 const beginnerInventoryItemOrder: { kind: InventorySlotItemKind; label: string }[] = [
@@ -54,9 +61,12 @@ const beginnerInventoryItemOrder: { kind: InventorySlotItemKind; label: string }
   { kind: 'branchClubs', label: 'Branch Club' }
 ];
 
+const getCarriedBeginnerInventoryItems = (state: GameState) =>
+  beginnerInventoryItemOrder.filter(({ kind }) => state.inventory[kind] > 0);
+
 export const getBeginnerInventorySlots = (state: GameState): BeginnerInventorySlot[] => {
-  const carried: BeginnerInventorySlot[] = beginnerInventoryItemOrder
-    .filter(({ kind }) => state.inventory[kind] > 0)
+  const carriedItems = getCarriedBeginnerInventoryItems(state);
+  const carried: BeginnerInventorySlot[] = carriedItems
     .slice(0, beginnerInventorySlotCount)
     .map((item, index) => ({
       index,
@@ -76,6 +86,17 @@ export const getBeginnerInventorySlots = (state: GameState): BeginnerInventorySl
   }
 
   return carried;
+};
+
+export const getBeginnerInventorySummary = (state: GameState): BeginnerInventorySummary => {
+  const carriedItemCount = getCarriedBeginnerInventoryItems(state).length;
+  const occupiedSlots = Math.min(carriedItemCount, beginnerInventorySlotCount);
+  return {
+    occupiedSlots,
+    slotCount: beginnerInventorySlotCount,
+    hiddenItemKinds: Math.max(0, carriedItemCount - beginnerInventorySlotCount),
+    full: occupiedSlots >= beginnerInventorySlotCount
+  };
 };
 
 export const updateInventory = (state: GameState, actions: ActionState, deltaMs: number): void => {

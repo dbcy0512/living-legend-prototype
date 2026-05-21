@@ -3,7 +3,7 @@ import { getMeleeSeedProfile } from '../game/content/meleeSeeds';
 import { getAvailableCraftingRecipes, getCraftingCostText } from '../game/simulation/systems/craftingSystem';
 import { getHotbarSlots, type HotbarItemId } from '../game/simulation/systems/hotbarSystem';
 import {
-  beginnerInventorySlotCount,
+  getBeginnerInventorySummary,
   getBeginnerInventorySlots,
   getFirstFirePreview
 } from '../game/simulation/systems/inventorySystem';
@@ -41,7 +41,10 @@ export const createHud = (root: Element | null): HudApi => {
     <div class="satchel" data-hud="inventoryPanel" aria-hidden="true">
       <div class="satchel__header">
         <div class="satchel__title">Satchel</div>
-        <div class="satchel__mode" data-hud="inventoryMode"></div>
+        <div class="satchel__status">
+          <div class="satchel__mode" data-hud="inventoryMode"></div>
+          <div class="satchel__capacity" data-hud="inventoryCapacity"></div>
+        </div>
       </div>
       <div class="satchel__body">
         <div class="satchel__grid" data-hud="inventoryGrid"></div>
@@ -54,7 +57,7 @@ export const createHud = (root: Element | null): HudApi => {
       </div>
     </div>
     <div class="hotbar" data-hud="hotbar"></div>
-    <div class="hud__hint" data-hud="hint">Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-4 abilities, 5 heal, 6 utility, I satchel, Tab making.</div>
+    <div class="hud__hint" data-hud="hint">Move WASD/Arrows. Left mouse/J attacks, Shift dodge rolls, E gathers, 1-4 abilities, 5 heal, 6 utility. Tab opens satchel.</div>
   `;
 
   const lookup = (key: string): HTMLElement => {
@@ -77,6 +80,7 @@ export const createHud = (root: Element | null): HudApi => {
   const pause = lookup('pause');
   const inventoryPanel = lookup('inventoryPanel');
   const inventoryMode = lookup('inventoryMode');
+  const inventoryCapacity = lookup('inventoryCapacity');
   const inventoryGrid = lookup('inventoryGrid');
   const inventoryControls = lookup('inventoryControls');
   const craftingPanel = lookup('craftingPanel');
@@ -93,6 +97,7 @@ export const createHud = (root: Element | null): HudApi => {
       inventoryPanel.classList.toggle('satchel--making', state.ui.craftingOpen);
       inventoryPanel.setAttribute('aria-hidden', inventoryVisible ? 'false' : 'true');
       inventoryMode.textContent = state.ui.craftingOpen ? 'Making' : 'Inventory';
+      inventoryCapacity.textContent = getInventoryCapacityText(state);
       inventoryControls.innerHTML = getInventoryControlsHtml(state);
       craftingPanel.classList.toggle('crafting--active', state.ui.craftingOpen);
       craftingPanel.setAttribute('aria-hidden', state.ui.craftingOpen ? 'false' : 'true');
@@ -133,8 +138,7 @@ const getStatusText = (state: GameState): string => {
 };
 
 const getInventoryText = (state: GameState): string => {
-  const occupiedSlots = getBeginnerInventorySlots(state).filter((slot) => !slot.empty).length;
-  return `Satchel ${occupiedSlots}/${beginnerInventorySlotCount}`;
+  return `Satchel ${getInventoryCapacityText(state)}`;
 };
 
 const getCombatText = (state: GameState): string => {
@@ -173,7 +177,8 @@ const getHintText = (state: GameState): string => {
 };
 
 const getInventoryPanelHtml = (state: GameState): string => {
-  return getBeginnerInventorySlots(state)
+  const summary = getBeginnerInventorySummary(state);
+  const slotsHtml = getBeginnerInventorySlots(state)
     .map((slot) => {
       const emptyClass = slot.empty ? 'satchel__slot--empty' : '';
       const count = slot.empty ? '' : `<strong>${slot.count}</strong>`;
@@ -185,11 +190,21 @@ const getInventoryPanelHtml = (state: GameState): string => {
       `;
     })
     .join('');
+  const overflowHtml =
+    summary.hiddenItemKinds > 0
+      ? `<div class="satchel__notice">Packed: ${summary.hiddenItemKinds} more ${summary.hiddenItemKinds === 1 ? 'kind' : 'kinds'} tucked away.</div>`
+      : '';
+  return `${slotsHtml}${overflowHtml}`;
 };
 
 const getInventoryControlsHtml = (state: GameState): string => {
   const makingControls = state.ui.craftingOpen ? '<span>[ ] Select</span><span>Enter Make</span>' : '';
   return `<span>Tab Close</span><span>M Making</span>${makingControls}`;
+};
+
+const getInventoryCapacityText = (state: GameState): string => {
+  const summary = getBeginnerInventorySummary(state);
+  return `${summary.occupiedSlots}/${summary.slotCount}${summary.hiddenItemKinds > 0 ? ' packed' : ''}`;
 };
 
 const getCraftingPanelHtml = (state: GameState): string =>

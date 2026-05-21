@@ -118,6 +118,7 @@ body {
   position: absolute;
   top: 98px;
   width: min(360px, calc(100vw - 40px));
+  max-height: calc(100vh - 188px);
   border: 2px solid rgba(245, 239, 216, 0.68);
   background: rgba(12, 17, 27, 0.72);
   box-shadow: 0 7px 0 rgba(0, 0, 0, 0.24);
@@ -163,6 +164,13 @@ body {
   text-transform: uppercase;
 }
 
+.satchel__status {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  text-align: right;
+}
+
 .satchel__mode {
   color: rgba(45, 32, 23, 0.72);
   font-size: 11px;
@@ -171,9 +179,18 @@ body {
   text-transform: uppercase;
 }
 
+.satchel__capacity {
+  color: rgba(45, 32, 23, 0.9);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
 .satchel__body {
   display: grid;
   gap: 10px;
+  max-height: calc(100vh - 254px);
+  overflow: hidden;
 }
 
 .satchel__grid {
@@ -199,13 +216,33 @@ body {
   line-height: 1.2;
 }
 
+.satchel__slot span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .satchel__slot--empty {
   color: rgba(45, 32, 23, 0.48);
   background: rgba(245, 230, 188, 0.28);
 }
 
 .satchel__slot strong {
+  flex: 0 0 auto;
   color: #f8d16c;
+}
+
+.satchel__notice {
+  grid-column: 1 / -1;
+  min-height: 26px;
+  padding: 6px 8px;
+  border: 1px solid rgba(75, 48, 30, 0.26);
+  color: rgba(45, 32, 23, 0.78);
+  background: rgba(245, 230, 188, 0.38);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
 }
 
 .satchel__controls {
@@ -229,11 +266,14 @@ body {
 .crafting--active {
   display: grid;
   gap: 8px;
+  min-height: 0;
 }
 
 .crafting__list {
   display: grid;
   gap: 6px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .crafting__recipe {
@@ -473,6 +513,11 @@ body {
     left: 10px;
     right: 10px;
     width: auto;
+    max-height: calc(100vh - 172px);
+  }
+
+  .satchel__body {
+    max-height: calc(100vh - 238px);
   }
 
   .satchel--making .satchel__grid {

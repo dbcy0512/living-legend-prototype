@@ -1435,3 +1435,28 @@ Verification:
 
 - `npm.cmd test` passed: 87 tests.
 - `npm.cmd run build` passed.
+
+### Starter Child PixelLab Seed Pass v1
+
+Status: review candidate created.
+
+- Generated three PixelLab passes against the starter-child visual standard.
+- Saved all rotations under `public/assets/characters/source/`.
+- Current best candidate:
+  - `pixellab-2026-05-21-starter-child-cold-v3-state`
+  - PixelLab id: `21e5e1bc-deaf-4a23-9556-fb093a240444`
+  - 8 directions
+  - `68 x 68`
+  - transparent PNGs
+- V1 and V2 are kept as source/reference but not accepted.
+- V3-state is not wired into gameplay yet because it must be visually approved and normalized into the `64 x 64` runtime frame first.
+
+Alive-world cross-check:
+
+The useful iteration was not the neutral child avatar. The useful iteration was the state variant where cold visibly changes the body: arms tuck in, posture closes, and the child reads as affected by the world before UI explains the condition.
+
+Next gate:
+
+- Approve, reject, or revise the V3-state silhouette.
+- If approved, normalize south/east/north/west into the runtime frame and wire a first static player replacement.
+- If rejected, iterate from V3-state instead of starting over, preserving identity while pushing posture, clothing, or scale.

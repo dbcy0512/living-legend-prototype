@@ -1,17 +1,34 @@
 import type { GameState } from '../state';
 import { clamp } from '../rules/math';
 import { getMobilityFrame, type MobilityFrame } from '../rules/mobility';
+import { getMeleeSeedProfile, type MeleeSeed } from '../../content/meleeSeeds';
+import { getPrimaryWeaponAbility, type WeaponAbilityDefinition, type WeaponAbilityId } from '../../content/weaponAbilities';
 
 export const utilitySlotCooldownMs = 4800;
 
 export type HotbarItemId = 'simple-poultice' | 'branch-club' | 'stone-edge';
 export type HotbarSlotRole = 'ability' | 'heal' | 'utility';
 
+export type WeaponFrame = {
+  weapon: MeleeSeed;
+  label: string;
+  lineage: string;
+  iconItemId?: Extract<HotbarItemId, 'branch-club' | 'stone-edge'>;
+  equipped: boolean;
+  available: boolean;
+};
+
 export type HotbarSlot = {
   index: number;
   role: HotbarSlotRole;
   roleLabel: string;
   itemId?: HotbarItemId;
+  abilityId?: WeaponAbilityId;
+  abilityLabel?: string;
+  linkedWeapon?: MeleeSeed;
+  animationKey?: string;
+  statusTags?: WeaponAbilityDefinition['statusTags'];
+  damage?: number;
   label: string;
   count: number;
   locked: boolean;
@@ -25,11 +42,16 @@ export const getHotbarSlots = (state: GameState): HotbarSlot[] => [
     index: 0,
     role: 'ability',
     roleLabel: 'A1',
-    itemId: 'branch-club',
-    label: 'Branch Club',
-    count: state.inventory.branchClubs,
+    abilityId: getPrimaryWeaponAbility(state.equipment.mainHand).id,
+    abilityLabel: getPrimaryWeaponAbility(state.equipment.mainHand).shortLabel,
+    linkedWeapon: state.equipment.mainHand,
+    animationKey: getPrimaryWeaponAbility(state.equipment.mainHand).animationKey,
+    statusTags: getPrimaryWeaponAbility(state.equipment.mainHand).statusTags,
+    damage: getPrimaryWeaponAbility(state.equipment.mainHand).damage,
+    label: getPrimaryWeaponAbility(state.equipment.mainHand).name,
+    count: 0,
     locked: false,
-    ready: state.inventory.branchClubs > 0,
+    ready: true,
     cooldownMs: 0,
     cooldownDurationMs: 0
   },
@@ -37,11 +59,10 @@ export const getHotbarSlots = (state: GameState): HotbarSlot[] => [
     index: 1,
     role: 'ability',
     roleLabel: 'A2',
-    itemId: 'stone-edge',
-    label: 'Stone Edge',
-    count: state.inventory.stoneEdges,
+    label: 'Ability 2',
+    count: 0,
     locked: false,
-    ready: state.inventory.stoneEdges > 0,
+    ready: false,
     cooldownMs: 0,
     cooldownDurationMs: 0
   },
@@ -94,6 +115,22 @@ export const getHotbarSlots = (state: GameState): HotbarSlot[] => [
 
 export const getHotbarMobilityFrame = (state: GameState): MobilityFrame => getMobilityFrame(state);
 
+export const getHotbarWeaponFrame = (state: GameState): WeaponFrame => {
+  const weapon = state.equipment.mainHand;
+  const profile = getMeleeSeedProfile(weapon);
+  return {
+    weapon,
+    label: profile.name,
+    lineage: profile.lineage,
+    iconItemId: weapon === 'bare-hands' ? undefined : weapon,
+    equipped: weapon !== 'bare-hands',
+    available:
+      weapon === 'bare-hands' ||
+      (weapon === 'branch-club' && state.inventory.branchClubs > 0) ||
+      (weapon === 'stone-edge' && state.inventory.stoneEdges > 0)
+  };
+};
+
 export const updateHotbar = (state: GameState, deltaMs: number): void => {
   state.hotbar.utilityCooldownMs = Math.max(0, state.hotbar.utilityCooldownMs - deltaMs);
 };
@@ -117,6 +154,10 @@ export const selectOrUseHotbarSlot = (state: GameState, slotIndex: number): bool
       return false;
     }
     state.ui.hotbarMessage = 'No utility move learned.';
+    return false;
+  }
+  if (slot.abilityId && slot.role === 'ability') {
+    state.ui.hotbarMessage = `${slot.label} is forming.`;
     return false;
   }
   if (!slot.itemId && slot.role === 'ability') {

@@ -1,7 +1,12 @@
 import type { GameState } from '../game/simulation/state';
 import { getMeleeSeedProfile } from '../game/content/meleeSeeds';
 import { getAvailableCraftingRecipes, getCraftingCostText } from '../game/simulation/systems/craftingSystem';
-import { getHotbarMobilityFrame, getHotbarSlots, type HotbarItemId } from '../game/simulation/systems/hotbarSystem';
+import {
+  getHotbarMobilityFrame,
+  getHotbarSlots,
+  getHotbarWeaponFrame,
+  type HotbarItemId
+} from '../game/simulation/systems/hotbarSystem';
 import {
   getBeginnerInventorySummary,
   getBeginnerInventorySlots,
@@ -229,22 +234,35 @@ const getCraftingPanelHtml = (state: GameState): string =>
     .join('');
 
 const getHotbarHtml = (state: GameState): string => {
+  const weaponFrame = getHotbarWeaponFrame(state);
+  const weaponIcon = weaponFrame.iconItemId ? getHotbarIcon(weaponFrame.iconItemId) : '';
+  const weaponIconStyle = weaponIcon ? ` style="--icon: url('${weaponIcon}')"` : '';
+  const weaponFrameHtml = `
+    <div class="hotbar__weapon ${weaponFrame.equipped ? 'hotbar__weapon--equipped' : ''}">
+      <span class="hotbar__weapon-flame"></span>
+      <span class="hotbar__icon"${weaponIconStyle}></span>
+      <span class="hotbar__role">WEAP</span>
+    </div>
+  `;
   const slotsHtml = getHotbarSlots(state)
     .map((slot) => {
       const selected = slot.index === state.ui.selectedHotbarSlot;
       const lockedClass = slot.locked ? 'hotbar__slot--locked' : '';
       const readyClass = slot.ready ? 'hotbar__slot--ready' : 'hotbar__slot--empty';
+      const abilityClass = slot.abilityId ? 'hotbar__slot--ability' : '';
       const icon = slot.itemId ? getHotbarIcon(slot.itemId) : '';
       const count = slot.count > 0 ? `<span class="hotbar__count">${slot.count}</span>` : '';
       const iconStyle = icon ? ` style="--icon: url('${icon}')"` : '';
+      const abilityIcon = slot.abilityId ? `<span class="hotbar__ability-icon">${slot.abilityLabel ?? ''}</span>` : '';
       const cooldown =
         slot.cooldownDurationMs > 0 && slot.cooldownMs > 0
           ? `<span class="hotbar__cooldown" style="--cooldown: ${(slot.cooldownMs / slot.cooldownDurationMs) * 100}%"></span>`
           : '';
       return `
-        <div class="hotbar__slot ${lockedClass} ${readyClass}">
+        <div class="hotbar__slot ${lockedClass} ${readyClass} ${abilityClass}">
           <span class="hotbar__key">${slot.index + 1}</span>
           <span class="hotbar__icon"${iconStyle}></span>
+          ${abilityIcon}
           <span class="hotbar__role">${slot.roleLabel}</span>
           ${cooldown}
           ${count}
@@ -261,7 +279,7 @@ const getHotbarHtml = (state: GameState): string => {
       ? `<span class="hotbar__cooldown" style="--cooldown: ${(mobility.cooldownMs / mobility.cooldownDurationMs) * 100}%"></span>`
       : '';
 
-  return `${slotsHtml}
+  const mobilityHtml = `
     <div class="hotbar__mobility ${mobilityReadyClass} ${evolvedClass}">
       <span class="hotbar__key">${mobility.keyLabel}</span>
       <span class="hotbar__mobility-icon"></span>
@@ -270,6 +288,7 @@ const getHotbarHtml = (state: GameState): string => {
       ${mobilityCooldown}
     </div>
   `;
+  return `${weaponFrameHtml}${slotsHtml}${mobilityHtml}`;
 };
 
 const getHotbarIcon = (itemId: HotbarItemId): string => {

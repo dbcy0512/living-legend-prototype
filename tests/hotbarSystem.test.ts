@@ -4,6 +4,7 @@ import { craftRecipe } from '../src/game/simulation/systems/craftingSystem';
 import {
   getHotbarMobilityFrame,
   getHotbarSlots,
+  getHotbarWeaponFrame,
   selectOrUseHotbarSlot,
   updateHotbar,
   utilitySlotCooldownMs
@@ -16,6 +17,10 @@ describe('hotbar system', () => {
 
     expect(slots.map((slot) => slot.role)).toEqual(['ability', 'ability', 'ability', 'ability', 'heal', 'utility']);
     expect(slots.map((slot) => slot.roleLabel)).toEqual(['A1', 'A2', 'A3', 'A4', 'HEAL', 'UTIL']);
+    expect(slots[0].abilityId).toBe('unarmed-survival-swipe');
+    expect(slots[0].linkedWeapon).toBe('bare-hands');
+    expect(slots[0].animationKey).toBe('combat.unarmed.survivalSwipe');
+    expect(slots[0].damage).toBeGreaterThan(0);
     expect(slots[5].cooldownDurationMs).toBe(utilitySlotCooldownMs);
   });
 
@@ -35,20 +40,30 @@ describe('hotbar system', () => {
     expect(state.ui.hotbarMessage).toBe('Poultice used.');
   });
 
-  it('equips crude melee seeds from their hotbar slots', () => {
+  it('keeps equipped weapons in a separate fire-bordered frame', () => {
     const state = createGameState();
-    state.ui.inventoryMessage = 'Twig gathered.';
-    state.inventory.branchClubs = 1;
+    state.equipment.mainHand = 'stone-edge';
     state.inventory.stoneEdges = 1;
 
-    expect(selectOrUseHotbarSlot(state, 0)).toBe(true);
-    expect(state.equipment.mainHand).toBe('branch-club');
-    expect(state.ui.selectedHotbarSlot).toBe(0);
-    expect(state.ui.inventoryMessage).toBe('');
+    const weaponFrame = getHotbarWeaponFrame(state);
+    const slots = getHotbarSlots(state);
 
-    expect(selectOrUseHotbarSlot(state, 1)).toBe(true);
+    expect(weaponFrame.weapon).toBe('stone-edge');
+    expect(weaponFrame.iconItemId).toBe('stone-edge');
+    expect(weaponFrame.equipped).toBe(true);
+    expect(slots[0].abilityId).toBe('stone-edge-cleaving-cut');
+    expect(slots[0].linkedWeapon).toBe('stone-edge');
+    expect(slots[0].statusTags).toContain('bleed-seed');
+  });
+
+  it('keeps number one as the weapon-linked ability foundation', () => {
+    const state = createGameState();
+    state.equipment.mainHand = 'stone-edge';
+
+    expect(selectOrUseHotbarSlot(state, 0)).toBe(false);
     expect(state.equipment.mainHand).toBe('stone-edge');
-    expect(state.ui.selectedHotbarSlot).toBe(1);
+    expect(state.ui.selectedHotbarSlot).toBe(0);
+    expect(state.ui.hotbarMessage).toBe('Cleaving Cut is forming.');
   });
 
   it('keeps unlearned ability slots visible but unusable', () => {

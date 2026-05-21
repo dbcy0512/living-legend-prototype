@@ -81,7 +81,7 @@ export const craftRecipe = (state: GameState, recipeId: CraftingRecipeId): boole
       state.ui.selectedHotbarSlot = 0;
     } else if (recipe.effect.item === 'stoneEdges') {
       state.equipment.mainHand = 'stone-edge';
-      state.ui.selectedHotbarSlot = 1;
+      state.ui.selectedHotbarSlot = 0;
     }
   }
 

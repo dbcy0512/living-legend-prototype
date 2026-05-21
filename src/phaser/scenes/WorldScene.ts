@@ -317,22 +317,47 @@ export class WorldScene extends Phaser.Scene {
 
   private drawPreparedZoneGround(): void {
     for (const patch of getZoneOnePreparedGroundPatches()) {
+      const alpha = patch.opacity;
       switch (patch.material) {
         case 'damp-deadwood-floor':
-          this.ground.fillStyle(0x14251f, 0.44);
+          this.ground.fillStyle(0x14251f, alpha);
           this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
           this.ground.lineStyle(2, 0x4f6b45, 0.16);
           this.ground.strokeEllipse(patch.center.x, patch.center.y + 4, patch.radius.x * 1.92, patch.radius.y * 1.84);
           break;
         case 'rotting-log-litter':
-          this.ground.fillStyle(0x2b2117, 0.34);
+          this.ground.fillStyle(0x2b2117, alpha);
           this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
           this.ground.lineStyle(3, 0x6b4728, 0.2);
           this.ground.lineBetween(patch.center.x - 150, patch.center.y + 28, patch.center.x + 88, patch.center.y - 16);
           this.ground.lineBetween(patch.center.x - 70, patch.center.y + 58, patch.center.x + 150, patch.center.y + 12);
           break;
         case 'soft-shade-edge':
-          this.ground.fillStyle(0x0e1c1a, 0.3);
+          this.ground.fillStyle(0x0e1c1a, alpha);
+          this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          break;
+        case 'muddy-bank':
+          this.ground.fillStyle(0x3b2c22, alpha);
+          this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          break;
+        case 'trampled-animal-trail':
+          this.ground.fillStyle(0x5b5330, alpha);
+          this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          break;
+        case 'leaf-litter':
+          this.ground.fillStyle(0x273e24, alpha);
+          this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          break;
+        case 'stone-rubble':
+          this.ground.fillStyle(0x5f655f, alpha);
+          this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          break;
+        case 'flower-meadow':
+          this.ground.fillStyle(0x5d7a35, alpha);
+          this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          break;
+        case 'camp-worn-earth':
+          this.ground.fillStyle(0x5d4530, alpha);
           this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
           break;
       }

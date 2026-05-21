@@ -18,7 +18,14 @@ export type ZoneOneRegionId =
 export type ZoneOneRegion = {
   id: ZoneOneRegionId;
   label: string;
-  role: 'hub' | 'resource-pocket' | 'path' | 'danger-gate';
+  role:
+    | 'hub'
+    | 'resource-pocket'
+    | 'resource-habitat'
+    | 'travel-corridor'
+    | 'danger-gate'
+    | 'mystery-poi'
+    | 'crafting-support';
   dangerTier: 0 | 1 | 2 | 3;
   center: {
     x: number;
@@ -31,8 +38,51 @@ export type ZoneOneRegion = {
   resourceKinds: readonly ResourceKind[];
   ecologyTags: readonly ResourceEcologyTag[];
   enemyHabitats: readonly EnemyHabitatTag[];
+  resourceProfile: ZoneOneResourceProfile;
+  enemyPressureProfile: ZoneOneEnemyPressureProfile;
+  discoveryProfile: ZoneOneDiscoveryProfile;
+  visibilityProfile: ZoneOneVisibilityProfile;
+  ambientProfile: ZoneOneAmbientProfile;
+  accessState: ZoneOneAccessState;
+  requiredUnlocks: readonly string[];
   poiProfile: ZoneOnePoiProfile;
   designIntent: string;
+};
+
+export type ZoneOneAccessState = 'open' | 'soft-warning' | 'blocked' | 'requires-tool' | 'requires-story';
+
+export type ZoneOneResourceProfile = {
+  density: 'none' | 'sparse' | 'common' | 'rich';
+  renews: boolean;
+  renewalRule: 'daily' | 'after-rain' | 'seasonal' | 'manual-reset' | 'none';
+  overharvestEffect?: 'none' | 'reduced-yield' | 'enemy-trigger' | 'resource-damage' | 'ecology-shift';
+};
+
+export type ZoneOneEnemyPressureProfile = {
+  daytimeTier: 0 | 1 | 2 | 3;
+  nighttimeTier: 0 | 1 | 2 | 3;
+  patrolAllowed: boolean;
+  ambushAllowed: boolean;
+  triggerIds: readonly ZoneOneTriggerId[];
+};
+
+export type ZoneOneDiscoveryProfile = {
+  firstVisitMessage: string;
+  inspectables: readonly string[];
+  unlockHints: readonly string[];
+  returnReasons: readonly string[];
+};
+
+export type ZoneOneVisibilityProfile = {
+  canopyDensity: 0 | 1 | 2 | 3;
+  sightPenalty: 0 | 1 | 2 | 3;
+  minimapReveal: 'immediate' | 'partial' | 'requires-scouting';
+};
+
+export type ZoneOneAmbientProfile = {
+  soundscape: readonly string[];
+  musicMood: 'safe' | 'curious' | 'tense' | 'danger' | 'mystery';
+  nighttimeShift?: string;
 };
 
 export type ZoneOnePoiProfile = {
@@ -70,6 +120,9 @@ export type ZoneOneSanctuary = {
     y: number;
   };
   radius: number;
+  suppressEnemySpawns: boolean;
+  suppressHostileProjectiles: boolean;
+  allowThreatAtNightEdge: boolean;
   designIntent: string;
 };
 
@@ -92,7 +145,16 @@ export type ZoneOneHabitatAnchor = {
 export type ZoneOnePreparedGroundPatch = {
   id: string;
   regionId: ZoneOneRegionId;
-  material: 'damp-deadwood-floor' | 'rotting-log-litter' | 'soft-shade-edge';
+  material:
+    | 'damp-deadwood-floor'
+    | 'rotting-log-litter'
+    | 'soft-shade-edge'
+    | 'muddy-bank'
+    | 'trampled-animal-trail'
+    | 'leaf-litter'
+    | 'stone-rubble'
+    | 'flower-meadow'
+    | 'camp-worn-earth';
   center: {
     x: number;
     y: number;
@@ -101,6 +163,8 @@ export type ZoneOnePreparedGroundPatch = {
     x: number;
     y: number;
   };
+  opacity: number;
+  scatterDensity: 0 | 1 | 2 | 3;
   designIntent: string;
 };
 
@@ -115,6 +179,37 @@ const zoneOneRegions = [
     resourceKinds: ['twigs', 'dryGrass', 'bark', 'stone'],
     ecologyTags: ['dead-fire-debris', 'dry-clearing-edge', 'exposed-stone'],
     enemyHabitats: [],
+    resourceProfile: {
+      density: 'sparse',
+      renews: true,
+      renewalRule: 'daily',
+      overharvestEffect: 'none'
+    },
+    enemyPressureProfile: {
+      daytimeTier: 0,
+      nighttimeTier: 0,
+      patrolAllowed: false,
+      ambushAllowed: false,
+      triggerIds: []
+    },
+    discoveryProfile: {
+      firstVisitMessage: 'The fire is dead. It could burn again.',
+      inspectables: ['dead-fire-pit', 'leaf-bed', 'old-cloth-scraps', 'ash-ring'],
+      unlockHints: ['Warmth can make the clearing answer back.', 'A simple work place could make loose things useful.'],
+      returnReasons: ['rebuild fire', 'rest', 'craft crude tools', 'organize supplies']
+    },
+    visibilityProfile: {
+      canopyDensity: 0,
+      sightPenalty: 0,
+      minimapReveal: 'immediate'
+    },
+    ambientProfile: {
+      soundscape: ['thin wind', 'distant birds', 'small fire crackle after lighting'],
+      musicMood: 'safe',
+      nighttimeShift: 'The clearing stays quieter than the forest edge, but distant movement becomes easier to hear.'
+    },
+    accessState: 'open',
+    requiredUnlocks: [],
     poiProfile: {
       emotionalRole: 'Home before comfort. The child has one fragile place that can answer cold.',
       worldLogic: 'A failed overnight camp left a dead fire shape, scattered survival debris, and a small clearing made by prior struggle.',
@@ -139,6 +234,37 @@ const zoneOneRegions = [
     resourceKinds: ['herbs', 'food'],
     ecologyTags: ['damp-shade', 'edge-growth'],
     enemyHabitats: ['damp-shade'],
+    resourceProfile: {
+      density: 'common',
+      renews: true,
+      renewalRule: 'daily',
+      overharvestEffect: 'reduced-yield'
+    },
+    enemyPressureProfile: {
+      daytimeTier: 0,
+      nighttimeTier: 1,
+      patrolAllowed: false,
+      ambushAllowed: true,
+      triggerIds: []
+    },
+    discoveryProfile: {
+      firstVisitMessage: 'Soft leaves grow where the light reaches the ground.',
+      inspectables: ['berry-bush', 'bitter-herb', 'flower-stem', 'thorn-stem'],
+      unlockHints: ['Some plants answer hunger. Some answer pain.', 'Taking too much from one patch may change what grows back.'],
+      returnReasons: ['gather food', 'craft poultices', 'collect plant fiber', 'watch regrowth']
+    },
+    visibilityProfile: {
+      canopyDensity: 1,
+      sightPenalty: 0,
+      minimapReveal: 'immediate'
+    },
+    ambientProfile: {
+      soundscape: ['leaf rustle', 'small insects', 'lighter bird calls'],
+      musicMood: 'curious',
+      nighttimeShift: 'Insects become louder and bushes feel less certain after dark.'
+    },
+    accessState: 'open',
+    requiredUnlocks: [],
     poiProfile: {
       emotionalRole: 'First proof that living plants can help, but the woods are still indifferent.',
       worldLogic: 'Light breaks along the forest edge, letting berries, low herbs, and soft ground growth cluster together.',
@@ -163,6 +289,37 @@ const zoneOneRegions = [
     resourceKinds: ['stone'],
     ecologyTags: ['exposed-stone'],
     enemyHabitats: [],
+    resourceProfile: {
+      density: 'common',
+      renews: true,
+      renewalRule: 'manual-reset',
+      overharvestEffect: 'reduced-yield'
+    },
+    enemyPressureProfile: {
+      daytimeTier: 0,
+      nighttimeTier: 1,
+      patrolAllowed: false,
+      ambushAllowed: false,
+      triggerIds: []
+    },
+    discoveryProfile: {
+      firstVisitMessage: 'Hard shapes push through the dirt here.',
+      inspectables: ['loose-stone', 'flint-crack', 'flat-work-stone', 'gravel-edge'],
+      unlockHints: ['A sharp edge can change what a branch means.', 'The flat stone could support crude tool work later.'],
+      returnReasons: ['craft stone edge', 'collect tool stone', 'prepare axe path', 'test thrown rocks']
+    },
+    visibilityProfile: {
+      canopyDensity: 0,
+      sightPenalty: 0,
+      minimapReveal: 'immediate'
+    },
+    ambientProfile: {
+      soundscape: ['gravel underfoot', 'open wind', 'distant forest'],
+      musicMood: 'curious',
+      nighttimeShift: 'Open ground feels exposed when the forest quiets down.'
+    },
+    accessState: 'open',
+    requiredUnlocks: [],
     poiProfile: {
       emotionalRole: 'Useful exposure. The player leaves shelter to get something hard and practical.',
       worldLogic: 'Erosion and exposed ground push usable stone to the surface where roots and dirt thin out.',
@@ -187,6 +344,37 @@ const zoneOneRegions = [
     resourceKinds: ['herbs', 'food'],
     ecologyTags: ['damp-shade', 'edge-growth'],
     enemyHabitats: ['damp-shade'],
+    resourceProfile: {
+      density: 'common',
+      renews: true,
+      renewalRule: 'daily',
+      overharvestEffect: 'reduced-yield'
+    },
+    enemyPressureProfile: {
+      daytimeTier: 1,
+      nighttimeTier: 2,
+      patrolAllowed: true,
+      ambushAllowed: true,
+      triggerIds: []
+    },
+    discoveryProfile: {
+      firstVisitMessage: 'The water looks helpful, but the bank does not feel still.',
+      inspectables: ['reed-bend', 'wet-stone', 'mud-edge', 'waterline'],
+      unlockHints: ['Reeds can bind. Water can cook. The bank can slow a body down.', 'A container would make this place more useful.'],
+      returnReasons: ['collect reeds', 'fill water later', 'fish later', 'follow wet clay traces']
+    },
+    visibilityProfile: {
+      canopyDensity: 1,
+      sightPenalty: 0,
+      minimapReveal: 'immediate'
+    },
+    ambientProfile: {
+      soundscape: ['lapping water', 'reed movement', 'damp insects'],
+      musicMood: 'curious',
+      nighttimeShift: 'Water sounds carry farther after dark and can hide smaller movement.'
+    },
+    accessState: 'open',
+    requiredUnlocks: [],
     poiProfile: {
       emotionalRole: 'Beautiful uncertainty. Water looks like life but should not feel fully mastered.',
       worldLogic: 'A low basin gathers runoff, reeds, mud edges, small edible life, and damp vegetation.',
@@ -204,13 +392,44 @@ const zoneOneRegions = [
   {
     id: 'clay-mud-bank',
     label: 'Clay & Mud',
-    role: 'resource-pocket',
+    role: 'crafting-support',
     dangerTier: 1,
     center: { x: 860, y: 1285 },
     radius: { x: 190, y: 120 },
     resourceKinds: ['stone'],
     ecologyTags: ['exposed-stone', 'damp-shade'],
     enemyHabitats: ['damp-shade'],
+    resourceProfile: {
+      density: 'sparse',
+      renews: true,
+      renewalRule: 'after-rain',
+      overharvestEffect: 'resource-damage'
+    },
+    enemyPressureProfile: {
+      daytimeTier: 1,
+      nighttimeTier: 2,
+      patrolAllowed: false,
+      ambushAllowed: true,
+      triggerIds: []
+    },
+    discoveryProfile: {
+      firstVisitMessage: 'The ground gives underfoot, but it holds shape in the hand.',
+      inspectables: ['muddy-bank', 'clay-shelf', 'flat-stone', 'wet-reed'],
+      unlockHints: ['Soft earth can become a vessel.', 'Standing too long in wet ground should matter later.'],
+      returnReasons: ['shape clay', 'prepare containers', 'collect bait later', 'test mud slow']
+    },
+    visibilityProfile: {
+      canopyDensity: 1,
+      sightPenalty: 0,
+      minimapReveal: 'immediate'
+    },
+    ambientProfile: {
+      soundscape: ['wet footstep', 'low insects', 'soft water trickle'],
+      musicMood: 'curious',
+      nighttimeShift: 'The bank becomes harder to read and easier to stumble through after dark.'
+    },
+    accessState: 'open',
+    requiredUnlocks: [],
     poiProfile: {
       emotionalRole: 'Primitive practicality. Survival becomes messy and hands-on.',
       worldLogic: 'Where water drains and soil settles, clay and mud gather below roots and stone edges.',
@@ -228,13 +447,44 @@ const zoneOneRegions = [
   {
     id: 'deep-forest',
     label: 'Deep Forest',
-    role: 'resource-pocket',
-    dangerTier: 2,
+    role: 'resource-habitat',
+    dangerTier: 3,
     center: { x: 1400, y: 390 },
     radius: { x: 280, y: 180 },
     resourceKinds: ['wood', 'twigs', 'bark'],
     ecologyTags: ['tree-shed', 'damp-shade'],
     enemyHabitats: ['deadwood', 'dense-forest-edge'],
+    resourceProfile: {
+      density: 'rich',
+      renews: true,
+      renewalRule: 'daily',
+      overharvestEffect: 'ecology-shift'
+    },
+    enemyPressureProfile: {
+      daytimeTier: 2,
+      nighttimeTier: 3,
+      patrolAllowed: true,
+      ambushAllowed: true,
+      triggerIds: []
+    },
+    discoveryProfile: {
+      firstVisitMessage: 'The trees close around the path.',
+      inspectables: ['thick-branch', 'bark-sheet', 'old-root', 'strange-tree-mark'],
+      unlockHints: ['Better wood lives where the forest is older.', 'Some trees here should feel like they are watching.'],
+      returnReasons: ['collect stronger wood', 'find resin later', 'scout strange tree', 'test stealth and sight']
+    },
+    visibilityProfile: {
+      canopyDensity: 3,
+      sightPenalty: 2,
+      minimapReveal: 'requires-scouting'
+    },
+    ambientProfile: {
+      soundscape: ['heavy canopy', 'distant branch creak', 'hidden movement'],
+      musicMood: 'tense',
+      nighttimeShift: 'At night the deep forest becomes a danger band, not a normal gathering route.'
+    },
+    accessState: 'open',
+    requiredUnlocks: [],
     poiProfile: {
       emotionalRole: 'The first place where the woods feel bigger than the player.',
       worldLogic: 'Dense canopy, fallen limbs, bark shed, and shaded rot create a stronger forest-material pocket.',
@@ -252,13 +502,44 @@ const zoneOneRegions = [
   {
     id: 'dense-forest-east',
     label: 'Dense Forest',
-    role: 'resource-pocket',
+    role: 'resource-habitat',
     dangerTier: 2,
     center: { x: 2180, y: 440 },
     radius: { x: 330, y: 190 },
     resourceKinds: ['wood', 'twigs', 'bark'],
     ecologyTags: ['tree-shed', 'edge-growth'],
     enemyHabitats: ['dense-forest-edge', 'deadwood'],
+    resourceProfile: {
+      density: 'common',
+      renews: true,
+      renewalRule: 'daily',
+      overharvestEffect: 'reduced-yield'
+    },
+    enemyPressureProfile: {
+      daytimeTier: 1,
+      nighttimeTier: 2,
+      patrolAllowed: true,
+      ambushAllowed: false,
+      triggerIds: []
+    },
+    discoveryProfile: {
+      firstVisitMessage: 'The forest gives more here, but it also hides more.',
+      inspectables: ['windfall-branch', 'bark-shed', 'softwood-limb', 'vine-edge'],
+      unlockHints: ['Wood should come from trees, roots, and fallen limbs.', 'Night changes routine work into risk.'],
+      returnReasons: ['gather basic wood', 'collect bark', 'find vines later', 'practice return routes']
+    },
+    visibilityProfile: {
+      canopyDensity: 2,
+      sightPenalty: 1,
+      minimapReveal: 'partial'
+    },
+    ambientProfile: {
+      soundscape: ['leaf pressure', 'wood creak', 'small animals'],
+      musicMood: 'tense',
+      nighttimeShift: 'The same useful route gains patrol pressure after dark.'
+    },
+    accessState: 'open',
+    requiredUnlocks: [],
     poiProfile: {
       emotionalRole: 'Tempting abundance just past comfort.',
       worldLogic: 'The eastern forest edge has heavier tree growth, richer windfall, and less visibility from camp.',
@@ -276,13 +557,44 @@ const zoneOneRegions = [
   {
     id: 'deadwood-mushrooms',
     label: 'Deadwood & Mushrooms',
-    role: 'resource-pocket',
+    role: 'resource-habitat',
     dangerTier: 2,
     center: { x: 2180, y: 850 },
     radius: { x: 270, y: 170 },
     resourceKinds: ['wood', 'herbs'],
     ecologyTags: ['tree-shed', 'damp-shade'],
     enemyHabitats: ['deadwood', 'damp-shade'],
+    resourceProfile: {
+      density: 'common',
+      renews: true,
+      renewalRule: 'daily',
+      overharvestEffect: 'enemy-trigger'
+    },
+    enemyPressureProfile: {
+      daytimeTier: 2,
+      nighttimeTier: 3,
+      patrolAllowed: false,
+      ambushAllowed: true,
+      triggerIds: ['deadwood-skitter-trigger']
+    },
+    discoveryProfile: {
+      firstVisitMessage: 'Rot is alive here.',
+      inspectables: ['fallen-log', 'mushroom-cluster', 'root-hole-den', 'spore-dust'],
+      unlockHints: ['Breaking deadwood can wake what lives under it.', 'Clearing disturbed creatures should make the pocket usable again.'],
+      returnReasons: ['gather mushrooms', 'collect rotten wood', 'test action waves', 'learn poison and medicine later']
+    },
+    visibilityProfile: {
+      canopyDensity: 2,
+      sightPenalty: 1,
+      minimapReveal: 'partial'
+    },
+    ambientProfile: {
+      soundscape: ['damp rot creak', 'soft insect clicks', 'muffled ground movement'],
+      musicMood: 'tense',
+      nighttimeShift: 'Fungus and root holes should feel more active after sunset.'
+    },
+    accessState: 'open',
+    requiredUnlocks: [],
     poiProfile: {
       emotionalRole: 'Decay that is useful, alive, and risky.',
       worldLogic: 'Rotting wood, damp shade, fungus, and root hollows make a small living system under dead material.',
@@ -300,13 +612,44 @@ const zoneOneRegions = [
   {
     id: 'animal-trails',
     label: 'Animal Trails',
-    role: 'path',
+    role: 'travel-corridor',
     dangerTier: 2,
     center: { x: 2180, y: 1120 },
     radius: { x: 300, y: 160 },
     resourceKinds: ['twigs', 'food'],
     ecologyTags: ['edge-growth', 'tree-shed'],
     enemyHabitats: ['animal-trail'],
+    resourceProfile: {
+      density: 'sparse',
+      renews: true,
+      renewalRule: 'daily',
+      overharvestEffect: 'none'
+    },
+    enemyPressureProfile: {
+      daytimeTier: 2,
+      nighttimeTier: 3,
+      patrolAllowed: true,
+      ambushAllowed: true,
+      triggerIds: ['animal-trail-pressure-trigger']
+    },
+    discoveryProfile: {
+      firstVisitMessage: 'The grass is bent by feet that are not yours.',
+      inspectables: ['fresh-tracks', 'old-tracks', 'fur-tuft', 'broken-branch'],
+      unlockHints: ['Tracks are information before they are resources.', 'Lingering on a trail can make the trail notice you.'],
+      returnReasons: ['read tracks', 'place snares later', 'test aggro drop distance', 'study patrol movement']
+    },
+    visibilityProfile: {
+      canopyDensity: 1,
+      sightPenalty: 1,
+      minimapReveal: 'partial'
+    },
+    ambientProfile: {
+      soundscape: ['bent grass', 'distant footfall', 'quick wingbeats'],
+      musicMood: 'tense',
+      nighttimeShift: 'The trail becomes an enemy movement corridor at night.'
+    },
+    accessState: 'open',
+    requiredUnlocks: [],
     poiProfile: {
       emotionalRole: 'A path that belongs to something else.',
       worldLogic: 'Repeated animal movement bends grass, leaves tracks, scatters sticks, and exposes small food traces.',
@@ -331,6 +674,37 @@ const zoneOneRegions = [
     resourceKinds: [],
     ecologyTags: ['damp-shade'],
     enemyHabitats: ['dense-forest-edge'],
+    resourceProfile: {
+      density: 'none',
+      renews: false,
+      renewalRule: 'none',
+      overharvestEffect: 'none'
+    },
+    enemyPressureProfile: {
+      daytimeTier: 1,
+      nighttimeTier: 3,
+      patrolAllowed: false,
+      ambushAllowed: false,
+      triggerIds: ['future-gate-warning-trigger']
+    },
+    discoveryProfile: {
+      firstVisitMessage: 'The air feels colder near the old stones.',
+      inspectables: ['cold-stone-marker', 'collapsed-entry', 'scratched-rune', 'cold-ash'],
+      unlockHints: ['A stronger light may reveal the path.', 'The stones react after sunset.'],
+      returnReasons: ['crafted torch', 'first night survived', 'first magic discovery', 'map transition test']
+    },
+    visibilityProfile: {
+      canopyDensity: 2,
+      sightPenalty: 2,
+      minimapReveal: 'requires-scouting'
+    },
+    ambientProfile: {
+      soundscape: ['low stone hum', 'distant hollow wind', 'absence of birds'],
+      musicMood: 'mystery',
+      nighttimeShift: 'Symbols and warning pressure become stronger after dark.'
+    },
+    accessState: 'soft-warning',
+    requiredUnlocks: ['crafted-torch', 'campfire-stable', 'first-night-survived'],
     poiProfile: {
       emotionalRole: 'The world continues, but the child is not ready yet.',
       worldLogic: 'A ruin, blocked path, or darker threshold marks a boundary between Zone 1 survival and later exploration.',
@@ -395,6 +769,9 @@ const zoneOneCampSanctuary = {
   label: 'Camp Sanctuary',
   center: startingAreaLayout.campCenter,
   radius: 155,
+  suppressEnemySpawns: true,
+  suppressHostileProjectiles: true,
+  allowThreatAtNightEdge: true,
   designIntent: 'The tight home circle: safety, resting, crafting, upgrading, and learning live here before deeper exploration opens.'
 } as const satisfies ZoneOneSanctuary;
 
@@ -451,6 +828,8 @@ const zoneOnePreparedGroundPatches = [
     material: 'damp-deadwood-floor',
     center: { x: 2180, y: 850 },
     radius: { x: 355, y: 182 },
+    opacity: 0.44,
+    scatterDensity: 2,
     designIntent: 'Turns the deadwood pocket into a damp shaded floor before any object is placed.'
   },
   {
@@ -459,6 +838,8 @@ const zoneOnePreparedGroundPatches = [
     material: 'rotting-log-litter',
     center: { x: 2208, y: 868 },
     radius: { x: 245, y: 106 },
+    opacity: 0.34,
+    scatterDensity: 3,
     designIntent: 'Groups the log, mushrooms, and root den into one readable decay cluster.'
   },
   {
@@ -467,6 +848,8 @@ const zoneOnePreparedGroundPatches = [
     material: 'soft-shade-edge',
     center: { x: 2300, y: 790 },
     radius: { x: 210, y: 84 },
+    opacity: 0.3,
+    scatterDensity: 1,
     designIntent: 'Softens the transition from grass into the den and canopy shade.'
   }
 ] as const satisfies readonly ZoneOnePreparedGroundPatch[];

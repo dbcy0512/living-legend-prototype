@@ -40,6 +40,21 @@ describe('zone one concept map', () => {
     }
   });
 
+  it('separates resource, enemy, discovery, visibility, and ambient profiles for every region', () => {
+    for (const region of getZoneOneRegions()) {
+      expect(region.resourceProfile.density).toMatch(/none|sparse|common|rich/);
+      expect(region.resourceProfile.renewalRule).toMatch(/daily|after-rain|seasonal|manual-reset|none/);
+      expect(region.enemyPressureProfile.nighttimeTier).toBeGreaterThanOrEqual(region.enemyPressureProfile.daytimeTier);
+      expect(region.discoveryProfile.firstVisitMessage.length).toBeGreaterThan(12);
+      expect(region.discoveryProfile.inspectables.length).toBeGreaterThan(0);
+      expect(region.discoveryProfile.returnReasons.length).toBeGreaterThan(0);
+      expect(region.visibilityProfile.canopyDensity).toBeGreaterThanOrEqual(0);
+      expect(region.visibilityProfile.sightPenalty).toBeGreaterThanOrEqual(0);
+      expect(region.ambientProfile.soundscape.length).toBeGreaterThan(0);
+      expect(region.requiredUnlocks).toBeDefined();
+    }
+  });
+
   it('keeps POI resource logic grounded in authored ecology instead of loose pickup placement', () => {
     for (const region of getZoneOneRegions()) {
       if (region.resourceKinds.length <= 0) {
@@ -60,6 +75,42 @@ describe('zone one concept map', () => {
     expect(deadwood.poiProfile.threatLogic).toContain('action-triggered');
     expect(deadwood.poiProfile.progressionUse).toContain('disturb the world');
     expect(deadwood.poiProfile.placementRules).toContain('Every spawned creature needs a visible habitat anchor nearby.');
+    expect(deadwood.resourceProfile.overharvestEffect).toBe('enemy-trigger');
+    expect(deadwood.enemyPressureProfile.triggerIds).toContain('deadwood-skitter-trigger');
+  });
+
+  it('distinguishes routine dense forest from true deep forest danger', () => {
+    const dense = getZoneOneRegion('dense-forest-east');
+    const deep = getZoneOneRegion('deep-forest');
+
+    expect(dense.role).toBe('resource-habitat');
+    expect(deep.role).toBe('resource-habitat');
+    expect(deep.dangerTier).toBeGreaterThan(dense.dangerTier);
+    expect(deep.resourceProfile.density).toBe('rich');
+    expect(deep.enemyPressureProfile.nighttimeTier).toBeGreaterThan(dense.enemyPressureProfile.nighttimeTier);
+    expect(deep.visibilityProfile.sightPenalty).toBeGreaterThan(dense.visibilityProfile.sightPenalty);
+    expect(deep.visibilityProfile.minimapReveal).toBe('requires-scouting');
+  });
+
+  it('treats animal trails as information and pressure corridors instead of normal loot pockets', () => {
+    const trails = getZoneOneRegion('animal-trails');
+
+    expect(trails.role).toBe('travel-corridor');
+    expect(trails.resourceProfile.density).toBe('sparse');
+    expect(trails.enemyPressureProfile.triggerIds).toContain('animal-trail-pressure-trigger');
+    expect(trails.discoveryProfile.inspectables).toContain('fresh-tracks');
+    expect(trails.discoveryProfile.unlockHints.join(' ')).toContain('information');
+  });
+
+  it('keeps the future danger gate as a soft-gated mystery instead of a resource farm', () => {
+    const gate = getZoneOneRegion('future-danger-gate');
+
+    expect(gate.role).toBe('danger-gate');
+    expect(gate.resourceProfile.density).toBe('none');
+    expect(gate.accessState).toBe('soft-warning');
+    expect(gate.requiredUnlocks).toContain('crafted-torch');
+    expect(gate.ambientProfile.musicMood).toBe('mystery');
+    expect(gate.discoveryProfile.inspectables).toContain('cold-stone-marker');
   });
 
   it('defines enemy wave trigger candidates outside the camp hub', () => {
@@ -78,6 +129,9 @@ describe('zone one concept map', () => {
     const anchors = getZoneOneHabitatAnchorsForTrigger(trigger.id);
 
     expect(sanctuary.radius).toBeLessThan(getZoneOneRegion('camp-clearing-hub').radius.x);
+    expect(sanctuary.suppressEnemySpawns).toBe(true);
+    expect(sanctuary.suppressHostileProjectiles).toBe(true);
+    expect(sanctuary.allowThreatAtNightEdge).toBe(true);
     expect(anchors.length).toBeGreaterThanOrEqual(3);
     expect(anchors.every((anchor) => isPointInsideZoneOneTrigger(trigger, anchor.spawnPoint.x, anchor.spawnPoint.y))).toBe(true);
     expect(anchors.some((anchor) => anchor.enemyKinds.includes('violet-moss-blob'))).toBe(true);
@@ -95,6 +149,8 @@ describe('zone one concept map', () => {
       'rotting-log-litter',
       'soft-shade-edge'
     ]);
+    expect(patches.every((patch) => patch.opacity > 0 && patch.opacity <= 1)).toBe(true);
+    expect(patches.every((patch) => patch.scatterDensity >= 1)).toBe(true);
     expect(mushroom).toBeDefined();
     expect(
       patches.some(

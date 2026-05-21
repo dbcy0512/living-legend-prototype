@@ -10,7 +10,8 @@ PixelLab generation date: 2026-05-21.
   - Use: review candidate for the starter child's cold idle seed.
   - Files: 8 directional rotations plus `rotation-contact-sheet.png`.
   - Reason kept: strongest cold-condition read so far; arms tuck inward, stance is smaller, and the child still has clear hand/held-item zones.
-  - Runtime status: not wired into gameplay yet. It is `68 x 68`, so it needs normalization into the `64 x 64` runtime frame before use.
+  - Runtime status: normalized into `starter-child-cold-v3-*.png` and wired into gameplay as the first starter child model.
+  - Normalization: 68 x 68 source lifted into a 64 x 64 runtime frame with the feet aligned to `starter-child-character-standard-v1`.
 
 ## Reference / Rejected First Passes
 

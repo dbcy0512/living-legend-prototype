@@ -31,6 +31,14 @@ export class BootScene extends Phaser.Scene {
     this.load.image(assetKeys.resourceDryGrass, 'assets/environment/resource-dry-grass-v2.png');
     this.load.image(assetKeys.resourceBark, 'assets/environment/resource-bark-v2.png');
     this.load.image(assetKeys.resourceStrikingStone, 'assets/environment/resource-striking-stone-v2.png');
+    this.load.image(assetKeys.playerSouth, 'assets/characters/starter-child-cold-v3-south.png');
+    this.load.image(assetKeys.playerNorth, 'assets/characters/starter-child-cold-v3-north.png');
+    this.load.image(assetKeys.playerEast, 'assets/characters/starter-child-cold-v3-east.png');
+    this.load.image(assetKeys.playerWest, 'assets/characters/starter-child-cold-v3-west.png');
+    this.load.image(assetKeys.playerSouthEast, 'assets/characters/starter-child-cold-v3-south-east.png');
+    this.load.image(assetKeys.playerSouthWest, 'assets/characters/starter-child-cold-v3-south-west.png');
+    this.load.image(assetKeys.playerNorthEast, 'assets/characters/starter-child-cold-v3-north-east.png');
+    this.load.image(assetKeys.playerNorthWest, 'assets/characters/starter-child-cold-v3-north-west.png');
     this.load.image(assetKeys.enemy, 'assets/enemies/wolf-idle-watch-game-v1.png');
     this.load.spritesheet(assetKeys.wolfIdleWatch, 'assets/enemies/wolf-idle-watch-sheet-v2.png', {
       frameWidth: 96,
@@ -60,7 +68,6 @@ export class BootScene extends Phaser.Scene {
 
   private createGeneratedTextures(): void {
     this.makeCircleTexture(assetKeys.shadow, 36, 0x111827, 0.34);
-    this.makeHeroTexture();
     this.makeHeroEquipmentTextures();
     this.makeGrassTexture();
     this.makeTreeTexture();
@@ -76,22 +83,6 @@ export class BootScene extends Phaser.Scene {
     graphics.fillStyle(color, alpha);
     graphics.fillEllipse(size / 2, size / 2, size, size * 0.45);
     graphics.generateTexture(key, size, size);
-    graphics.destroy();
-  }
-
-  private makeHeroTexture(): void {
-    const graphics = this.add.graphics();
-    graphics.fillStyle(0x121827, 1);
-    graphics.fillEllipse(16, 27, 18, 10);
-    graphics.fillStyle(0xf5d076, 1);
-    graphics.fillRoundedRect(9, 7, 14, 18, 5);
-    graphics.fillStyle(0x2563eb, 1);
-    graphics.fillTriangle(16, 4, 26, 22, 6, 22);
-    graphics.lineStyle(2, 0xffffff, 0.82);
-    graphics.strokeTriangle(16, 4, 26, 22, 6, 22);
-    graphics.fillStyle(0x38bdf8, 1);
-    graphics.fillRect(20, 16, 8, 3);
-    graphics.generateTexture(assetKeys.player, 32, 36);
     graphics.destroy();
   }
 

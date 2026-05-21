@@ -13,6 +13,7 @@ const groundPropDepth = 8;
 const actorDepthBase = 40;
 const combatFxDepth = 62;
 const treeDepthBaseOffset = 12;
+const playerBodyScale = 0.94;
 
 type TreeView = {
   id: string;
@@ -426,10 +427,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createActor(textureKey: string, x: number, y: number): Phaser.GameObjects.Container {
-    const shadow = this.add.image(0, 13, assetKeys.shadow);
+    const shadow = this.add.image(0, 8, assetKeys.shadow);
     shadow.setName('player-shadow');
     const body = this.add.image(0, 0, textureKey);
     body.setName('player-body');
+    body.setOrigin(0.5, 0.74);
     const heldItem = this.add.image(12, 0, assetKeys.playerHeldBranchClub);
     heldItem.setName('player-held-item');
     heldItem.setVisible(false);
@@ -572,7 +574,8 @@ export class WorldScene extends Phaser.Scene {
     this.player.rotation = rolling ? Math.sin(this.state.world.windPhase * 18) * 0.14 : 0;
 
     if (body) {
-      body.setScale(1 - coldPressure * 0.07, 1 + coldPressure * 0.08);
+      body.setTexture(this.getPlayerTextureKey());
+      body.setScale(playerBodyScale * (1 - coldPressure * 0.07), playerBodyScale * (1 + coldPressure * 0.08));
       body.setY(coldPressure * 2);
       if (coldPressure > 0.18) {
         body.setTint(0xc7eeff);
@@ -587,6 +590,19 @@ export class WorldScene extends Phaser.Scene {
     }
 
     this.syncPlayerEquipmentView(heldItem, coldPressure);
+  }
+
+  private getPlayerTextureKey(): string {
+    switch (this.state.player.facing) {
+      case 'north':
+        return assetKeys.playerNorth;
+      case 'south':
+        return assetKeys.playerSouth;
+      case 'west':
+        return assetKeys.playerWest;
+      case 'east':
+        return assetKeys.playerEast;
+    }
   }
 
   private syncPlayerEquipmentView(heldItem: Phaser.GameObjects.Image | undefined, coldPressure: number): void {

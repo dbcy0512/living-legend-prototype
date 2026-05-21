@@ -4,6 +4,7 @@ import { animationKeys, assetKeys } from '../../game/assets/manifest';
 import { startingArea, viewportSize } from '../../game/content/maps/startingArea';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
 import type { CampfireState, GameState, ResourceNode } from '../../game/simulation/state';
+import { getCampfireCollisionObstacles, getPlayerCollisionRadius } from '../../game/simulation/rules/collision';
 import { isPlayerUnderThreat } from '../../game/simulation/systems/enemySystem';
 import { getNearestGatherableResource } from '../../game/simulation/systems/inventorySystem';
 import { updateSimulation } from '../../game/simulation/systems/simulationSystem';
@@ -92,6 +93,9 @@ export class WorldScene extends Phaser.Scene {
   private collisionDebugVisible = false;
   private wasPrimaryPointerDown = false;
   private pausedViewActive = false;
+  private playerAnimPhase = 0;
+  private previousPlayerX = 0;
+  private previousPlayerY = 0;
 
   constructor() {
     super('WorldScene');
@@ -112,7 +116,7 @@ export class WorldScene extends Phaser.Scene {
     const actions = this.readActions();
     updateSimulation(this.state, actions, delta);
     this.syncPauseView();
-    this.syncView();
+    this.syncView(delta);
     this.hud.render(this.state);
   }
 
@@ -420,6 +424,8 @@ export class WorldScene extends Phaser.Scene {
 
   private createActors(): void {
     this.player = this.createActor(assetKeys.player, this.state.player.x, this.state.player.y);
+    this.previousPlayerX = this.state.player.x;
+    this.previousPlayerY = this.state.player.y;
     this.createThoughtBubble();
     for (const enemy of this.state.enemies) {
       this.enemySprites.set(enemy.id, this.createEnemyActor(enemy.x, enemy.y));
@@ -452,12 +458,12 @@ export class WorldScene extends Phaser.Scene {
     return container;
   }
 
-  private syncView(): void {
+  private syncView(deltaMs: number): void {
     const world = this.state.world;
     const coldPressure = this.getColdPressure();
     this.player.setPosition(this.state.player.x, this.state.player.y);
     this.player.setDepth(actorDepthBase + this.state.player.y * 0.001);
-    this.syncPlayerView(coldPressure);
+    this.syncPlayerView(coldPressure, deltaMs);
     this.syncThoughtBubble();
 
     for (const enemy of this.state.enemies) {
@@ -564,20 +570,51 @@ export class WorldScene extends Phaser.Scene {
     this.thoughtBubbleBg.lineBetween(left + 12, top + 6, right - 14, top + 6);
   }
 
-  private syncPlayerView(coldPressure: number): void {
+  private syncPlayerView(coldPressure: number, deltaMs: number): void {
     const body = this.player.getByName('player-body') as Phaser.GameObjects.Image | undefined;
     const shadow = this.player.getByName('player-shadow') as Phaser.GameObjects.Image | undefined;
     const heldItem = this.player.getByName('player-held-item') as Phaser.GameObjects.Image | undefined;
     const rolling = this.state.combat.phase === 'rolling';
     const coldBody = this.isPlayerColdBody(coldPressure);
+    const frameSeconds = Math.min(deltaMs, 50) / 1000;
+    const movedDistance = Math.hypot(this.state.player.x - this.previousPlayerX, this.state.player.y - this.previousPlayerY);
+    const moving = movedDistance > 0.08;
+    const phaseSpeed = moving ? 10.5 : coldBody ? 7.5 : 2.6;
+    this.playerAnimPhase += frameSeconds * phaseSpeed;
+    const step = Math.sin(this.playerAnimPhase);
+    const breath = Math.sin(this.playerAnimPhase * (coldBody ? 1.8 : 1));
+    const baseBodyScaleX = playerBodyScale * (1 - coldPressure * 0.07);
+    const baseBodyScaleY = playerBodyScale * (1 + coldPressure * 0.08);
+    let bodyX = 0;
+    let bodyY = coldPressure * 2;
+    let bodyAngle = 0;
+    let shadowScaleX = 1 - coldPressure * 0.12;
+    let shadowScaleY = 1;
+
+    if (!rolling && moving) {
+      const stride = Math.abs(step);
+      bodyY += -stride * 2.2;
+      bodyAngle = step * (coldBody ? 1.2 : 1.8);
+      shadowScaleX += stride * 0.08;
+      shadowScaleY -= stride * 0.04;
+    } else if (!rolling && coldBody) {
+      bodyX = Math.sin(this.playerAnimPhase * 4.1) * coldPressure * 0.85;
+      bodyY += breath * 0.7;
+      bodyAngle = Math.sin(this.playerAnimPhase * 3.7) * coldPressure * 0.9;
+    } else if (!rolling) {
+      bodyY += breath * 0.55;
+      shadowScaleX += breath * 0.015;
+      shadowScaleY -= breath * 0.01;
+    }
 
     this.player.setScale(rolling ? 0.9 : 1);
     this.player.rotation = rolling ? Math.sin(this.state.world.windPhase * 18) * 0.14 : 0;
 
     if (body) {
       body.setTexture(this.getPlayerTextureKey(coldBody));
-      body.setScale(playerBodyScale * (1 - coldPressure * 0.07), playerBodyScale * (1 + coldPressure * 0.08));
-      body.setY(coldPressure * 2);
+      body.setScale(baseBodyScaleX, baseBodyScaleY);
+      body.setPosition(bodyX, bodyY);
+      body.setAngle(bodyAngle);
       if (coldPressure > 0.18) {
         body.setTint(0xc7eeff);
       } else {
@@ -586,11 +623,13 @@ export class WorldScene extends Phaser.Scene {
     }
 
     if (shadow) {
-      shadow.setScale(1 - coldPressure * 0.12, 1);
+      shadow.setScale(shadowScaleX, shadowScaleY);
       shadow.setAlpha(0.34 - coldPressure * 0.08);
     }
 
     this.syncPlayerEquipmentView(heldItem, coldPressure);
+    this.previousPlayerX = this.state.player.x;
+    this.previousPlayerY = this.state.player.y;
   }
 
   private isPlayerColdBody(coldPressure: number): boolean {
@@ -786,12 +825,12 @@ export class WorldScene extends Phaser.Scene {
     }
 
     this.collisionDebug.lineStyle(2, 0xfff3a3, 0.85);
-    this.collisionDebug.strokeCircle(this.state.player.x, this.state.player.y, 14);
+    this.collisionDebug.strokeCircle(this.state.player.x, this.state.player.y, getPlayerCollisionRadius());
     this.collisionDebug.lineStyle(2, 0xff8a3d, 0.9);
     this.collisionDebug.fillStyle(0xff8a3d, 0.12);
-    for (const campfire of this.state.campfires) {
-      this.collisionDebug.fillCircle(campfire.x, campfire.y + 8, 28);
-      this.collisionDebug.strokeCircle(campfire.x, campfire.y + 8, 28);
+    for (const obstacle of getCampfireCollisionObstacles(this.state.campfires)) {
+      this.collisionDebug.fillCircle(obstacle.x, obstacle.y, obstacle.radius);
+      this.collisionDebug.strokeCircle(obstacle.x, obstacle.y, obstacle.radius);
     }
 
     this.collisionDebug.lineStyle(1, 0xb7f7c6, 0.62);

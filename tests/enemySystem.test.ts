@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { createGameState } from '../src/game/simulation/state';
 import { applyEnemyDamageResponse, updateEnemies } from '../src/game/simulation/systems/enemySystem';
+import { getCampfireCollisionObstacles, getEnemyCollisionRadius } from '../src/game/simulation/rules/collision';
+import { distance } from '../src/game/simulation/rules/math';
 
 describe('enemy telegraph', () => {
   it('telegraphs before a committed lunge can damage the player', () => {
@@ -72,6 +74,26 @@ describe('enemy telegraph', () => {
     expect(enemy.mode).toBe('stalking');
     expect(enemy.x).toBeLessThan(startX);
     expect(state.player.health).toBe(playerHealth);
+  });
+
+  it('keeps night enemies outside campfire collision while they assault the fire', () => {
+    const state = createGameState();
+    state.world.openingStage = 'open';
+    state.world.timeOfDay = 0.9;
+    state.campfires[0].fuelMs = 10000;
+    const enemy = state.enemies[0];
+    enemy.x = state.campfires[0].x + 90;
+    enemy.y = state.campfires[0].y + 8;
+    enemy.hunger = 100;
+    enemy.fear = 0;
+    const fireCollision = getCampfireCollisionObstacles(state.campfires)[0];
+
+    updateEnemies(state, 1000);
+
+    expect(distance(enemy.x, enemy.y, fireCollision.x, fireCollision.y)).toBeGreaterThanOrEqual(
+      fireCollision.radius + getEnemyCollisionRadius() - 0.01
+    );
+    expect(distance(enemy.x, enemy.y, state.campfires[0].x, state.campfires[0].y)).toBeLessThanOrEqual(42);
   });
 
   it('damages fire integrity during a night assault without reducing fuel directly', () => {

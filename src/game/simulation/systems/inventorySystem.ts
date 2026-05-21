@@ -37,6 +37,11 @@ export type FirstFirePreview = {
   reason: 'ready' | 'needs-kindling' | 'too-far' | 'already-lit';
 };
 
+export type FirstFireRelightPreview = {
+  canRelight: boolean;
+  reason: 'ready' | 'needs-kindling' | 'too-far' | 'already-lit' | 'broken' | 'missing-fire';
+};
+
 export type BeginnerInventorySlot = SatchelSlot;
 export type BeginnerInventorySummary = SatchelSummary;
 export const beginnerInventorySlotCount = beginnerSatchelSlotCount;
@@ -92,8 +97,8 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
   if (actions.craft) {
     if (state.world.openingStage === 'cold') {
       rebuildFirstFire(state);
-    } else if (!rebuildFirstFire(state)) {
-      placeCampfire(state);
+    } else {
+      relightFirstFire(state);
     }
   }
 
@@ -174,6 +179,37 @@ export const rebuildFirstFire = (state: GameState): boolean => {
   return true;
 };
 
+export const relightFirstFire = (state: GameState): boolean => {
+  if (state.world.openingStage === 'cold') {
+    return rebuildFirstFire(state);
+  }
+
+  const preview = getFirstFireRelightPreview(state);
+  if (!preview.canRelight) {
+    if (preview.reason === 'needs-kindling') {
+      setPlayerThought(state, 'It needs something dry.');
+    } else if (preview.reason === 'broken') {
+      setPlayerThought(state, 'The fire has lost its shape.');
+    }
+    return false;
+  }
+
+  const firstFire = getFirstFire(state);
+  if (!firstFire) {
+    return false;
+  }
+
+  state.inventory.twigs -= 1;
+  state.inventory.dryGrass -= 1;
+  state.inventory.bark -= 1;
+  state.behaviorMemory.tools.usedAsFuel.twigs += 1;
+  state.behaviorMemory.tools.usedAsFuel.dryGrass += 1;
+  state.behaviorMemory.tools.usedAsFuel.bark += 1;
+  firstFire.fuelMs = 45000;
+  setPlayerThought(state, 'The flame catches again.');
+  return true;
+};
+
 export const getFirstFirePreview = (state: GameState): FirstFirePreview => {
   const firstFire = getFirstFire(state);
   if (!firstFire) {
@@ -189,6 +225,26 @@ export const getFirstFirePreview = (state: GameState): FirstFirePreview => {
     return { canRebuild: false, reason: 'needs-kindling' };
   }
   return { canRebuild: true, reason: 'ready' };
+};
+
+export const getFirstFireRelightPreview = (state: GameState): FirstFireRelightPreview => {
+  const firstFire = getFirstFire(state);
+  if (!firstFire) {
+    return { canRelight: false, reason: 'missing-fire' };
+  }
+  if (firstFire.fuelMs > 0) {
+    return { canRelight: false, reason: 'already-lit' };
+  }
+  if (distance(state.player.x, state.player.y, firstFire.x, firstFire.y) > firstFireReach) {
+    return { canRelight: false, reason: 'too-far' };
+  }
+  if (firstFire.integrity <= 0) {
+    return { canRelight: false, reason: 'broken' };
+  }
+  if (!hasFirstFireRelightKindling(state.inventory)) {
+    return { canRelight: false, reason: 'needs-kindling' };
+  }
+  return { canRelight: true, reason: 'ready' };
 };
 
 export const getNearestGatherableResource = (state: GameState): ResourceNode | undefined => {
@@ -251,6 +307,9 @@ const syncOpeningPrompt = (state: GameState): void => {
 
 const hasFirstFireKindling = (inventory: Inventory): boolean =>
   inventory.twigs >= 1 && inventory.dryGrass >= 1 && inventory.bark >= 1 && inventory.stone >= 1;
+
+const hasFirstFireRelightKindling = (inventory: Inventory): boolean =>
+  inventory.twigs >= 1 && inventory.dryGrass >= 1 && inventory.bark >= 1;
 
 const getPlacementPoint = (player: PlayerState): { x: number; y: number } => {
   switch (player.facing) {

@@ -1,4 +1,5 @@
 import { startingArea } from '../../content/maps/startingArea';
+import type { CampfireState } from '../state';
 
 export type CircleObstacle = {
   id: string;
@@ -16,8 +17,11 @@ export type CollisionResult = {
 };
 
 const playerCollisionRadius = 14;
+const enemyCollisionRadius = 10;
+const campfireCollisionRadius = 28;
 
 export const getPlayerCollisionRadius = (): number => playerCollisionRadius;
+export const getEnemyCollisionRadius = (): number => enemyCollisionRadius;
 
 const resolveVerticalTrunkCollision = (
   x: number,
@@ -117,3 +121,32 @@ export const resolveObstacleListCollisions = (
 
 export const resolveMapCollisions = (x: number, y: number, actorRadius = playerCollisionRadius): CollisionResult =>
   resolveObstacleListCollisions(x, y, startingArea.collision, actorRadius);
+
+export const getCampfireCollisionObstacles = (campfires: readonly CampfireState[]): CircleObstacle[] =>
+  campfires.map((campfire) => ({
+    id: `collision-${campfire.id}`,
+    kind: 'campfire',
+    x: campfire.x,
+    y: campfire.y + 8,
+    radius: campfireCollisionRadius
+  }));
+
+export const resolveWorldCollisions = (
+  campfires: readonly CampfireState[],
+  x: number,
+  y: number,
+  actorRadius = playerCollisionRadius
+): CollisionResult => {
+  const mapResolved = resolveMapCollisions(x, y, actorRadius);
+  const campfireResolved = resolveObstacleListCollisions(
+    mapResolved.x,
+    mapResolved.y,
+    getCampfireCollisionObstacles(campfires),
+    actorRadius
+  );
+  return {
+    x: campfireResolved.x,
+    y: campfireResolved.y,
+    blocked: mapResolved.blocked || campfireResolved.blocked
+  };
+};

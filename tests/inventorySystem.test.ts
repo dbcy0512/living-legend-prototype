@@ -8,9 +8,11 @@ import {
   getBeginnerInventorySlots,
   getCampfirePlacementPreview,
   getFirstFirePreview,
+  getFirstFireRelightPreview,
   getNearestGatherableResource,
   placeCampfire,
   rebuildFirstFire,
+  relightFirstFire,
   updateInventory,
   useFood
 } from '../src/game/simulation/systems/inventorySystem';
@@ -190,6 +192,57 @@ describe('inventory crafting', () => {
     updateInventory(state, idleActions(), 16);
 
     expect(state.world.openingPrompt).toBe('ready');
+  });
+
+  it('does not place extra campfires from the fire action after the first fire is lit', () => {
+    const state = createGameState();
+    const actions = idleActions();
+    actions.craft = true;
+    state.world.openingStage = 'open';
+    state.campfires[0].fuelMs = 10000;
+    state.inventory.wood = 2;
+    state.inventory.stone = 1;
+
+    updateInventory(state, actions, 16);
+
+    expect(state.campfires).toHaveLength(1);
+    expect(state.inventory.wood).toBe(2);
+    expect(state.inventory.stone).toBe(1);
+  });
+
+  it('relights the first fire after opening without creating a new campfire', () => {
+    const state = createGameState();
+    state.world.openingStage = 'open';
+    state.campfires[0].fuelMs = 0;
+    state.campfires[0].integrity = 64;
+    state.inventory.twigs = 1;
+    state.inventory.dryGrass = 1;
+    state.inventory.bark = 1;
+
+    expect(getFirstFireRelightPreview(state).reason).toBe('ready');
+    expect(relightFirstFire(state)).toBe(true);
+
+    expect(state.campfires).toHaveLength(1);
+    expect(state.campfires[0].fuelMs).toBeGreaterThan(0);
+    expect(state.campfires[0].integrity).toBe(64);
+    expect(state.inventory.twigs).toBe(0);
+    expect(state.inventory.dryGrass).toBe(0);
+    expect(state.inventory.bark).toBe(0);
+    expect(state.inventory.campfires).toBe(0);
+  });
+
+  it('does not relight a fire whose structure has been destroyed', () => {
+    const state = createGameState();
+    state.world.openingStage = 'open';
+    state.campfires[0].fuelMs = 0;
+    state.campfires[0].integrity = 0;
+    state.inventory.twigs = 1;
+    state.inventory.dryGrass = 1;
+    state.inventory.bark = 1;
+
+    expect(getFirstFireRelightPreview(state).reason).toBe('broken');
+    expect(relightFirstFire(state)).toBe(false);
+    expect(state.campfires[0].fuelMs).toBe(0);
   });
 
   it('reports why a campfire preview is invalid', () => {

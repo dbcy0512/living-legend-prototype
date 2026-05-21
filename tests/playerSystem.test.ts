@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { idleActions } from '../src/game/input/actions';
 import { startingArea } from '../src/game/content/maps/startingArea';
-import { getPlayerCollisionRadius, resolveCircleObstacleCollision } from '../src/game/simulation/rules/collision';
+import {
+  getCampfireCollisionObstacles,
+  getPlayerCollisionRadius,
+  resolveCircleObstacleCollision
+} from '../src/game/simulation/rules/collision';
 import { createGameState } from '../src/game/simulation/state';
 import { updateSimulation } from '../src/game/simulation/systems/simulationSystem';
-import { getCampfireCollisionObstacles, updatePlayer } from '../src/game/simulation/systems/playerSystem';
+import { updatePlayer } from '../src/game/simulation/systems/playerSystem';
 
 describe('player stamina and dodge', () => {
   it('spends stamina and grants brief invulnerability when dodge roll starts', () => {

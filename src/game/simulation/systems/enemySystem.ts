@@ -3,6 +3,7 @@ import { clamp, distance, normalizeAxis } from '../rules/math';
 import { applyCreatureDamageResponse } from '../rules/creatureResponses';
 import { getWorldCyclePhase, isNightAssaultPhase } from '../rules/dayNight';
 import { setPlayerThought } from '../rules/thoughts';
+import { getEnemyCollisionRadius, resolveWorldCollisions } from '../rules/collision';
 
 const stalkDistance = 250;
 const fireStalkDistance = 155;
@@ -26,6 +27,7 @@ const boldnessToLunge = 36;
 const respawnGraceMs = 1400;
 const enemyDenX = 1188;
 const enemyDenY = 214;
+const enemyCollisionRadius = getEnemyCollisionRadius();
 
 export const updateEnemies = (state: GameState, deltaMs: number): void => {
   if (state.world.status !== 'playing') {
@@ -52,7 +54,7 @@ export const updateEnemies = (state: GameState, deltaMs: number): void => {
     enemy.attackTimerMs = Math.max(0, enemy.attackTimerMs - deltaMs);
 
     if (!nightAssault) {
-      updateDaytimeEnemy(enemy, seconds);
+      updateDaytimeEnemy(enemy, state, seconds);
       continue;
     }
 
@@ -80,7 +82,7 @@ export const updateEnemies = (state: GameState, deltaMs: number): void => {
   }
 };
 
-const updateDaytimeEnemy = (enemy: EnemyState, seconds: number): void => {
+const updateDaytimeEnemy = (enemy: EnemyState, state: GameState, seconds: number): void => {
   enemy.mode = 'watching';
   enemy.telegraphMs = 0;
   enemy.phaseTimerMs = 0;
@@ -93,8 +95,7 @@ const updateDaytimeEnemy = (enemy: EnemyState, seconds: number): void => {
     return;
   }
   const axis = normalizeAxis(enemyDenX - enemy.x, enemyDenY - enemy.y);
-  enemy.x += axis.x * 38 * seconds;
-  enemy.y += axis.y * 38 * seconds;
+  moveEnemy(enemy, state, axis.x * 38 * seconds, axis.y * 38 * seconds);
 };
 
 const updateWolfNeeds = (
@@ -143,8 +144,7 @@ const updateFireAssault = (
   if (dist > fireAttackDistance) {
     enemy.mode = 'stalking';
     const axis = normalizeAxis(fireTarget.x - enemy.x, fireTarget.y - enemy.y);
-    enemy.x += axis.x * fireAssaultSpeed * seconds;
-    enemy.y += axis.y * fireAssaultSpeed * seconds;
+    moveEnemy(enemy, state, axis.x * fireAssaultSpeed * seconds, axis.y * fireAssaultSpeed * seconds);
     return;
   }
 
@@ -217,8 +217,7 @@ const updateStalkDecision = (
     if (dist > desiredDistance) {
       const axis = normalizeAxis(state.player.x - enemy.x, state.player.y - enemy.y);
       const speed = stalkSpeed * (fireProtected ? fireStalkSpeedMultiplier : 1);
-      enemy.x += axis.x * speed * seconds;
-      enemy.y += axis.y * speed * seconds;
+      moveEnemy(enemy, state, axis.x * speed * seconds, axis.y * speed * seconds);
     }
   } else {
     enemy.mode = 'watching';
@@ -239,8 +238,7 @@ const updateTelegraph = (enemy: EnemyState, deltaMs: number): void => {
 
 const updateLunge = (enemy: EnemyState, state: GameState, deltaMs: number, seconds: number): void => {
   enemy.phaseTimerMs = Math.max(0, enemy.phaseTimerMs - deltaMs);
-  enemy.x += enemy.lungeX * lungeSpeed * seconds;
-  enemy.y += enemy.lungeY * lungeSpeed * seconds;
+  moveEnemy(enemy, state, enemy.lungeX * lungeSpeed * seconds, enemy.lungeY * lungeSpeed * seconds);
 
   if (
     !enemy.hasDamagedThisLunge &&
@@ -269,8 +267,7 @@ const updateRecovery = (enemy: EnemyState, state: GameState, deltaMs: number, se
   enemy.phaseTimerMs = Math.max(0, enemy.phaseTimerMs - deltaMs);
   enemy.telegraphMs = 0;
   const axis = normalizeAxis(enemy.x - state.player.x, enemy.y - state.player.y);
-  enemy.x += axis.x * 24 * seconds;
-  enemy.y += axis.y * 24 * seconds;
+  moveEnemy(enemy, state, axis.x * 24 * seconds, axis.y * 24 * seconds);
   if (enemy.phaseTimerMs <= 0) {
     enemy.mode = 'stalking';
   }
@@ -310,6 +307,14 @@ const startRecovery = (enemy: EnemyState, durationMs: number): void => {
   enemy.attackTimerMs = Math.max(enemy.attackTimerMs, durationMs);
   enemy.telegraphMs = 0;
   enemy.hasDamagedThisLunge = false;
+};
+
+const moveEnemy = (enemy: EnemyState, state: GameState, moveX: number, moveY: number): void => {
+  enemy.x += moveX;
+  enemy.y += moveY;
+  const resolved = resolveWorldCollisions(state.campfires, enemy.x, enemy.y, enemyCollisionRadius);
+  enemy.x = resolved.x;
+  enemy.y = resolved.y;
 };
 
 const getProtectiveFire = (state: GameState) =>

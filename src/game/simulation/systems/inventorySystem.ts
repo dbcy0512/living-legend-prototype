@@ -1,5 +1,6 @@
 import type { ActionState } from '../../input/actions';
 import { getCraftingRecipes } from '../../content/craftingRecipes';
+import { getResourceProfile } from '../../content/resources';
 import type { GameState, Inventory, PlayerState, ResourceNode } from '../state';
 import {
   addSatchelItem,
@@ -66,7 +67,7 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
       }
       node.respawnMs = Math.max(0, node.respawnMs - deltaMs);
       if (node.respawnMs <= 0) {
-        node.amount = node.kind === 'wood' ? 3 : 2;
+        node.amount = getResourceProfile(node.kind).defaultAmount;
       }
     }
   }
@@ -294,7 +295,7 @@ const hasCampfireResources = (inventory: Inventory): boolean =>
   inventory.wood >= campfireWoodCost && inventory.stone >= campfireStoneCost;
 
 const isOpeningKindling = (node: ResourceNode): boolean =>
-  node.kind === 'twigs' || node.kind === 'dryGrass' || node.kind === 'bark' || node.id === 'striking-stone';
+  getResourceProfile(node.kind).openingMaterial && node.source?.type === 'opening';
 
 const syncOpeningPrompt = (state: GameState): void => {
   if (state.world.openingStage !== 'cold') {

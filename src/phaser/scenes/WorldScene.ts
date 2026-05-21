@@ -850,6 +850,11 @@ export class WorldScene extends Phaser.Scene {
         this.collisionDebug.strokeCircle(node.x, node.y, 10);
         continue;
       }
+      if (source.type !== 'tree-dependent') {
+        this.collisionDebug.fillCircle(node.x, node.y, 3);
+        this.collisionDebug.strokeCircle(node.x, node.y, 8);
+        continue;
+      }
       const parentTree = this.treeViews.find((tree) => tree.id === source.parentId);
       if (!parentTree) {
         continue;

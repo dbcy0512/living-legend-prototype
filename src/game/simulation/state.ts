@@ -1,11 +1,10 @@
 import type { Direction } from '../input/actions';
 import { startingArea } from '../content/maps/startingArea';
 import {
-  createEcosystemResourceSeeds,
   defaultEcosystemSeed,
-  type EcosystemResourceSource
 } from '../content/ecosystem';
 import type { MeleeSeed } from '../content/meleeSeeds';
+import { createStartingResourceSeeds, type ResourceKind, type ResourceSource } from '../content/resources';
 import type { WeaponAbilityId, WeaponAbilityStatusTag } from '../content/weaponAbilities';
 import type { WorldCyclePhase } from './rules/dayNight';
 
@@ -23,7 +22,7 @@ export type Inventory = {
   branchClubs: number;
 };
 
-export type ItemKind = keyof Pick<Inventory, 'twigs' | 'dryGrass' | 'bark' | 'wood' | 'stone' | 'herbs' | 'food'>;
+export type ItemKind = ResourceKind;
 
 export type PlayerState = {
   x: number;
@@ -90,7 +89,7 @@ export type ResourceNode = {
   y: number;
   amount: number;
   respawnMs: number;
-  source?: EcosystemResourceSource;
+  source?: ResourceSource;
 };
 
 export type EnemyState = {
@@ -341,18 +340,7 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
         maxIntegrity: 100
       }
     ],
-    resources: [
-      { id: 'first-twig', kind: 'twigs', x: 620, y: 524, amount: 1, respawnMs: 0 },
-      { id: 'dry-grass-handful', kind: 'dryGrass', x: 815, y: 506, amount: 1, respawnMs: 0 },
-      { id: 'curl-of-bark', kind: 'bark', x: 642, y: 608, amount: 1, respawnMs: 0 },
-      { id: 'striking-stone', kind: 'stone', x: 832, y: 598, amount: 1, respawnMs: 0 },
-      { id: 'elder-branch', kind: 'wood', x: 405, y: 520, amount: 3, respawnMs: 0 },
-      { id: 'moon-stone', kind: 'stone', x: 1045, y: 332, amount: 2, respawnMs: 0 },
-      { id: 'sun-herb', kind: 'herbs', x: 520, y: 720, amount: 2, respawnMs: 0 },
-      { id: 'wild-fruit', kind: 'food', x: 1116, y: 674, amount: 2, respawnMs: 0 },
-      { id: 'silver-herb', kind: 'herbs', x: 268, y: 684, amount: 2, respawnMs: 0 },
-      ...createEcosystemResourceSeeds(ecosystemSeed)
-    ],
+    resources: createStartingResourceSeeds(ecosystemSeed),
     enemies: [
       {
         id: 'hollow-wolf',

@@ -321,7 +321,7 @@ describe('inventory crafting', () => {
 
   it('leaves depleted ecosystem resources for ecosystem regeneration', () => {
     const state = createGameState();
-    const resource = state.resources.find((node) => node.source);
+    const resource = state.resources.find((node) => node.source?.type === 'tree-dependent');
     if (!resource) {
       throw new Error('ecosystem resource fixture missing');
     }

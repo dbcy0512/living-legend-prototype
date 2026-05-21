@@ -131,7 +131,9 @@ describe('zone one ecosystem rules', () => {
   it('stores the ecosystem seed on game state and uses it to create resources', () => {
     const state = createGameState({ ecosystemSeed: 'test-seed-b' });
     const seededResources = createEcosystemResourceSeeds('test-seed-b');
-    const ecosystemResources = state.resources.filter((resource) => resource.source);
+    const ecosystemResources = state.resources.filter(
+      (resource) => resource.source?.type === 'tree-dependent' || resource.source?.type === 'zone-dependent'
+    );
 
     expect(state.ecosystem.seed).toBe('test-seed-b');
     expect(ecosystemResources.map((resource) => resource.id)).toEqual(seededResources.map((resource) => resource.id));

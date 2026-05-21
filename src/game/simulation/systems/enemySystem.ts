@@ -24,6 +24,10 @@ const lungeHitDistance = 34;
 const recoveryAfterHitMs = 700;
 const recoveryAfterMissMs = 1100;
 const boldnessToLunge = 36;
+const daytimeAwarenessDistance = 235;
+const daytimeCloseThreatDistance = 92;
+const aggressionToStalk = 28;
+const aggressionToLunge = 56;
 const respawnGraceMs = 1400;
 const enemyDenX = 1188;
 const enemyDenY = 214;
@@ -54,7 +58,7 @@ export const updateEnemies = (state: GameState, deltaMs: number): void => {
     enemy.attackTimerMs = Math.max(0, enemy.attackTimerMs - deltaMs);
 
     if (!nightAssault) {
-      updateDaytimeEnemy(enemy, state, seconds);
+      updateDaytimeEnemy(enemy, state, fireProtected, deltaMs, seconds);
       continue;
     }
 
@@ -82,13 +86,60 @@ export const updateEnemies = (state: GameState, deltaMs: number): void => {
   }
 };
 
-const updateDaytimeEnemy = (enemy: EnemyState, state: GameState, seconds: number): void => {
+const updateDaytimeEnemy = (
+  enemy: EnemyState,
+  state: GameState,
+  fireProtected: boolean,
+  deltaMs: number,
+  seconds: number
+): void => {
+  enemy.fear = clamp(enemy.fear + seconds * 12, 0, 100);
+  enemy.boldness = clamp(enemy.boldness - seconds * 22, 0, 100);
+  updateEnemyAggression(enemy, state, fireProtected, seconds);
+
+  if (enemy.mode === 'recovering') {
+    updateRecovery(enemy, state, deltaMs, seconds);
+    return;
+  }
+
+  if (enemy.mode === 'telegraphing') {
+    updateTelegraph(enemy, deltaMs);
+    return;
+  }
+
+  if (enemy.mode === 'lunging') {
+    updateLunge(enemy, state, deltaMs, seconds);
+    return;
+  }
+
+  const playerDistance = distance(enemy.x, enemy.y, state.player.x, state.player.y);
+  const canDayLunge =
+    enemy.attackTimerMs <= 0 &&
+    state.player.invulnerableMs <= 0 &&
+    enemy.aggression >= aggressionToLunge &&
+    playerDistance <= lungeStartDistance;
+
+  if (canDayLunge) {
+    startTelegraph(enemy, state);
+    return;
+  }
+
+  if (enemy.aggression >= aggressionToStalk || playerDistance <= daytimeCloseThreatDistance) {
+    enemy.mode = 'stalking';
+    enemy.telegraphMs = 0;
+    const desiredDistance = fireProtected ? 64 : 38;
+    if (playerDistance > desiredDistance) {
+      const axis = normalizeAxis(state.player.x - enemy.x, state.player.y - enemy.y);
+      const speed = stalkSpeed * (fireProtected ? fireStalkSpeedMultiplier : 0.86);
+      moveEnemy(enemy, state, axis.x * speed * seconds, axis.y * speed * seconds);
+    }
+    return;
+  }
+
   enemy.mode = 'watching';
   enemy.telegraphMs = 0;
   enemy.phaseTimerMs = 0;
   enemy.hasDamagedThisLunge = false;
-  enemy.fear = clamp(enemy.fear + seconds * 12, 0, 100);
-  enemy.boldness = clamp(enemy.boldness - seconds * 22, 0, 100);
 
   const dist = distance(enemy.x, enemy.y, enemyDenX, enemyDenY);
   if (dist <= 3) {
@@ -96,6 +147,30 @@ const updateDaytimeEnemy = (enemy: EnemyState, state: GameState, seconds: number
   }
   const axis = normalizeAxis(enemyDenX - enemy.x, enemyDenY - enemy.y);
   moveEnemy(enemy, state, axis.x * 38 * seconds, axis.y * 38 * seconds);
+};
+
+const updateEnemyAggression = (
+  enemy: EnemyState,
+  state: GameState,
+  fireProtected: boolean,
+  seconds: number
+): void => {
+  const playerDistance = distance(enemy.x, enemy.y, state.player.x, state.player.y);
+  const awareness = clamp((daytimeAwarenessDistance - playerDistance) / daytimeAwarenessDistance, 0, 1);
+  const closeThreat = playerDistance <= daytimeCloseThreatDistance ? 1 : 0;
+  const hungerPressure = enemy.hunger / 100;
+  const territoryPressure = enemy.territoryPressure / 42;
+  const exposurePressure = fireProtected ? -0.55 : 0.25;
+  const fearPressure = enemy.fear / 100;
+  const gain =
+    awareness * 18 +
+    closeThreat * 34 +
+    hungerPressure * 10 +
+    territoryPressure * 18 +
+    exposurePressure * 18 -
+    fearPressure * 16;
+  const decay = fireProtected || awareness <= 0 ? 24 : 8;
+  enemy.aggression = clamp(enemy.aggression + gain * seconds - decay * seconds, 0, 100);
 };
 
 const updateWolfNeeds = (
@@ -199,14 +274,7 @@ const updateStalkDecision = (
     dist <= (fireProtected ? fireLungeStartDistance : lungeStartDistance);
 
   if (canLunge) {
-    const axis = normalizeAxis(state.player.x - enemy.x, state.player.y - enemy.y);
-    enemy.mode = 'telegraphing';
-    enemy.phaseTimerMs = telegraphMs;
-    enemy.telegraphMs = 1;
-    enemy.lungeX = axis.x;
-    enemy.lungeY = axis.y;
-    enemy.hasDamagedThisLunge = false;
-    state.behaviorMemory.creatures.wolfLungesFaced += 1;
+    startTelegraph(enemy, state);
     return;
   }
 
@@ -290,13 +358,18 @@ export const isPlayerUnderThreat = (state: GameState): boolean => {
       return false;
     }
     const dist = distance(enemy.x, enemy.y, state.player.x, state.player.y);
-    return enemy.mode === 'telegraphing' || enemy.mode === 'lunging' || (enemy.mode === 'stalking' && dist <= 175 && enemy.boldness >= 24);
+    return (
+      enemy.mode === 'telegraphing' ||
+      enemy.mode === 'lunging' ||
+      (enemy.mode === 'stalking' && dist <= 175 && (enemy.boldness >= 24 || enemy.aggression >= aggressionToStalk))
+    );
   });
 };
 
 export const forceEnemyRespawnGrace = (enemy: EnemyState): void => {
   enemy.fear = clamp(enemy.fear + 45, 0, 100);
   enemy.boldness = 0;
+  enemy.aggression = 0;
   enemy.attackTimerMs = Math.max(enemy.attackTimerMs, respawnGraceMs);
   startRecovery(enemy, respawnGraceMs);
 };
@@ -307,6 +380,17 @@ const startRecovery = (enemy: EnemyState, durationMs: number): void => {
   enemy.attackTimerMs = Math.max(enemy.attackTimerMs, durationMs);
   enemy.telegraphMs = 0;
   enemy.hasDamagedThisLunge = false;
+};
+
+const startTelegraph = (enemy: EnemyState, state: GameState): void => {
+  const axis = normalizeAxis(state.player.x - enemy.x, state.player.y - enemy.y);
+  enemy.mode = 'telegraphing';
+  enemy.phaseTimerMs = telegraphMs;
+  enemy.telegraphMs = 1;
+  enemy.lungeX = axis.x;
+  enemy.lungeY = axis.y;
+  enemy.hasDamagedThisLunge = false;
+  state.behaviorMemory.creatures.wolfLungesFaced += 1;
 };
 
 const moveEnemy = (enemy: EnemyState, state: GameState, moveX: number, moveY: number): void => {

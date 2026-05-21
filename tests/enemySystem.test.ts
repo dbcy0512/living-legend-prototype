@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createGameState } from '../src/game/simulation/state';
-import { applyEnemyDamageResponse, updateEnemies } from '../src/game/simulation/systems/enemySystem';
+import { applyEnemyDamageResponse, forceEnemyRespawnGrace, isPlayerUnderThreat, updateEnemies } from '../src/game/simulation/systems/enemySystem';
 import { getCampfireCollisionObstacles, getEnemyCollisionRadius } from '../src/game/simulation/rules/collision';
 import { distance } from '../src/game/simulation/rules/math';
 
@@ -74,6 +74,43 @@ describe('enemy telegraph', () => {
     expect(enemy.mode).toBe('stalking');
     expect(enemy.x).toBeLessThan(startX);
     expect(state.player.health).toBe(playerHealth);
+  });
+
+  it('builds daytime aggression when the player gets too close', () => {
+    const state = createGameState();
+    state.world.openingStage = 'open';
+    state.world.timeOfDay = 0.42;
+    const enemy = state.enemies[0];
+    enemy.x = state.player.x + 82;
+    enemy.y = state.player.y;
+    enemy.hunger = 100;
+    enemy.fear = 0;
+    const startX = enemy.x;
+
+    updateEnemies(state, 1000);
+
+    expect(enemy.aggression).toBeGreaterThan(28);
+    expect(enemy.mode).toBe('stalking');
+    expect(enemy.x).toBeLessThan(startX);
+    expect(isPlayerUnderThreat(state)).toBe(true);
+  });
+
+  it('telegraphs a daytime lunge when aggression is already high', () => {
+    const state = createGameState();
+    state.world.openingStage = 'open';
+    state.world.timeOfDay = 0.42;
+    const enemy = state.enemies[0];
+    enemy.x = state.player.x + 76;
+    enemy.y = state.player.y;
+    enemy.hunger = 100;
+    enemy.fear = 0;
+    enemy.aggression = 72;
+
+    updateEnemies(state, 16);
+
+    expect(enemy.mode).toBe('telegraphing');
+    expect(enemy.telegraphMs).toBeGreaterThan(0);
+    expect(state.behaviorMemory.creatures.wolfLungesFaced).toBe(1);
   });
 
   it('keeps night enemies outside campfire collision while they assault the fire', () => {
@@ -156,5 +193,16 @@ describe('enemy telegraph', () => {
 
     expect(enemy.fear).toBeGreaterThan(45);
     expect(enemy.phaseTimerMs).toBeGreaterThanOrEqual(1200);
+  });
+
+  it('clears aggression during respawn grace', () => {
+    const state = createGameState();
+    const enemy = state.enemies[0];
+    enemy.aggression = 80;
+
+    forceEnemyRespawnGrace(enemy);
+
+    expect(enemy.aggression).toBe(0);
+    expect(enemy.mode).toBe('recovering');
   });
 });

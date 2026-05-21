@@ -104,6 +104,7 @@ export type EnemyState = {
   fear: number;
   territoryPressure: number;
   boldness: number;
+  aggression: number;
   attackTimerMs: number;
   telegraphMs: number;
   phaseTimerMs: number;
@@ -364,6 +365,7 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
         fear: 18,
         territoryPressure: 0,
         boldness: 0,
+        aggression: 0,
         attackTimerMs: 0,
         telegraphMs: 0,
         phaseTimerMs: 0,

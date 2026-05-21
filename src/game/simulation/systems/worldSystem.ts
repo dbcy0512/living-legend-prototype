@@ -133,11 +133,6 @@ const updateCold = (state: GameState, seconds: number): void => {
     world.cold = clamp(world.cold + seconds * 4, 0, world.maxCold);
   }
 
-  if (world.openingStage === 'cold' && world.cold >= 85 && !nearActiveFire) {
-    const danger = (world.cold - 84) / 16;
-    state.player.health = clamp(state.player.health - seconds * danger * 1.15, 0, state.player.maxHealth);
-  }
-
   if (world.openingStage === 'first-flame' && world.cold <= 18) {
     world.openingStage = 'open';
   }

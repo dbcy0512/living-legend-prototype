@@ -65,7 +65,7 @@ describe('living world pressure', () => {
     expect(state.world.openingStage).toBe('open');
   });
 
-  it('slowly damages health when cold exposure is ignored', () => {
+  it('tracks severe cold without directly damaging health', () => {
     const state = createGameState();
     state.world.openingStage = 'cold';
     state.world.cold = 100;
@@ -73,7 +73,8 @@ describe('living world pressure', () => {
 
     updateWorld(state, 1000);
 
-    expect(state.player.health).toBeLessThan(health);
+    expect(state.world.cold).toBe(100);
+    expect(state.player.health).toBe(health);
   });
 
   it('respawns the player at the sleeping spot when health reaches zero', () => {

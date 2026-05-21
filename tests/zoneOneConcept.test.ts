@@ -28,6 +28,40 @@ describe('zone one concept map', () => {
     expect(getZoneOneRegion('deep-forest').resourceKinds).toEqual(['wood', 'twigs', 'bark']);
   });
 
+  it('gives every POI a full design profile before implementation details depend on it', () => {
+    for (const region of getZoneOneRegions()) {
+      expect(region.poiProfile.emotionalRole.length).toBeGreaterThan(18);
+      expect(region.poiProfile.worldLogic.length).toBeGreaterThan(18);
+      expect(region.poiProfile.resourceLogic.length).toBeGreaterThan(18);
+      expect(region.poiProfile.threatLogic.length).toBeGreaterThan(18);
+      expect(region.poiProfile.progressionUse.length).toBeGreaterThan(18);
+      expect(region.poiProfile.placementRules.length).toBeGreaterThanOrEqual(3);
+      expect(region.poiProfile.placementRules.every((rule) => rule.length > 18)).toBe(true);
+    }
+  });
+
+  it('keeps POI resource logic grounded in authored ecology instead of loose pickup placement', () => {
+    for (const region of getZoneOneRegions()) {
+      if (region.resourceKinds.length <= 0) {
+        expect(region.poiProfile.resourceLogic).toContain('No early resources');
+        continue;
+      }
+
+      expect(region.ecologyTags.length).toBeGreaterThan(0);
+      expect(region.poiProfile.placementRules.some((rule) => /ground|tree|shade|edge|shoreline|trail|debris|rock|rot/i.test(rule))).toBe(true);
+    }
+  });
+
+  it('locks the deadwood POI as the first full living-world pocket standard', () => {
+    const deadwood = getZoneOneRegion('deadwood-mushrooms');
+
+    expect(deadwood.poiProfile.emotionalRole).toContain('Decay');
+    expect(deadwood.poiProfile.resourceLogic).toContain('prepared rot floor');
+    expect(deadwood.poiProfile.threatLogic).toContain('action-triggered');
+    expect(deadwood.poiProfile.progressionUse).toContain('disturb the world');
+    expect(deadwood.poiProfile.placementRules).toContain('Every spawned creature needs a visible habitat anchor nearby.');
+  });
+
   it('defines enemy wave trigger candidates outside the camp hub', () => {
     const triggers = getZoneOneEnemyWaveTriggers();
 

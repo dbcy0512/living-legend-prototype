@@ -31,7 +31,17 @@ export type ZoneOneRegion = {
   resourceKinds: readonly ResourceKind[];
   ecologyTags: readonly ResourceEcologyTag[];
   enemyHabitats: readonly EnemyHabitatTag[];
+  poiProfile: ZoneOnePoiProfile;
   designIntent: string;
+};
+
+export type ZoneOnePoiProfile = {
+  emotionalRole: string;
+  worldLogic: string;
+  resourceLogic: string;
+  threatLogic: string;
+  progressionUse: string;
+  placementRules: readonly string[];
 };
 
 export type ZoneOneTriggerId = 'deadwood-skitter-trigger' | 'animal-trail-pressure-trigger' | 'future-gate-warning-trigger';
@@ -105,6 +115,18 @@ const zoneOneRegions = [
     resourceKinds: ['twigs', 'dryGrass', 'bark', 'stone'],
     ecologyTags: ['dead-fire-debris', 'dry-clearing-edge', 'exposed-stone'],
     enemyHabitats: [],
+    poiProfile: {
+      emotionalRole: 'Home before comfort. The child has one fragile place that can answer cold.',
+      worldLogic: 'A failed overnight camp left a dead fire shape, scattered survival debris, and a small clearing made by prior struggle.',
+      resourceLogic: 'Only primitive first-fire materials belong here: twigs, dry grass, bark, and a striking stone close enough for first recovery.',
+      threatLogic: 'The sanctuary is safe by default. Early enemies should not randomly pressure this circle unless a later event deliberately violates home.',
+      progressionUse: 'Introduces warmth, crafting proximity, resting, learning, and the idea that the world becomes useful through attention.',
+      placementRules: [
+        'Keep the fire and sleep spot readable from the first camera view.',
+        'Starter resources should read as failed-camp debris, not loot drops.',
+        'Do not place active enemy habitat inside the sanctuary radius.'
+      ]
+    },
     designIntent: 'The first breath area. Resources here should look like survival debris around a failed camp, not rewards.'
   },
   {
@@ -117,6 +139,18 @@ const zoneOneRegions = [
     resourceKinds: ['herbs', 'food'],
     ecologyTags: ['damp-shade', 'edge-growth'],
     enemyHabitats: ['damp-shade'],
+    poiProfile: {
+      emotionalRole: 'First proof that living plants can help, but the woods are still indifferent.',
+      worldLogic: 'Light breaks along the forest edge, letting berries, low herbs, and soft ground growth cluster together.',
+      resourceLogic: 'Food and medicine should come from bushes, leafy edges, shaded flowers, and visible plant density.',
+      threatLogic: 'Threat should be light or defensive here: skittish small life, disturbed nests, or future poison/irritation pressure.',
+      progressionUse: 'Teaches healing ingredients, food gathering, and plant recognition before combat pressure dominates.',
+      placementRules: [
+        'Prepare bushes or dense edge growth before placing berries.',
+        'Herbs should sit in shade or moisture pockets, never isolated in open grass.',
+        'Keep first visits lower danger than deadwood or animal trails.'
+      ]
+    },
     designIntent: 'A softer pocket that teaches living plants have use, with light creature risk later.'
   },
   {
@@ -129,6 +163,18 @@ const zoneOneRegions = [
     resourceKinds: ['stone'],
     ecologyTags: ['exposed-stone'],
     enemyHabitats: [],
+    poiProfile: {
+      emotionalRole: 'Useful exposure. The player leaves shelter to get something hard and practical.',
+      worldLogic: 'Erosion and exposed ground push usable stone to the surface where roots and dirt thin out.',
+      resourceLogic: 'Stone and future flint require visible rock clusters, gravel, cracked dirt, or outcrop silhouettes.',
+      threatLogic: 'Threat comes from exposure and low cover first, with later ambushes from nearby grass or cracks.',
+      progressionUse: 'Seeds stone edge crafting, tool identity, and later axe-path material logic.',
+      placementRules: [
+        'No stone without exposed ground, rock clusters, or erosion marks.',
+        'Keep sightlines more open than forest pockets.',
+        'Use fewer plants so the material contrast reads immediately.'
+      ]
+    },
     designIntent: 'Exposed rock and erosion should visually explain stone and future flint.'
   },
   {
@@ -141,6 +187,18 @@ const zoneOneRegions = [
     resourceKinds: ['herbs', 'food'],
     ecologyTags: ['damp-shade', 'edge-growth'],
     enemyHabitats: ['damp-shade'],
+    poiProfile: {
+      emotionalRole: 'Beautiful uncertainty. Water looks like life but should not feel fully mastered.',
+      worldLogic: 'A low basin gathers runoff, reeds, mud edges, small edible life, and damp vegetation.',
+      resourceLogic: 'Future water, reeds, fish, mud herbs, and wet fibers must hug the shoreline or marsh edge.',
+      threatLogic: 'Early threat is environmental unease; later water-edge creatures, slippery mud, and sound attraction can live here.',
+      progressionUse: 'Anchors future thirst, fishing, reeds, washing/status recovery, and water-crossing ideas.',
+      placementRules: [
+        'Water resources must touch shoreline, reeds, or mud.',
+        'Do not place dry materials inside the wet pocket.',
+        'Use reflection, reeds, and bank shapes before adding harvestables.'
+      ]
+    },
     designIntent: 'Future water/reed/fish logic. For now it anchors damp resources and mud-side life.'
   },
   {
@@ -153,6 +211,18 @@ const zoneOneRegions = [
     resourceKinds: ['stone'],
     ecologyTags: ['exposed-stone', 'damp-shade'],
     enemyHabitats: ['damp-shade'],
+    poiProfile: {
+      emotionalRole: 'Primitive practicality. Survival becomes messy and hands-on.',
+      worldLogic: 'Where water drains and soil settles, clay and mud gather below roots and stone edges.',
+      resourceLogic: 'Clay, mud, damp stone, and future container materials belong on wet banks and darker exposed soil.',
+      threatLogic: 'Low immediate danger; later slow movement, insects, or crafting risk can make this area matter.',
+      progressionUse: 'Prepares future containers, crude kiln, station crafting, and building material progression.',
+      placementRules: [
+        'Use darker wet ground before clay or mud resources appear.',
+        'Keep this near water logic, not random forest floor.',
+        'Favor utility over combat pressure in first implementation.'
+      ]
+    },
     designIntent: 'Future crafting material pocket that connects water, mud, and survival building.'
   },
   {
@@ -165,6 +235,18 @@ const zoneOneRegions = [
     resourceKinds: ['wood', 'twigs', 'bark'],
     ecologyTags: ['tree-shed', 'damp-shade'],
     enemyHabitats: ['deadwood', 'dense-forest-edge'],
+    poiProfile: {
+      emotionalRole: 'The first place where the woods feel bigger than the player.',
+      worldLogic: 'Dense canopy, fallen limbs, bark shed, and shaded rot create a stronger forest-material pocket.',
+      resourceLogic: 'Wood, twigs, and bark must attach to trees, roots, deadfall, or shaded windfall zones.',
+      threatLogic: 'Pressure should come from limited visibility and territory feeling, not instant swarm combat.',
+      progressionUse: 'Introduces better wood, shelter parts, stealth/visibility experiments, and deeper forest identity.',
+      placementRules: [
+        'Branches should spawn under trees or deadfall bands.',
+        'Canopy and trunks should create partial occlusion or narrow sightlines.',
+        'Do not use bright open-field ground as the dominant material.'
+      ]
+    },
     designIntent: 'A denser wood pocket. Better tree materials come from stronger forest identity.'
   },
   {
@@ -177,6 +259,18 @@ const zoneOneRegions = [
     resourceKinds: ['wood', 'twigs', 'bark'],
     ecologyTags: ['tree-shed', 'edge-growth'],
     enemyHabitats: ['dense-forest-edge', 'deadwood'],
+    poiProfile: {
+      emotionalRole: 'Tempting abundance just past comfort.',
+      worldLogic: 'The eastern forest edge has heavier tree growth, richer windfall, and less visibility from camp.',
+      resourceLogic: 'Better wood materials should cluster around tree parents, forest edge piles, and broken limb context.',
+      threatLogic: 'Future threat can escalate here through patrols, den proximity, or nighttime pathing.',
+      progressionUse: 'Supports higher-quality early crafting once the player earns confidence and mobility.',
+      placementRules: [
+        'Place forest resources in groups around tree logic, not even scatter.',
+        'Use density and shadow to make the pocket feel less comfortable than camp.',
+        'Leave approach space for combat and retreat decisions.'
+      ]
+    },
     designIntent: 'A thicker forest edge that should feel useful but less comfortable than the hub.'
   },
   {
@@ -189,6 +283,18 @@ const zoneOneRegions = [
     resourceKinds: ['wood', 'herbs'],
     ecologyTags: ['tree-shed', 'damp-shade'],
     enemyHabitats: ['deadwood', 'damp-shade'],
+    poiProfile: {
+      emotionalRole: 'Decay that is useful, alive, and risky.',
+      worldLogic: 'Rotting wood, damp shade, fungus, and root hollows make a small living system under dead material.',
+      resourceLogic: 'Wood, mushrooms, and damp herbs require prepared rot floor, logs, root holes, moss, and shade.',
+      threatLogic: 'First action-triggered danger pocket. Gathering from the pocket can wake creatures tied to visible habitat anchors.',
+      progressionUse: 'Teaches that resource choices can disturb the world and that clearing danger can reopen materials.',
+      placementRules: [
+        'Prepare damp/rotting ground before mushrooms or dens are placed.',
+        'Every spawned creature needs a visible habitat anchor nearby.',
+        'Resources can lock during the wave and unlock only after spawned enemies are dead.'
+      ]
+    },
     designIntent: 'The best first place for spiders/blobs because it visually supports small damp/deadwood life.'
   },
   {
@@ -201,6 +307,18 @@ const zoneOneRegions = [
     resourceKinds: ['twigs', 'food'],
     ecologyTags: ['edge-growth', 'tree-shed'],
     enemyHabitats: ['animal-trail'],
+    poiProfile: {
+      emotionalRole: 'A path that belongs to something else.',
+      worldLogic: 'Repeated animal movement bends grass, leaves tracks, scatters sticks, and exposes small food traces.',
+      resourceLogic: 'Tracks, small food, bones, droppings, and sticks belong along trail lines and crossings.',
+      threatLogic: 'Best home for trigger zones, patrol routes, aggro drop tests, and tracking behavior.',
+      progressionUse: 'Introduces reading movement, following signs, avoiding ambush, and later hunting/tracking identity.',
+      placementRules: [
+        'Trail resources must align to visible path direction.',
+        'Use footprints, bent grass, and broken twigs before adding combat triggers.',
+        'Keep enough open lane space for dodge, retreat, and enemy approach tests.'
+      ]
+    },
     designIntent: 'A movement corridor for first trigger zones and small enemy waves.'
   },
   {
@@ -213,6 +331,18 @@ const zoneOneRegions = [
     resourceKinds: [],
     ecologyTags: ['damp-shade'],
     enemyHabitats: ['dense-forest-edge'],
+    poiProfile: {
+      emotionalRole: 'The world continues, but the child is not ready yet.',
+      worldLogic: 'A ruin, blocked path, or darker threshold marks a boundary between Zone 1 survival and later exploration.',
+      resourceLogic: 'No early resources. The value is promise, warning, and later transition control.',
+      threatLogic: 'Signal danger without requiring completion now; later it can host warning enemies or a transition event.',
+      progressionUse: 'Acts as future map transition foundation and emotional proof that exploration will open outward.',
+      placementRules: [
+        'Do not reward early players with resources here yet.',
+        'Make the boundary visually readable before adding mechanical locks.',
+        'Use this as a promise of future exploration, not a first-session objective.'
+      ]
+    },
     designIntent: 'A locked emotional promise: the world continues, but Zone 1 should not push the child here immediately.'
   }
 ] as const satisfies readonly ZoneOneRegion[];

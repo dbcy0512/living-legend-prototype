@@ -1400,3 +1400,38 @@ Verification:
 - `npm.cmd test` passed: 81 tests.
 - `npm.cmd run build` passed.
 - Browser smoke loaded `http://127.0.0.1:5173/`, rendered one canvas, six hotbar slots, the active Making panel, and no console errors.
+
+### Starter Child Character Visual Standard v1
+
+Status: implemented.
+
+- Added `CHARACTER_VISUAL_STANDARD.md` as the source standard for the first real player character before sprite generation.
+- Added a typed `starterChildCharacterStandard` content contract in `src/game/content/characterVisualStandard.ts`.
+- Locked the first character target to:
+  - `64 x 64` runtime frames.
+  - `36-44 px` child visual height.
+  - bottom-center foot anchor at `x=0.5`, `y=0.78`.
+  - top-down 3/4 cel-shaded anime survival fantasy.
+  - transparent background with no baked ground, scenery, labels, or UI.
+- Required future equipment sockets:
+  - `mainHand`
+  - `tool`
+  - `body`
+  - `back`
+  - `hands`
+- Required condition states:
+  - cold
+  - warming
+  - exhausted
+  - hurt
+  - under threat
+- Required future animation groups now include cold/warm idle, walking, gathering, fire-kneel, bare attack, main-hand attack, dodge roll, hurt, collapse, and use-item.
+
+Alive-world cross-check:
+
+The player standard now treats condition as a world/body response instead of a class identity. The child is designed to visually answer cold, warmth, exhaustion, injury, threat, tools, and carried gear. This keeps the world alive because the player visibly changes in response to it.
+
+Verification:
+
+- `npm.cmd test` passed: 87 tests.
+- `npm.cmd run build` passed.

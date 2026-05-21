@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { idleActions, type ActionState } from '../../game/input/actions';
 import { animationKeys, assetKeys } from '../../game/assets/manifest';
+import { getEnemyDefinition } from '../../game/content/enemies';
 import { startingArea, viewportSize } from '../../game/content/maps/startingArea';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
 import { getResourceProfile, isEcosystemResourceSource } from '../../game/content/resources';
-import type { CampfireState, GameState, ResourceNode } from '../../game/simulation/state';
+import type { CampfireState, EnemyState, GameState, ResourceNode } from '../../game/simulation/state';
 import { getCampfireCollisionObstacles, getPlayerCollisionRadius } from '../../game/simulation/rules/collision';
 import { isPlayerUnderThreat } from '../../game/simulation/systems/enemySystem';
 import { getNearestGatherableResource } from '../../game/simulation/systems/inventorySystem';
@@ -424,7 +425,7 @@ export class WorldScene extends Phaser.Scene {
     this.previousPlayerY = this.state.player.y;
     this.createThoughtBubble();
     for (const enemy of this.state.enemies) {
-      this.enemySprites.set(enemy.id, this.createEnemyActor(enemy.x, enemy.y));
+      this.enemySprites.set(enemy.id, this.createEnemyActor(enemy));
     }
   }
 
@@ -442,15 +443,22 @@ export class WorldScene extends Phaser.Scene {
     return container;
   }
 
-  private createEnemyActor(x: number, y: number): Phaser.GameObjects.Container {
+  private createEnemyActor(enemy: EnemyState): Phaser.GameObjects.Container {
+    const definition = getEnemyDefinition(enemy.kind);
     const shadow = this.add.image(0, 13, assetKeys.shadow);
-    shadow.setScale(2.1, 1.05);
-    const body = this.add.sprite(0, 0, assetKeys.wolfIdleWatch);
+    shadow.setScale(1.2, 0.58);
+    const body = this.add.sprite(0, 0, definition.assetKey);
     body.setName('enemy-body');
     body.setOrigin(0.5, 0.78);
-    body.play(animationKeys.wolfIdleWatch);
-    const container = this.add.container(x, y, [shadow, body]);
-    container.setDepth(actorDepthBase + y * 0.001);
+    if (enemy.kind === 'mire-spider') {
+      body.setScale(0.76);
+    } else if (enemy.kind === 'violet-moss-blob') {
+      body.setScale(0.82);
+    } else {
+      body.setScale(0.78);
+    }
+    const container = this.add.container(enemy.x, enemy.y, [shadow, body]);
+    container.setDepth(actorDepthBase + enemy.y * 0.001);
     return container;
   }
 
@@ -781,6 +789,9 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
+    if (body.texture.key !== assetKeys.wolfIdleWatch) {
+      return;
+    }
     if (mode === 'watching' && body.anims.currentAnim?.key !== animationKeys.wolfIdleWatch) {
       body.play(animationKeys.wolfIdleWatch);
       return;

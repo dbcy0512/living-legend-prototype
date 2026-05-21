@@ -3,6 +3,7 @@ import { startingArea } from '../content/maps/startingArea';
 import {
   defaultEcosystemSeed,
 } from '../content/ecosystem';
+import { getEnemyDefinition, type EnemyKind } from '../content/enemies';
 import type { MeleeSeed } from '../content/meleeSeeds';
 import { createStartingResourceSeeds, type ResourceKind, type ResourceSource } from '../content/resources';
 import type { WeaponAbilityId, WeaponAbilityStatusTag } from '../content/weaponAbilities';
@@ -93,9 +94,12 @@ export type ResourceNode = {
 };
 
 export type EnemyState = {
+  kind: EnemyKind;
   id: string;
   x: number;
   y: number;
+  homeX: number;
+  homeY: number;
   health: number;
   maxHealth: number;
   mode: 'watching' | 'stalking' | 'telegraphing' | 'lunging' | 'recovering' | 'attacking-fire';
@@ -224,6 +228,7 @@ export type GameState = {
 
 export type GameStateOptions = {
   ecosystemSeed?: string;
+  includePrototypeEnemies?: boolean;
 };
 
 export const createGameState = (options: GameStateOptions = {}): GameState => {
@@ -341,27 +346,39 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       }
     ],
     resources: createStartingResourceSeeds(ecosystemSeed),
-    enemies: [
-      {
-        id: 'hollow-wolf',
-        x: 1188,
-        y: 214,
-        health: 35,
-        maxHealth: 35,
-        mode: 'watching',
-        hunger: 34,
-        fear: 18,
-        territoryPressure: 0,
-        boldness: 0,
-        aggression: 0,
-        attackTimerMs: 0,
-        telegraphMs: 0,
-        phaseTimerMs: 0,
-        lungeX: 0,
-        lungeY: 0,
-        hasDamagedThisLunge: false
-      }
-    ]
+    enemies: options.includePrototypeEnemies ? [createEnemyState('mire-spider')] : []
+  };
+};
+
+export const createEnemyState = (
+  kind: EnemyKind,
+  overrides: Partial<Omit<EnemyState, 'kind'>> = {}
+): EnemyState => {
+  const definition = getEnemyDefinition(kind);
+  const x = overrides.x ?? definition.home.x;
+  const y = overrides.y ?? definition.home.y;
+
+  return {
+    kind,
+    id: overrides.id ?? `${kind}-1`,
+    x,
+    y,
+    homeX: overrides.homeX ?? definition.home.x,
+    homeY: overrides.homeY ?? definition.home.y,
+    health: overrides.health ?? definition.maxHealth,
+    maxHealth: overrides.maxHealth ?? definition.maxHealth,
+    mode: overrides.mode ?? 'watching',
+    hunger: overrides.hunger ?? 34,
+    fear: overrides.fear ?? 18,
+    territoryPressure: overrides.territoryPressure ?? 0,
+    boldness: overrides.boldness ?? 0,
+    aggression: overrides.aggression ?? 0,
+    attackTimerMs: overrides.attackTimerMs ?? 0,
+    telegraphMs: overrides.telegraphMs ?? 0,
+    phaseTimerMs: overrides.phaseTimerMs ?? 0,
+    lungeX: overrides.lungeX ?? 0,
+    lungeY: overrides.lungeY ?? 0,
+    hasDamagedThisLunge: overrides.hasDamagedThisLunge ?? false
   };
 };
 

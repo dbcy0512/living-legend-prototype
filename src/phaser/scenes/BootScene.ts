@@ -47,6 +47,9 @@ export class BootScene extends Phaser.Scene {
     this.load.image(assetKeys.playerWarmSouthWest, 'assets/characters/starter-child-warm-v1-south-west.png');
     this.load.image(assetKeys.playerWarmNorthEast, 'assets/characters/starter-child-warm-v1-north-east.png');
     this.load.image(assetKeys.playerWarmNorthWest, 'assets/characters/starter-child-warm-v1-north-west.png');
+    this.load.image(assetKeys.enemyMireSpider, 'assets/enemies/mire-spider-v1.png');
+    this.load.image(assetKeys.enemyVioletMossBlob, 'assets/enemies/violet-moss-blob-v1.png');
+    this.load.image(assetKeys.enemyThornShellMite, 'assets/enemies/thorn-shell-mite-v1.png');
     this.load.image(assetKeys.enemy, 'assets/enemies/wolf-idle-watch-game-v1.png');
     this.load.spritesheet(assetKeys.wolfIdleWatch, 'assets/enemies/wolf-idle-watch-sheet-v2.png', {
       frameWidth: 96,
@@ -83,6 +86,7 @@ export class BootScene extends Phaser.Scene {
     this.makeSleepingSpotTexture();
     this.makeWorldDetailTextures();
     this.makeOpeningMaterialTextures();
+    this.makeSmallEnemyTextures();
     this.makeCampfireTexture();
   }
 
@@ -127,6 +131,68 @@ export class BootScene extends Phaser.Scene {
     graphics.lineStyle(2, 0xf472b6, 1);
     graphics.strokeEllipse(18, 20, 29, 19);
     graphics.generateTexture(assetKeys.enemy, 36, 32);
+    graphics.destroy();
+  }
+
+  private makeSmallEnemyTextures(): void {
+    const graphics = this.add.graphics();
+
+    if (!this.textures.exists(assetKeys.enemyMireSpider)) {
+      graphics.fillStyle(0x0f1720, 0.34);
+      graphics.fillEllipse(32, 42, 42, 14);
+      graphics.lineStyle(3, 0x18311f, 1);
+      graphics.lineBetween(18, 32, 6, 25);
+      graphics.lineBetween(18, 36, 5, 39);
+      graphics.lineBetween(46, 32, 58, 25);
+      graphics.lineBetween(46, 36, 59, 39);
+      graphics.lineStyle(2, 0x264c2d, 1);
+      graphics.lineBetween(22, 29, 12, 18);
+      graphics.lineBetween(42, 29, 52, 18);
+      graphics.fillStyle(0x255c34, 1);
+      graphics.fillEllipse(32, 33, 30, 24);
+      graphics.fillStyle(0x6bcf58, 1);
+      graphics.fillEllipse(29, 29, 14, 10);
+      graphics.fillStyle(0xd9f99d, 0.9);
+      graphics.fillCircle(26, 30, 2);
+      graphics.fillCircle(38, 30, 2);
+      graphics.lineStyle(2, 0x102116, 0.78);
+      graphics.strokeEllipse(32, 33, 31, 25);
+      graphics.generateTexture(assetKeys.enemyMireSpider, 64, 64);
+      graphics.clear();
+    }
+
+    if (!this.textures.exists(assetKeys.enemyVioletMossBlob)) {
+      graphics.fillStyle(0x0f1720, 0.36);
+      graphics.fillEllipse(32, 43, 40, 13);
+      graphics.fillStyle(0x334d32, 1);
+      graphics.fillEllipse(32, 33, 36, 28);
+      graphics.fillStyle(0x7444a5, 1);
+      graphics.fillEllipse(38, 29, 20, 16);
+      graphics.fillStyle(0x9bdc65, 1);
+      graphics.fillEllipse(25, 28, 16, 12);
+      graphics.fillStyle(0xd8b4fe, 0.85);
+      graphics.fillEllipse(41, 24, 8, 5);
+      graphics.lineStyle(2, 0x172314, 0.8);
+      graphics.strokeEllipse(32, 33, 37, 29);
+      graphics.generateTexture(assetKeys.enemyVioletMossBlob, 64, 64);
+      graphics.clear();
+    }
+
+    if (!this.textures.exists(assetKeys.enemyThornShellMite)) {
+      graphics.fillStyle(0x0f1720, 0.34);
+      graphics.fillEllipse(32, 43, 36, 12);
+      graphics.fillStyle(0x274a2d, 1);
+      graphics.fillEllipse(32, 34, 32, 24);
+      graphics.fillStyle(0x6faa42, 1);
+      graphics.fillEllipse(30, 31, 20, 13);
+      graphics.fillStyle(0x6d2f7a, 1);
+      graphics.fillTriangle(22, 31, 17, 20, 29, 27);
+      graphics.fillTriangle(42, 31, 47, 20, 35, 27);
+      graphics.fillTriangle(32, 25, 37, 14, 27, 25);
+      graphics.lineStyle(2, 0x172314, 0.8);
+      graphics.strokeEllipse(32, 34, 33, 25);
+      graphics.generateTexture(assetKeys.enemyThornShellMite, 64, 64);
+    }
     graphics.destroy();
   }
 

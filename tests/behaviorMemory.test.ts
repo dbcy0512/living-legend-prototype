@@ -56,8 +56,8 @@ describe('behavior memory', () => {
     expect(state.behaviorMemory.body.collapses).toBe(1);
   });
 
-  it('records wolf lunge faced and avoided', () => {
-    const state = createGameState();
+  it('records creature lunge faced and avoided', () => {
+    const state = createGameState({ includePrototypeEnemies: true });
     state.world.openingStage = 'open';
     state.world.timeOfDay = 0.9;
     const enemy = state.enemies[0];

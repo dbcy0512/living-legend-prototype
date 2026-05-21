@@ -5,7 +5,7 @@ import { updateSimulation } from '../src/game/simulation/systems/simulationSyste
 
 describe('weapon ability foundation', () => {
   it('starts the equipped weapon ability from hotbar slot one', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     state.equipment.mainHand = 'branch-club';
     state.inventory.branchClubs = 1;
     const actions = idleActions();
@@ -23,7 +23,7 @@ describe('weapon ability foundation', () => {
   });
 
   it('applies weapon ability damage once during the active phase', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     state.equipment.mainHand = 'stone-edge';
     state.inventory.stoneEdges = 1;
     state.player.facing = 'east';

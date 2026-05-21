@@ -6,7 +6,7 @@ import { distance } from '../src/game/simulation/rules/math';
 
 describe('enemy telegraph', () => {
   it('telegraphs before a committed lunge can damage the player', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     state.world.openingStage = 'open';
     state.world.timeOfDay = 0.9;
     const enemy = state.enemies[0];
@@ -24,7 +24,7 @@ describe('enemy telegraph', () => {
   });
 
   it('applies one damage event during the committed lunge', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     state.world.openingStage = 'open';
     state.world.timeOfDay = 0.9;
     const enemy = state.enemies[0];
@@ -45,7 +45,7 @@ describe('enemy telegraph', () => {
   });
 
   it('keeps enemies dormant before the opening resolves', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     const enemy = state.enemies[0];
     enemy.x = state.player.x + 20;
     enemy.y = state.player.y;
@@ -57,7 +57,7 @@ describe('enemy telegraph', () => {
   });
 
   it('makes night enemies target the fire before the player', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     state.world.openingStage = 'open';
     state.world.timeOfDay = 0.9;
     state.campfires[0].fuelMs = 10000;
@@ -77,7 +77,7 @@ describe('enemy telegraph', () => {
   });
 
   it('builds daytime aggression when the player gets too close', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     state.world.openingStage = 'open';
     state.world.timeOfDay = 0.42;
     const enemy = state.enemies[0];
@@ -96,7 +96,7 @@ describe('enemy telegraph', () => {
   });
 
   it('telegraphs a daytime lunge when aggression is already high', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     state.world.openingStage = 'open';
     state.world.timeOfDay = 0.42;
     const enemy = state.enemies[0];
@@ -114,7 +114,7 @@ describe('enemy telegraph', () => {
   });
 
   it('keeps night enemies outside campfire collision while they assault the fire', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     state.world.openingStage = 'open';
     state.world.timeOfDay = 0.9;
     state.campfires[0].fuelMs = 10000;
@@ -134,7 +134,7 @@ describe('enemy telegraph', () => {
   });
 
   it('damages fire integrity during a night assault without reducing fuel directly', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     state.world.openingStage = 'open';
     state.world.timeOfDay = 0.9;
     state.campfires[0].fuelMs = 10000;
@@ -151,7 +151,7 @@ describe('enemy telegraph', () => {
   });
 
   it('adds fear and recovery after a missed lunge', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     state.world.openingStage = 'open';
     state.world.timeOfDay = 0.9;
     const enemy = state.enemies[0];
@@ -170,8 +170,8 @@ describe('enemy telegraph', () => {
     expect(state.player.health).toBe(state.player.maxHealth);
   });
 
-  it('uses scaled creature damage response when the wolf is hit', () => {
-    const state = createGameState();
+  it('uses scaled creature damage response when a small enemy is hit hard', () => {
+    const state = createGameState({ includePrototypeEnemies: true });
     const enemy = state.enemies[0];
     enemy.fear = 0;
     enemy.health -= 16;
@@ -179,24 +179,24 @@ describe('enemy telegraph', () => {
     applyEnemyDamageResponse(enemy, 16);
 
     expect(enemy.fear).toBeGreaterThan(0);
-    expect(enemy.fear).toBeLessThan(30);
+    expect(enemy.fear).toBeLessThan(50);
     expect(enemy.mode).toBe('recovering');
   });
 
-  it('spikes wolf fear when damage leaves it critically wounded', () => {
-    const state = createGameState();
+  it('spikes creature fear when damage leaves it critically wounded', () => {
+    const state = createGameState({ includePrototypeEnemies: true });
     const enemy = state.enemies[0];
     enemy.fear = 0;
-    enemy.health = 8;
+    enemy.health = 5;
 
     applyEnemyDamageResponse(enemy, 16);
 
-    expect(enemy.fear).toBeGreaterThan(45);
+    expect(enemy.fear).toBeGreaterThan(65);
     expect(enemy.phaseTimerMs).toBeGreaterThanOrEqual(1200);
   });
 
   it('clears aggression during respawn grace', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     const enemy = state.enemies[0];
     enemy.aggression = 80;
 

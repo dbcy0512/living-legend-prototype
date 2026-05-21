@@ -5,7 +5,7 @@ import { updateSimulation } from '../src/game/simulation/systems/simulationSyste
 
 describe('combat system', () => {
   it('moves attack through windup, active, recovery, and idle without scene state', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     const actions = idleActions();
     actions.attack = true;
 
@@ -25,7 +25,7 @@ describe('combat system', () => {
   });
 
   it('records hit feedback when an attack connects', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     const actions = idleActions();
     const enemy = state.enemies[0];
     enemy.x = state.player.x + 34;
@@ -36,13 +36,13 @@ describe('combat system', () => {
     actions.attack = false;
     advance(state, actions, 120);
 
-    expect(enemy.health).toBeLessThan(35);
+    expect(enemy.health).toBeLessThan(enemy.maxHealth);
     expect(state.combat.hitStopMs).toBeGreaterThan(0);
     expect(state.combat.lastHitFlashMs).toBeGreaterThan(0);
   });
 
   it('uses the branch club as the first blade-line seed with wider reach', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     const actions = idleActions();
     const enemy = state.enemies[0];
     state.equipment.mainHand = 'branch-club';
@@ -55,14 +55,14 @@ describe('combat system', () => {
     actions.attack = false;
     advance(state, actions, 128);
 
-    expect(enemy.health).toBe(18);
+    expect(enemy.health).toBe(enemy.maxHealth - 17);
     expect(state.behaviorMemory.combat.branchClubAttacks).toBe(1);
     expect(state.evolution.bladeSeedAffinity).toBe(1);
     expect(state.evolution.axeSeedAffinity).toBe(0);
   });
 
   it('uses the stone edge as the first axe-line seed with a heavier narrow chop', () => {
-    const state = createGameState();
+    const state = createGameState({ includePrototypeEnemies: true });
     const actions = idleActions();
     const enemy = state.enemies[0];
     state.equipment.mainHand = 'stone-edge';
@@ -75,7 +75,7 @@ describe('combat system', () => {
     actions.attack = false;
     advance(state, actions, 144);
 
-    expect(enemy.health).toBe(13);
+    expect(enemy.health).toBe(enemy.maxHealth - 22);
     expect(state.player.stamina).toBeLessThan(78);
     expect(state.behaviorMemory.combat.stoneEdgeAttacks).toBe(1);
     expect(state.evolution.axeSeedAffinity).toBe(1);

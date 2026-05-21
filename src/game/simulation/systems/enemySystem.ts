@@ -29,8 +29,6 @@ const daytimeCloseThreatDistance = 92;
 const aggressionToStalk = 28;
 const aggressionToLunge = 56;
 const respawnGraceMs = 1400;
-const enemyDenX = 1188;
-const enemyDenY = 214;
 const enemyCollisionRadius = getEnemyCollisionRadius();
 
 export const updateEnemies = (state: GameState, deltaMs: number): void => {
@@ -54,7 +52,7 @@ export const updateEnemies = (state: GameState, deltaMs: number): void => {
       continue;
     }
 
-    updateWolfNeeds(state, enemy, protectiveFire, seconds);
+  updateCreatureNeeds(state, enemy, protectiveFire, seconds);
     enemy.attackTimerMs = Math.max(0, enemy.attackTimerMs - deltaMs);
 
     if (!nightAssault) {
@@ -141,11 +139,11 @@ const updateDaytimeEnemy = (
   enemy.phaseTimerMs = 0;
   enemy.hasDamagedThisLunge = false;
 
-  const dist = distance(enemy.x, enemy.y, enemyDenX, enemyDenY);
+  const dist = distance(enemy.x, enemy.y, enemy.homeX, enemy.homeY);
   if (dist <= 3) {
     return;
   }
-  const axis = normalizeAxis(enemyDenX - enemy.x, enemyDenY - enemy.y);
+  const axis = normalizeAxis(enemy.homeX - enemy.x, enemy.homeY - enemy.y);
   moveEnemy(enemy, state, axis.x * 38 * seconds, axis.y * 38 * seconds);
 };
 
@@ -173,7 +171,7 @@ const updateEnemyAggression = (
   enemy.aggression = clamp(enemy.aggression + gain * seconds - decay * seconds, 0, 100);
 };
 
-const updateWolfNeeds = (
+const updateCreatureNeeds = (
   state: GameState,
   enemy: EnemyState,
   protectiveFire: CampfireState | undefined,

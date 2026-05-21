@@ -460,8 +460,8 @@ export class WorldScene extends Phaser.Scene {
   private createResourceSprite(node: ResourceNode): Phaser.GameObjects.Image {
     const texture = this.getResourceTexture(node);
     const sprite = this.add.image(node.x, node.y, texture);
-    sprite.setScale(this.getResourceScale(node));
-    sprite.setRotation(this.getResourceRotation(node));
+    sprite.setScale(this.getResourceRenderScale(node));
+    sprite.setRotation(this.getResourceRenderRotation(node));
     sprite.setDepth(groundPropDepth + 2);
     this.resourceAmounts.set(node.id, node.amount);
     return sprite;
@@ -473,26 +473,38 @@ export class WorldScene extends Phaser.Scene {
     }
     switch (node.kind) {
       case 'twigs':
-        return assetKeys.resourceTwigs;
+        return assetKeys.resourceKindlingPile;
       case 'bark':
         return assetKeys.resourceBark;
       case 'dryGrass':
-        return assetKeys.resourceDryGrass;
+        return assetKeys.resourceDryGrassTinder;
       case 'herbs':
-        return assetKeys.resourceHerb;
+        return assetKeys.resourceMedicinalHerb;
       case 'stone':
-        return assetKeys.resourceStone;
+        return assetKeys.resourceStoneOutcrop;
       case 'wood':
         return assetKeys.resourceWood;
       case 'food':
-        return assetKeys.resourceFruit;
+        return assetKeys.resourceBerryBush;
     }
   }
 
   private getResourceScale(node: ResourceNode): number {
     const baseScale = getResourceProfile(node.kind).visualScale;
+    if (node.kind === 'twigs') {
+      return 0.6;
+    }
+    if (node.kind === 'dryGrass') {
+      return 0.6;
+    }
+    if (node.kind === 'herbs') {
+      return 0.62;
+    }
     if (node.kind === 'stone') {
-      return node.id === 'striking-stone' ? baseScale + 0.04 : baseScale;
+      return node.id === 'striking-stone' ? baseScale + 0.04 : 0.6;
+    }
+    if (node.kind === 'food') {
+      return 0.64;
     }
     if (node.kind === 'wood' && node.source?.type === 'tree-dependent') {
       return [baseScale, baseScale - 0.04, baseScale + 0.04][this.getStableResourceIndex(node.id) % 3];
@@ -505,6 +517,30 @@ export class WorldScene extends Phaser.Scene {
       return 0;
     }
     return Phaser.Math.DegToRad([-18, 9, 24][this.getStableResourceIndex(node.id) % 3]);
+  }
+
+  private getResourceRenderScale(node: ResourceNode): number {
+    const baseScale = this.getResourceScale(node);
+    if (!this.shouldResourceUseWindMotion(node)) {
+      return baseScale;
+    }
+
+    const phase = this.getStableResourceIndex(node.id) * 0.41;
+    return baseScale * (1 + Math.sin(this.time.now * 0.0016 + phase) * 0.014);
+  }
+
+  private getResourceRenderRotation(node: ResourceNode): number {
+    const baseRotation = this.getResourceRotation(node);
+    if (!this.shouldResourceUseWindMotion(node)) {
+      return baseRotation;
+    }
+
+    const phase = this.getStableResourceIndex(node.id) * 0.37;
+    return baseRotation + Phaser.Math.DegToRad(Math.sin(this.time.now * 0.0012 + phase) * 1.4);
+  }
+
+  private shouldResourceUseWindMotion(node: ResourceNode): boolean {
+    return node.kind === 'herbs' || node.kind === 'food' || node.kind === 'dryGrass';
   }
 
   private getStableResourceIndex(id: string): number {
@@ -599,8 +635,8 @@ export class WorldScene extends Phaser.Scene {
         }
         this.resourceAmounts.set(node.id, node.amount);
         sprite.setAlpha(1);
-        sprite.setScale(this.getResourceScale(node));
-        sprite.setRotation(this.getResourceRotation(node));
+        sprite.setScale(this.getResourceRenderScale(node));
+        sprite.setRotation(this.getResourceRenderRotation(node));
       }
     }
 

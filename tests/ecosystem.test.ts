@@ -27,6 +27,7 @@ describe('zone one ecosystem rules', () => {
     expect(fallenBranchRule?.kind).toBe('wood');
     expect(fallenBranchRule?.excludeParentTrunkCollision).toBe(true);
     expect(fallenBranchRule?.maxActivePerParent).toBe(3);
+    expect(fallenBranchRule?.ecology).toBe('tree-shed');
     expect(fallenBranchRule?.offsets.length).toBeGreaterThan(fallenBranchRule?.maxActivePerParent ?? 0);
   });
 
@@ -38,6 +39,7 @@ describe('zone one ecosystem rules', () => {
     expect(herbRule?.kind).toBe('herbs');
     expect(herbRule?.zoneId).toBe('first-shelter-edge');
     expect(herbRule?.maxActive).toBe(2);
+    expect(herbRule?.ecology).toBe('damp-shade');
     expect(herbRule?.candidates.length).toBeGreaterThan(herbRule?.maxActive ?? 0);
   });
 
@@ -67,6 +69,8 @@ describe('zone one ecosystem rules', () => {
       expect(branch.kind).toBe('wood');
       expect(isTreeDependentResourceSeed(branch)).toBe(true);
       expect(branch.source.rule).toBe('fallen-branch-near-resource-parent');
+      expect(branch.source.ecology).toBe('tree-shed');
+      expect(branch.source.placementNote).toContain('windfall');
       expect(parent && isInsideTreeBranchSpawnBand(parent, branch.x, branch.y)).toBe(true);
       expect(parent && isOutsideParentTrunkCollision(parent, branch.x, branch.y)).toBe(true);
     }
@@ -125,7 +129,11 @@ describe('zone one ecosystem rules', () => {
       expect(byRule.every((resource) => resource.kind === rule.kind)).toBe(true);
       expect(
         byRule.every(
-          (resource) => resource.source.type === 'zone-dependent' && resource.source.zoneId === rule.zoneId
+          (resource) =>
+            resource.source.type === 'zone-dependent' &&
+            resource.source.zoneId === rule.zoneId &&
+            resource.source.ecology === rule.ecology &&
+            resource.source.placementNote === rule.placementNote
         )
       ).toBe(true);
     }

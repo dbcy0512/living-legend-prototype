@@ -1,5 +1,5 @@
 import { startingArea, type TreeInstance, type TreePlacementRole } from './maps/startingArea';
-import type { ResourceKind } from './resources';
+import type { ResourceEcologyTag, ResourceKind } from './resources';
 
 export type EcosystemResourceRuleId =
   | 'fallen-branch-near-resource-parent'
@@ -12,11 +12,15 @@ export type EcosystemResourceSource =
       type: 'tree-dependent';
       parentId: string;
       rule: EcosystemResourceRuleId;
+      ecology: ResourceEcologyTag;
+      placementNote: string;
     }
   | {
       type: 'zone-dependent';
       zoneId: string;
       rule: EcosystemResourceRuleId;
+      ecology: ResourceEcologyTag;
+      placementNote: string;
     };
 
 export type TreeDependentResourceRule = {
@@ -31,6 +35,8 @@ export type TreeDependentResourceRule = {
   minDistanceFromTrunk: number;
   maxDistanceFromTrunk: number;
   excludeParentTrunkCollision: boolean;
+  ecology: ResourceEcologyTag;
+  placementNote: string;
   offsets: readonly { x: number; y: number }[];
 };
 
@@ -44,6 +50,8 @@ export type ZoneDependentResourceRule = {
   respawnMs: number;
   maxActive: number;
   collisionClearance: number;
+  ecology: ResourceEcologyTag;
+  placementNote: string;
   candidates: readonly { x: number; y: number }[];
 };
 
@@ -78,6 +86,8 @@ const treeDependentResourceRules = [
     minDistanceFromTrunk: 34,
     maxDistanceFromTrunk: 96,
     excludeParentTrunkCollision: true,
+    ecology: 'tree-shed',
+    placementNote: 'Branches spawn as tree windfall within a believable ring around a resource-parent tree.',
     offsets: [
       { x: -54, y: 46 },
       { x: 46, y: 38 },
@@ -101,6 +111,8 @@ const zoneDependentResourceRules = [
     respawnMs: 0,
     maxActive: 2,
     collisionClearance: 20,
+    ecology: 'damp-shade',
+    placementNote: 'Dew herbs prefer lower, shaded shelter edges where cold moisture would linger.',
     candidates: [
       { x: 456, y: 680 },
       { x: 610, y: 704 },
@@ -119,6 +131,8 @@ const zoneDependentResourceRules = [
     respawnMs: 0,
     maxActive: 2,
     collisionClearance: 24,
+    ecology: 'exposed-stone',
+    placementNote: 'Loose stones appear near exposed northern dirt, roots, and rock edges.',
     candidates: [
       { x: 1006, y: 552 },
       { x: 1144, y: 612 },
@@ -137,6 +151,8 @@ const zoneDependentResourceRules = [
     respawnMs: 0,
     maxActive: 2,
     collisionClearance: 18,
+    ecology: 'dry-clearing-edge',
+    placementNote: 'Dry grass gathers on exposed clearing edges where wind and weak sun can dry it.',
     candidates: [
       { x: 548, y: 558 },
       { x: 718, y: 604 },
@@ -189,7 +205,9 @@ export const createTreeDependentResourceSeeds = (seed = defaultEcosystemSeed): E
         source: {
           type: 'tree-dependent' as const,
           parentId: tree.id,
-          rule: rule.id
+          rule: rule.id,
+          ecology: rule.ecology,
+          placementNote: rule.placementNote
         }
       }));
     })
@@ -208,7 +226,9 @@ export const createZoneDependentResourceSeeds = (seed = defaultEcosystemSeed): E
         source: {
           type: 'zone-dependent' as const,
           zoneId: rule.zoneId,
-          rule: rule.id
+          rule: rule.id,
+          ecology: rule.ecology,
+          placementNote: rule.placementNote
         }
       }))
   );

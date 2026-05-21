@@ -32,6 +32,8 @@ describe('resource registry', () => {
     expect(getResourceProfile('dryGrass').visualScale).toBeGreaterThan(getResourceProfile('food').visualScale);
     expect(getResourceProfile('wood').highlightWidth).toBeGreaterThan(getResourceProfile('herbs').highlightWidth);
     expect(getResourceProfiles().every((profile) => profile.facingReach > 0 && profile.highlightHeight > 0)).toBe(true);
+    expect(getResourceProfile('wood').ecologyTags).toContain('tree-shed');
+    expect(getResourceProfile('stone').placementLogic).toContain('exposed dirt');
   });
 
   it('tags static opening resources separately from fixed zone resources', () => {
@@ -43,10 +45,17 @@ describe('resource registry', () => {
     expect(
       opening.every((resource) => resource.source?.type === 'opening' && resource.source.purpose === 'first-fire')
     ).toBe(true);
+    expect(opening.map((resource) => resource.source?.ecology)).toEqual([
+      'dead-fire-debris',
+      'dry-clearing-edge',
+      'tree-shed',
+      'exposed-stone'
+    ]);
     expect(fixed.length).toBeGreaterThan(0);
     expect(
       fixed.some((resource) => resource.source?.type === 'fixed-zone' && resource.source.zoneId === 'wolf-territory-edge')
     ).toBe(true);
+    expect(fixed.every((resource) => resource.source?.placementNote)).toBe(true);
   });
 
   it('classifies placement modes for authored and living-world resource sources', () => {

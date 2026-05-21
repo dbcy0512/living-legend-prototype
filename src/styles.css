@@ -119,21 +119,24 @@ body {
   top: 98px;
   width: min(360px, calc(100vw - 40px));
   max-height: calc(100vh - 188px);
-  border: 2px solid rgba(245, 239, 216, 0.68);
-  background: rgba(12, 17, 27, 0.72);
-  box-shadow: 0 7px 0 rgba(0, 0, 0, 0.24);
+  border: 2px solid rgba(92, 59, 35, 0.82);
+  background:
+    linear-gradient(180deg, rgba(236, 217, 164, 0.96), rgba(199, 166, 108, 0.96)),
+    #d9bd78;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 245, 205, 0.3),
+    0 7px 0 rgba(0, 0, 0, 0.24);
   backdrop-filter: blur(5px);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-5px);
   transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
   left: 20px;
-  padding: 22px 24px;
-  border: 0;
-  background:
-    linear-gradient(rgba(35, 24, 17, 0.22), rgba(35, 24, 17, 0.22)),
-    url('/assets/ui/satchel-panel-v1.png') center / 100% 100% no-repeat;
-  box-shadow: none;
+  padding: 12px;
+}
+
+.satchel--making {
+  width: min(500px, calc(100vw - 40px));
 }
 
 .crafting {
@@ -151,16 +154,21 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 9px;
+  min-height: 36px;
+  margin-bottom: 10px;
+  padding: 7px 9px;
+  border: 1px solid rgba(92, 59, 35, 0.42);
+  background: rgba(75, 48, 30, 0.18);
   gap: 12px;
 }
 
 .satchel__title,
 .crafting__title {
-  color: #f8d16c;
+  color: #5a351e;
   font-size: 14px;
   font-weight: 800;
   letter-spacing: 0;
+  text-shadow: 0 1px 0 rgba(255, 244, 205, 0.42);
   text-transform: uppercase;
 }
 
@@ -200,7 +208,7 @@ body {
 }
 
 .satchel--making .satchel__grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: none;
 }
 
 .satchel__slot {
@@ -211,7 +219,7 @@ body {
   padding: 6px 8px;
   border: 1px solid rgba(75, 48, 30, 0.34);
   color: #2d2017;
-  background: rgba(245, 230, 188, 0.56);
+  background: rgba(245, 230, 188, 0.66);
   font-size: 12px;
   line-height: 1.2;
 }
@@ -225,7 +233,7 @@ body {
 
 .satchel__slot--empty {
   color: rgba(45, 32, 23, 0.48);
-  background: rgba(245, 230, 188, 0.28);
+  background: rgba(245, 230, 188, 0.34);
 }
 
 .satchel__slot strong {
@@ -267,6 +275,7 @@ body {
   display: grid;
   gap: 8px;
   min-height: 0;
+  padding: 0;
 }
 
 .crafting__list {
@@ -281,12 +290,12 @@ body {
   grid-template-columns: 30px minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
-  min-height: 56px;
-  padding: 8px 10px;
-  border: 1px solid transparent;
+  min-height: 58px;
+  padding: 9px 10px;
+  border: 1px solid rgba(92, 59, 35, 0.36);
   background:
-    linear-gradient(rgba(255, 244, 210, 0.7), rgba(255, 236, 190, 0.66)),
-    url('/assets/ui/recipe-card-v1.png') center / 100% 100% no-repeat;
+    linear-gradient(180deg, rgba(255, 244, 210, 0.86), rgba(239, 211, 151, 0.84)),
+    #f0d698;
 }
 
 .crafting__recipe--ready {
@@ -301,7 +310,7 @@ body {
 
 .crafting__recipe--selected {
   border-color: rgba(248, 209, 108, 0.88);
-  box-shadow: 0 0 0 2px rgba(248, 209, 108, 0.16);
+  box-shadow: 0 0 0 2px rgba(96, 60, 26, 0.22);
 }
 
 .crafting__key {
@@ -309,9 +318,9 @@ body {
   place-items: center;
   width: 28px;
   height: 28px;
-  border: 1px solid rgba(248, 209, 108, 0.68);
-  color: #f8d16c;
-  background: rgba(0, 0, 0, 0.26);
+  border: 1px solid rgba(92, 59, 35, 0.46);
+  color: #4b2f1b;
+  background: rgba(245, 230, 188, 0.58);
   font-size: 13px;
   font-weight: 800;
 }

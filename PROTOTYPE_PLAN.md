@@ -1550,3 +1550,22 @@ Verification:
 
 - `npm.cmd test` passed: 96 tests.
 - `npm.cmd run build` passed.
+
+### Inventory And Making Visual Cleanup v1
+
+Status: implemented.
+
+- Removed the stretched satchel panel art from the functional inventory surface because its baked straps/corners were overlapping slots and recipe cards.
+- Replaced it with a clean parchment-style UI panel using CSS so slot layout and recipe readability are controlled by the UI system.
+- Making mode now hides the six-slot grid instead of stacking recipes over inventory slots.
+- Making mode widens the panel slightly on desktop so recipe cards have room to breathe.
+- Recipe cards now use a cleaner parchment treatment instead of decorative asset backing that competed with text.
+- Header/title contrast was increased so Satchel and Making labels are readable on the parchment surface.
+
+Alive-world cross-check:
+
+The UI still feels handmade and grounded, but it no longer lets decorative assets damage legibility. This keeps the world visible while making survival decisions readable under pressure.
+
+Verification:
+
+- Browser visual check confirmed Satchel and Making no longer overlap their own assets.

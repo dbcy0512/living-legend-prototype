@@ -199,7 +199,7 @@ const getInventoryPanelHtml = (state: GameState): string => {
 
 const getInventoryControlsHtml = (state: GameState): string => {
   const makingControls = state.ui.craftingOpen ? '<span>[ ] Select</span><span>Enter Make</span>' : '';
-  return `<span>Tab Close</span><span>M Making</span>${makingControls}`;
+  return `<span>Tab Close</span><span>M ${state.ui.craftingOpen ? 'Inventory' : 'Making'}</span>${makingControls}`;
 };
 
 const getInventoryCapacityText = (state: GameState): string => {

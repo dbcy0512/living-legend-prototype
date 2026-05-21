@@ -6,6 +6,7 @@ import {
 export type ResourceKind = 'twigs' | 'dryGrass' | 'bark' | 'wood' | 'stone' | 'herbs' | 'food';
 export type ResourceCategory = 'kindling' | 'crafting' | 'medicine' | 'food';
 export type ResourceSourcePurpose = 'first-fire' | 'early-crafting' | 'medicine' | 'food';
+export type ResourcePlacementMode = 'opening-fixed' | 'zone-fixed' | 'tree-attached' | 'zone-seeded' | 'unplaced';
 
 export type StaticResourceSource = {
   type: 'opening' | 'fixed-zone';
@@ -108,6 +109,27 @@ const staticStartingResources = [
 export const getResourceProfile = (kind: ResourceKind): ResourceProfile => resourceProfiles[kind];
 
 export const getResourceProfiles = (): readonly ResourceProfile[] => Object.values(resourceProfiles);
+
+export const getResourcePlacementMode = (source?: ResourceSource): ResourcePlacementMode => {
+  if (!source) {
+    return 'unplaced';
+  }
+  if (source.type === 'opening') {
+    return 'opening-fixed';
+  }
+  if (source.type === 'fixed-zone') {
+    return 'zone-fixed';
+  }
+  if (source.type === 'tree-dependent') {
+    return 'tree-attached';
+  }
+  return 'zone-seeded';
+};
+
+export const isEcosystemResourceSource = (source?: ResourceSource): boolean => {
+  const placementMode = getResourcePlacementMode(source);
+  return placementMode === 'tree-attached' || placementMode === 'zone-seeded';
+};
 
 export const getStaticStartingResourceSeeds = (): ResourceSeed[] =>
   staticStartingResources.map((resource) => ({ ...resource, source: resource.source ? { ...resource.source } : undefined }));

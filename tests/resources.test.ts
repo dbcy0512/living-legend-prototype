@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   createStartingResourceSeeds,
+  getResourcePlacementMode,
   getResourceProfile,
   getResourceProfiles,
-  getStaticStartingResourceSeeds
+  getStaticStartingResourceSeeds,
+  isEcosystemResourceSource
 } from '../src/game/content/resources';
 import { createEcosystemResourceSeeds } from '../src/game/content/ecosystem';
 
@@ -38,6 +40,25 @@ describe('resource registry', () => {
     expect(
       fixed.some((resource) => resource.source?.type === 'fixed-zone' && resource.source.zoneId === 'wolf-territory-edge')
     ).toBe(true);
+  });
+
+  it('classifies placement modes for authored and living-world resource sources', () => {
+    const opening = getStaticStartingResourceSeeds().find((resource) => resource.source?.type === 'opening');
+    const fixed = getStaticStartingResourceSeeds().find((resource) => resource.source?.type === 'fixed-zone');
+    const treeAttached = createEcosystemResourceSeeds('placement-test').find(
+      (resource) => resource.source.type === 'tree-dependent'
+    );
+    const zoneSeeded = createEcosystemResourceSeeds('placement-test').find(
+      (resource) => resource.source.type === 'zone-dependent'
+    );
+
+    expect(getResourcePlacementMode(opening?.source)).toBe('opening-fixed');
+    expect(getResourcePlacementMode(fixed?.source)).toBe('zone-fixed');
+    expect(getResourcePlacementMode(treeAttached?.source)).toBe('tree-attached');
+    expect(getResourcePlacementMode(zoneSeeded?.source)).toBe('zone-seeded');
+    expect(getResourcePlacementMode()).toBe('unplaced');
+    expect(isEcosystemResourceSource(opening?.source)).toBe(false);
+    expect(isEcosystemResourceSource(zoneSeeded?.source)).toBe(true);
   });
 
   it('combines static and ecosystem resources for new game state creation', () => {

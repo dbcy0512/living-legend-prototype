@@ -41,6 +41,14 @@ describe('zone one ecosystem rules', () => {
     expect(herbRule?.candidates.length).toBeGreaterThan(herbRule?.maxActive ?? 0);
   });
 
+  it('defines zone-dependent resource rules for more than herbs', () => {
+    const rules = getZoneDependentResourceRules();
+
+    expect(rules.map((rule) => rule.kind)).toEqual(['herbs', 'stone', 'dryGrass']);
+    expect(rules.find((rule) => rule.id === 'loose-stone-near-wolf-edge')?.zoneId).toBe('wolf-territory-edge');
+    expect(rules.find((rule) => rule.id === 'wind-dry-grass-first-clearing')?.zoneId).toBe('first-clearing');
+  });
+
   it('uses resource-parent trees as fallen branch parents', () => {
     const fallenBranchRule = getTreeDependentResourceRules()[0];
     const parentTrees = getResourceParentTrees(fallenBranchRule);
@@ -94,7 +102,7 @@ describe('zone one ecosystem rules', () => {
   it('creates zone-dependent herbs from valid seeded candidates', () => {
     const herbRule = getZoneDependentResourceRules()[0];
     const candidates = getValidZoneDependentSpawnCandidates(herbRule);
-    const herbs = createZoneDependentResourceSeeds();
+    const herbs = createZoneDependentResourceSeeds().filter((resource) => resource.source.rule === herbRule.id);
 
     expect(candidates.length).toBeGreaterThan(herbs.length);
     expect(herbs.length).toBe(herbRule.maxActive);
@@ -103,6 +111,23 @@ describe('zone one ecosystem rules', () => {
       expect(isZoneDependentResourceSeed(herb)).toBe(true);
       expect(herb.source.type).toBe('zone-dependent');
       expect(candidates.some((candidate) => candidate.x === herb.x && candidate.y === herb.y)).toBe(true);
+    }
+  });
+
+  it('creates seeded zone-dependent resources for each active zone rule', () => {
+    const rules = getZoneDependentResourceRules();
+    const resources = createZoneDependentResourceSeeds('zone-resource-seed');
+
+    for (const rule of rules) {
+      const byRule = resources.filter((resource) => resource.source.rule === rule.id);
+
+      expect(byRule).toHaveLength(rule.maxActive);
+      expect(byRule.every((resource) => resource.kind === rule.kind)).toBe(true);
+      expect(
+        byRule.every(
+          (resource) => resource.source.type === 'zone-dependent' && resource.source.zoneId === rule.zoneId
+        )
+      ).toBe(true);
     }
   });
 

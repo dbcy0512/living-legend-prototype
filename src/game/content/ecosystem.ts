@@ -1,6 +1,11 @@
 import { startingArea, type TreeInstance, type TreePlacementRole } from './maps/startingArea';
+import type { ResourceKind } from './resources';
 
-export type EcosystemResourceRuleId = 'fallen-branch-near-resource-parent' | 'dew-herb-near-first-shelter';
+export type EcosystemResourceRuleId =
+  | 'fallen-branch-near-resource-parent'
+  | 'dew-herb-near-first-shelter'
+  | 'loose-stone-near-wolf-edge'
+  | 'wind-dry-grass-first-clearing';
 
 export type EcosystemResourceSource =
   | {
@@ -18,7 +23,7 @@ export type TreeDependentResourceRule = {
   id: EcosystemResourceRuleId;
   seedKey: string;
   seedIdPrefix: string;
-  kind: 'wood';
+  kind: Extract<ResourceKind, 'wood'>;
   parentRole: TreePlacementRole;
   amount: number;
   respawnMs: number;
@@ -33,7 +38,7 @@ export type ZoneDependentResourceRule = {
   id: EcosystemResourceRuleId;
   seedKey: string;
   seedIdPrefix: string;
-  kind: 'herbs';
+  kind: ResourceKind;
   zoneId: string;
   amount: number;
   respawnMs: number;
@@ -50,7 +55,7 @@ type EcosystemSpawnCandidate = {
 
 export type EcosystemResourceSeed = {
   id: string;
-  kind: 'wood' | 'herbs';
+  kind: ResourceKind;
   x: number;
   y: number;
   amount: number;
@@ -102,6 +107,42 @@ const zoneDependentResourceRules = [
       { x: 344, y: 736 },
       { x: 570, y: 760 },
       { x: 470, y: 748 }
+    ]
+  },
+  {
+    id: 'loose-stone-near-wolf-edge',
+    seedKey: 'zone-1-loose-stones',
+    seedIdPrefix: 'loose-stone',
+    kind: 'stone',
+    zoneId: 'wolf-territory-edge',
+    amount: 1,
+    respawnMs: 0,
+    maxActive: 2,
+    collisionClearance: 24,
+    candidates: [
+      { x: 1006, y: 552 },
+      { x: 1144, y: 612 },
+      { x: 1248, y: 580 },
+      { x: 1334, y: 660 },
+      { x: 918, y: 642 }
+    ]
+  },
+  {
+    id: 'wind-dry-grass-first-clearing',
+    seedKey: 'zone-1-dry-grass',
+    seedIdPrefix: 'dry-grass',
+    kind: 'dryGrass',
+    zoneId: 'first-clearing',
+    amount: 1,
+    respawnMs: 0,
+    maxActive: 2,
+    collisionClearance: 18,
+    candidates: [
+      { x: 548, y: 558 },
+      { x: 718, y: 604 },
+      { x: 770, y: 456 },
+      { x: 622, y: 696 },
+      { x: 858, y: 552 }
     ]
   }
 ] as const satisfies readonly ZoneDependentResourceRule[];

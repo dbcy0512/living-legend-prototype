@@ -3,6 +3,7 @@ import { idleActions, type ActionState } from '../../game/input/actions';
 import { animationKeys, assetKeys } from '../../game/assets/manifest';
 import { startingArea, viewportSize } from '../../game/content/maps/startingArea';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
+import { isEcosystemResourceSource } from '../../game/content/resources';
 import type { CampfireState, GameState, ResourceNode } from '../../game/simulation/state';
 import { getCampfireCollisionObstacles, getPlayerCollisionRadius } from '../../game/simulation/rules/collision';
 import { isPlayerUnderThreat } from '../../game/simulation/systems/enemySystem';
@@ -868,7 +869,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private getEcosystemDebugText(): string {
-    const ecosystemResources = this.state.resources.filter((node) => node.source);
+    const ecosystemResources = this.state.resources.filter((node) => isEcosystemResourceSource(node.source));
     const active = ecosystemResources.filter((node) => node.amount > 0).length;
     const depleted = ecosystemResources.length - active;
     const activeBranches = ecosystemResources.filter((node) => node.source?.type === 'tree-dependent' && node.amount > 0).length;

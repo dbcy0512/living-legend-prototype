@@ -3,7 +3,7 @@ import { idleActions, type ActionState } from '../../game/input/actions';
 import { animationKeys, assetKeys } from '../../game/assets/manifest';
 import { getEnemyDefinition } from '../../game/content/enemies';
 import { startingArea, startingAreaLayout, viewportSize } from '../../game/content/maps/startingArea';
-import { getZoneOneHabitatAnchors } from '../../game/content/maps/zoneOneConcept';
+import { getZoneOneHabitatAnchors, getZoneOnePreparedGroundPatches } from '../../game/content/maps/zoneOneConcept';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
 import { getResourceProfile, isEcosystemResourceSource } from '../../game/content/resources';
 import type { CampfireState, EnemyState, GameState, ResourceNode } from '../../game/simulation/state';
@@ -298,8 +298,7 @@ export class WorldScene extends Phaser.Scene {
     this.ground.fillEllipse(1400, 390, 650, 230);
     this.ground.fillStyle(0x101f22, 0.32);
     this.ground.fillEllipse(2180, 440, 720, 250);
-    this.ground.fillStyle(0x1f2c25, 0.38);
-    this.ground.fillEllipse(2180, 850, 620, 260);
+    this.drawPreparedZoneGround();
     this.ground.fillStyle(0x263f35, 0.26);
     this.ground.fillEllipse(2180, 1120, 620, 220);
     this.ground.fillStyle(0x111c20, 0.34);
@@ -314,6 +313,48 @@ export class WorldScene extends Phaser.Scene {
     this.ground.lineBetween(1660, 850, 1960, 850);
     this.ground.lineBetween(1660, 965, 2010, 1115);
     this.ground.lineBetween(1400, 1005, 1400, 1345);
+  }
+
+  private drawPreparedZoneGround(): void {
+    for (const patch of getZoneOnePreparedGroundPatches()) {
+      switch (patch.material) {
+        case 'damp-deadwood-floor':
+          this.ground.fillStyle(0x14251f, 0.44);
+          this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          this.ground.lineStyle(2, 0x4f6b45, 0.16);
+          this.ground.strokeEllipse(patch.center.x, patch.center.y + 4, patch.radius.x * 1.92, patch.radius.y * 1.84);
+          break;
+        case 'rotting-log-litter':
+          this.ground.fillStyle(0x2b2117, 0.34);
+          this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          this.ground.lineStyle(3, 0x6b4728, 0.2);
+          this.ground.lineBetween(patch.center.x - 150, patch.center.y + 28, patch.center.x + 88, patch.center.y - 16);
+          this.ground.lineBetween(patch.center.x - 70, patch.center.y + 58, patch.center.x + 150, patch.center.y + 12);
+          break;
+        case 'soft-shade-edge':
+          this.ground.fillStyle(0x0e1c1a, 0.3);
+          this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          break;
+      }
+    }
+
+    const litter = [
+      { x: 2052, y: 842, r: 5 },
+      { x: 2110, y: 920, r: 4 },
+      { x: 2188, y: 780, r: 3 },
+      { x: 2294, y: 898, r: 5 },
+      { x: 2350, y: 860, r: 4 },
+      { x: 2238, y: 824, r: 3 }
+    ];
+    this.ground.fillStyle(0x57402a, 0.42);
+    for (const item of litter) {
+      this.ground.fillEllipse(item.x, item.y, item.r * 2.5, item.r * 1.4);
+    }
+
+    this.ground.lineStyle(2, 0x8a5a32, 0.34);
+    this.ground.lineBetween(2118, 884, 2160, 870);
+    this.ground.lineBetween(2260, 858, 2308, 888);
+    this.ground.lineBetween(2190, 930, 2240, 910);
   }
 
   private createLivingDetails(): void {
@@ -339,8 +380,12 @@ export class WorldScene extends Phaser.Scene {
     this.sleepingSpot.setScale(0.86);
 
     for (const anchor of getZoneOneHabitatAnchors()) {
+      const shadow = this.add.image(anchor.x, anchor.y + 10, assetKeys.shadow);
+      shadow.setDepth(groundPropDepth);
+      shadow.setScale(anchor.scale * 1.2, anchor.scale * 0.55);
+      shadow.setAlpha(0.28);
       const habitat = this.add.image(anchor.x, anchor.y, anchor.textureKey);
-      habitat.setDepth(groundPropDepth + 1);
+      habitat.setDepth(groundPropDepth + 2);
       habitat.setScale(anchor.scale);
       habitat.setAlpha(1);
     }

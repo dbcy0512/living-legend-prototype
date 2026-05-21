@@ -79,6 +79,21 @@ export type ZoneOneHabitatAnchor = {
   designIntent: string;
 };
 
+export type ZoneOnePreparedGroundPatch = {
+  id: string;
+  regionId: ZoneOneRegionId;
+  material: 'damp-deadwood-floor' | 'rotting-log-litter' | 'soft-shade-edge';
+  center: {
+    x: number;
+    y: number;
+  };
+  radius: {
+    x: number;
+    y: number;
+  };
+  designIntent: string;
+};
+
 const zoneOneRegions = [
   {
     id: 'camp-clearing-hub',
@@ -273,9 +288,9 @@ const zoneOneHabitatAnchors = [
     triggerId: 'deadwood-skitter-trigger',
     label: 'Mushroom Moss Cluster',
     textureKey: assetKeys.mushroomHabitat,
-    x: 2248,
-    y: 918,
-    scale: 0.72,
+    x: 2218,
+    y: 888,
+    scale: 0.66,
     enemyKinds: ['violet-moss-blob'],
     spawnPoint: { x: 2248, y: 922 },
     designIntent: 'A damp pocket source for blobs and herbs, tying danger to living ground conditions.'
@@ -298,6 +313,35 @@ export const getZoneOneHabitatAnchors = (): readonly ZoneOneHabitatAnchor[] => z
 
 export const getZoneOneHabitatAnchorsForTrigger = (triggerId: ZoneOneTriggerId): readonly ZoneOneHabitatAnchor[] =>
   zoneOneHabitatAnchors.filter((anchor) => anchor.triggerId === triggerId);
+
+const zoneOnePreparedGroundPatches = [
+  {
+    id: 'deadwood-damp-floor',
+    regionId: 'deadwood-mushrooms',
+    material: 'damp-deadwood-floor',
+    center: { x: 2180, y: 850 },
+    radius: { x: 355, y: 182 },
+    designIntent: 'Turns the deadwood pocket into a damp shaded floor before any object is placed.'
+  },
+  {
+    id: 'deadwood-rot-core',
+    regionId: 'deadwood-mushrooms',
+    material: 'rotting-log-litter',
+    center: { x: 2208, y: 868 },
+    radius: { x: 245, y: 106 },
+    designIntent: 'Groups the log, mushrooms, and root den into one readable decay cluster.'
+  },
+  {
+    id: 'deadwood-shade-edge',
+    regionId: 'deadwood-mushrooms',
+    material: 'soft-shade-edge',
+    center: { x: 2300, y: 790 },
+    radius: { x: 210, y: 84 },
+    designIntent: 'Softens the transition from grass into the den and canopy shade.'
+  }
+] as const satisfies readonly ZoneOnePreparedGroundPatch[];
+
+export const getZoneOnePreparedGroundPatches = (): readonly ZoneOnePreparedGroundPatch[] => zoneOnePreparedGroundPatches;
 
 export const isPointInsideZoneOneTrigger = (trigger: ZoneOneEnemyWaveTrigger, x: number, y: number): boolean =>
   x >= trigger.bounds.x &&

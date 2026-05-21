@@ -3,6 +3,7 @@ import {
   getZoneOneCampSanctuary,
   getZoneOneEnemyWaveTriggers,
   getZoneOneHabitatAnchorsForTrigger,
+  getZoneOnePreparedGroundPatches,
   getZoneOneRegion,
   getZoneOneRegions,
   isPointInsideZoneOneTrigger
@@ -46,6 +47,29 @@ describe('zone one concept map', () => {
     expect(anchors.length).toBeGreaterThanOrEqual(3);
     expect(anchors.every((anchor) => isPointInsideZoneOneTrigger(trigger, anchor.spawnPoint.x, anchor.spawnPoint.y))).toBe(true);
     expect(anchors.some((anchor) => anchor.enemyKinds.includes('violet-moss-blob'))).toBe(true);
+  });
+
+  it('prepares the deadwood floor before placing mushrooms and dens', () => {
+    const deadwood = getZoneOneRegion('deadwood-mushrooms');
+    const patches = getZoneOnePreparedGroundPatches().filter((patch) => patch.regionId === deadwood.id);
+    const mushroom = getZoneOneHabitatAnchorsForTrigger('deadwood-skitter-trigger').find(
+      (anchor) => anchor.id === 'deadwood-mushroom-habitat'
+    );
+
+    expect(patches.map((patch) => patch.material)).toEqual([
+      'damp-deadwood-floor',
+      'rotting-log-litter',
+      'soft-shade-edge'
+    ]);
+    expect(mushroom).toBeDefined();
+    expect(
+      patches.some(
+        (patch) =>
+          mushroom &&
+          Math.abs(mushroom.x - patch.center.x) <= patch.radius.x &&
+          Math.abs(mushroom.y - patch.center.y) <= patch.radius.y
+      )
+    ).toBe(true);
   });
 
   it('spaces zone one POIs far enough to read as separate destinations', () => {

@@ -4,6 +4,7 @@ import { applyCreatureDamageResponse } from '../rules/creatureResponses';
 import { getWorldCyclePhase, isNightAssaultPhase } from '../rules/dayNight';
 import { setPlayerThought } from '../rules/thoughts';
 import { getEnemyCollisionRadius, resolveWorldCollisions } from '../rules/collision';
+import { getActiveEncounterForEnemy, isPlayerInsideCampSanctuary, isPlayerInsideEncounterAggro } from './encounterSystem';
 
 const stalkDistance = 250;
 const fireStalkDistance = 155;
@@ -52,7 +53,11 @@ export const updateEnemies = (state: GameState, deltaMs: number): void => {
       continue;
     }
 
-  updateCreatureNeeds(state, enemy, protectiveFire, seconds);
+    if (shouldDisengageEncounterEnemy(state, enemy, seconds)) {
+      continue;
+    }
+
+    updateCreatureNeeds(state, enemy, protectiveFire, seconds);
     enemy.attackTimerMs = Math.max(0, enemy.attackTimerMs - deltaMs);
 
     if (!nightAssault) {
@@ -82,6 +87,29 @@ export const updateEnemies = (state: GameState, deltaMs: number): void => {
 
     updateStalkDecision(enemy, state, fireProtected, seconds);
   }
+};
+
+const shouldDisengageEncounterEnemy = (state: GameState, enemy: EnemyState, seconds: number): boolean => {
+  if (!getActiveEncounterForEnemy(state, enemy.encounterId)) {
+    return false;
+  }
+
+  if (isPlayerInsideCampSanctuary(state) || !isPlayerInsideEncounterAggro(state, enemy.encounterId)) {
+    enemy.mode = 'watching';
+    enemy.telegraphMs = 0;
+    enemy.phaseTimerMs = 0;
+    enemy.aggression = clamp(enemy.aggression - seconds * 45, 0, 100);
+    enemy.boldness = clamp(enemy.boldness - seconds * 55, 0, 100);
+    enemy.fear = clamp(enemy.fear + seconds * 28, 0, 100);
+    const dist = distance(enemy.x, enemy.y, enemy.homeX, enemy.homeY);
+    if (dist > 4) {
+      const axis = normalizeAxis(enemy.homeX - enemy.x, enemy.homeY - enemy.y);
+      moveEnemy(enemy, state, axis.x * 42 * seconds, axis.y * 42 * seconds);
+    }
+    return true;
+  }
+
+  return false;
 };
 
 const updateDaytimeEnemy = (

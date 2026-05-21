@@ -15,6 +15,7 @@ import {
 import { clamp, distance } from '../rules/math';
 import { getGatherThought, setPlayerThought } from '../rules/thoughts';
 import { craftRecipe } from './craftingSystem';
+import { isResourceLockedByActiveWave, tryTriggerResourcePocketWave } from './encounterSystem';
 
 const campfireWoodCost = 2;
 const campfireStoneCost = 1;
@@ -89,6 +90,7 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
             ? Number.POSITIVE_INFINITY
             : getResourceProfile(node.kind).defaultRespawnMs;
       }
+      tryTriggerResourcePocketWave(state, node);
     }
   }
   syncOpeningPrompt(state);
@@ -252,6 +254,9 @@ export const getNearestGatherableResource = (state: GameState): ResourceNode | u
 
   for (const candidate of state.resources) {
     if (candidate.amount <= 0) {
+      continue;
+    }
+    if (isResourceLockedByActiveWave(state, candidate)) {
       continue;
     }
 

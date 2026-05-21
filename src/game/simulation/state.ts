@@ -4,6 +4,7 @@ import {
   defaultEcosystemSeed,
 } from '../content/ecosystem';
 import { getEnemyDefinition, type EnemyKind } from '../content/enemies';
+import { getZoneOneEnemyWaveTriggers, type ZoneOneTriggerId } from '../content/maps/zoneOneConcept';
 import type { MeleeSeed } from '../content/meleeSeeds';
 import { createStartingResourceSeeds, type ResourceKind, type ResourceSource } from '../content/resources';
 import type { WeaponAbilityId, WeaponAbilityStatusTag } from '../content/weaponAbilities';
@@ -114,6 +115,20 @@ export type EnemyState = {
   lungeX: number;
   lungeY: number;
   hasDamagedThisLunge: boolean;
+  encounterId?: ZoneOneTriggerId;
+};
+
+export type EncounterPocketStatus = 'ready' | 'active' | 'cleared';
+
+export type EncounterPocketState = {
+  triggerId: ZoneOneTriggerId;
+  status: EncounterPocketStatus;
+  spawnedEnemyIds: string[];
+  lockedResourceIds: string[];
+};
+
+export type EncounterState = {
+  pockets: EncounterPocketState[];
 };
 
 export type CampfireState = {
@@ -219,6 +234,7 @@ export type GameState = {
   equipment: EquipmentState;
   hotbar: HotbarState;
   ecosystem: EcosystemState;
+  encounters: EncounterState;
   ui: UiState;
   respawnPoint: RespawnPointState;
   campfires: CampfireState[];
@@ -319,6 +335,7 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       windfallPressure: 0,
       lastRegenerationPressure: 0
     },
+    encounters: createEncounterState(),
     ui: {
       inventoryOpen: false,
       craftingOpen: false,
@@ -378,9 +395,19 @@ export const createEnemyState = (
     phaseTimerMs: overrides.phaseTimerMs ?? 0,
     lungeX: overrides.lungeX ?? 0,
     lungeY: overrides.lungeY ?? 0,
-    hasDamagedThisLunge: overrides.hasDamagedThisLunge ?? false
+    hasDamagedThisLunge: overrides.hasDamagedThisLunge ?? false,
+    encounterId: overrides.encounterId
   };
 };
+
+const createEncounterState = (): EncounterState => ({
+  pockets: getZoneOneEnemyWaveTriggers().map((trigger) => ({
+    triggerId: trigger.id,
+    status: 'ready',
+    spawnedEnemyIds: [],
+    lockedResourceIds: []
+  }))
+});
 
 const createItemMemory = (): ItemMemory => ({
   twigs: 0,

@@ -3,6 +3,7 @@ import { idleActions, type ActionState } from '../../game/input/actions';
 import { animationKeys, assetKeys } from '../../game/assets/manifest';
 import { getEnemyDefinition } from '../../game/content/enemies';
 import { startingArea, viewportSize } from '../../game/content/maps/startingArea';
+import { getZoneOneHabitatAnchors } from '../../game/content/maps/zoneOneConcept';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
 import { getResourceProfile, isEcosystemResourceSource } from '../../game/content/resources';
 import type { CampfireState, EnemyState, GameState, ResourceNode } from '../../game/simulation/state';
@@ -319,6 +320,13 @@ export class WorldScene extends Phaser.Scene {
     this.sleepingSpot.setDepth(groundPropDepth);
     this.sleepingSpot.setScale(0.86);
 
+    for (const anchor of getZoneOneHabitatAnchors()) {
+      const habitat = this.add.image(anchor.x, anchor.y, anchor.textureKey);
+      habitat.setDepth(groundPropDepth + 1);
+      habitat.setScale(anchor.scale);
+      habitat.setAlpha(1);
+    }
+
     for (const node of this.state.resources) {
       this.resourceSprites.set(node.id, this.createResourceSprite(node));
     }
@@ -471,9 +479,10 @@ export class WorldScene extends Phaser.Scene {
     this.syncThoughtBubble();
 
     for (const enemy of this.state.enemies) {
-      const sprite = this.enemySprites.get(enemy.id);
+      let sprite = this.enemySprites.get(enemy.id);
       if (!sprite) {
-        continue;
+        sprite = this.createEnemyActor(enemy);
+        this.enemySprites.set(enemy.id, sprite);
       }
       sprite.setPosition(enemy.x, enemy.y);
       sprite.setDepth(actorDepthBase + enemy.y * 0.001);

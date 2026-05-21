@@ -31,6 +31,9 @@ export class BootScene extends Phaser.Scene {
     this.load.image(assetKeys.resourceDryGrass, 'assets/environment/resource-dry-grass-v2.png');
     this.load.image(assetKeys.resourceBark, 'assets/environment/resource-bark-v2.png');
     this.load.image(assetKeys.resourceStrikingStone, 'assets/environment/resource-striking-stone-v2.png');
+    this.load.image(assetKeys.deadwoodLogHabitat, 'assets/environment/deadwood-log-habitat-v1.png');
+    this.load.image(assetKeys.mushroomHabitat, 'assets/environment/mushroom-habitat-v1.png');
+    this.load.image(assetKeys.rootHoleHabitat, 'assets/environment/root-hole-habitat-v1.png');
     this.load.image(assetKeys.playerSouth, 'assets/characters/starter-child-cold-v3-south.png');
     this.load.image(assetKeys.playerNorth, 'assets/characters/starter-child-cold-v3-north.png');
     this.load.image(assetKeys.playerEast, 'assets/characters/starter-child-cold-v3-east.png');

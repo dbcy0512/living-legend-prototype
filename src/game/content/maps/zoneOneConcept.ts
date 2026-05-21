@@ -1,3 +1,4 @@
+import { assetKeys } from '../../assets/manifest';
 import type { EnemyHabitatTag, EnemyKind } from '../enemies';
 import type { ResourceEcologyTag, ResourceKind } from '../resources';
 
@@ -46,7 +47,34 @@ export type ZoneOneEnemyWaveTrigger = {
   };
   enemyKinds: readonly EnemyKind[];
   maxActive: number;
-  triggerWhen: 'enter-region' | 'linger-in-region' | 'return-at-night';
+  triggerWhen: 'gather-resource' | 'enter-region' | 'linger-in-region' | 'return-at-night';
+  designIntent: string;
+};
+
+export type ZoneOneSanctuary = {
+  id: 'camp-sanctuary';
+  label: string;
+  center: {
+    x: number;
+    y: number;
+  };
+  radius: number;
+  designIntent: string;
+};
+
+export type ZoneOneHabitatAnchor = {
+  id: string;
+  triggerId: ZoneOneTriggerId;
+  label: string;
+  textureKey: string;
+  x: number;
+  y: number;
+  scale: number;
+  enemyKinds: readonly EnemyKind[];
+  spawnPoint: {
+    x: number;
+    y: number;
+  };
   designIntent: string;
 };
 
@@ -186,7 +214,7 @@ const zoneOneEnemyWaveTriggers = [
     bounds: { x: 950, y: 380, width: 310, height: 190 },
     enemyKinds: ['mire-spider', 'violet-moss-blob'],
     maxActive: 2,
-    triggerWhen: 'enter-region',
+    triggerWhen: 'gather-resource',
     designIntent: 'First real danger pocket. Small creatures should feel like they belong to damp deadwood, not as random attackers.'
   },
   {
@@ -212,3 +240,66 @@ const zoneOneEnemyWaveTriggers = [
 ] as const satisfies readonly ZoneOneEnemyWaveTrigger[];
 
 export const getZoneOneEnemyWaveTriggers = (): readonly ZoneOneEnemyWaveTrigger[] => zoneOneEnemyWaveTriggers;
+
+export const getZoneOneEnemyWaveTrigger = (id: ZoneOneTriggerId): ZoneOneEnemyWaveTrigger =>
+  zoneOneEnemyWaveTriggers.find((trigger) => trigger.id === id) ?? zoneOneEnemyWaveTriggers[0];
+
+const zoneOneCampSanctuary = {
+  id: 'camp-sanctuary',
+  label: 'Camp Sanctuary',
+  center: { x: 710, y: 542 },
+  radius: 155,
+  designIntent: 'The tight home circle: safety, resting, crafting, upgrading, and learning live here before deeper exploration opens.'
+} as const satisfies ZoneOneSanctuary;
+
+export const getZoneOneCampSanctuary = (): ZoneOneSanctuary => zoneOneCampSanctuary;
+
+const zoneOneHabitatAnchors = [
+  {
+    id: 'deadwood-fallen-log-habitat',
+    triggerId: 'deadwood-skitter-trigger',
+    label: 'Deadwood Fallen Log',
+    textureKey: assetKeys.deadwoodLogHabitat,
+    x: 1084,
+    y: 466,
+    scale: 0.98,
+    enemyKinds: ['mire-spider', 'violet-moss-blob'],
+    spawnPoint: { x: 1052, y: 492 },
+    designIntent: 'A readable source for damp deadwood enemies and nearby wood resources.'
+  },
+  {
+    id: 'deadwood-mushroom-habitat',
+    triggerId: 'deadwood-skitter-trigger',
+    label: 'Mushroom Moss Cluster',
+    textureKey: assetKeys.mushroomHabitat,
+    x: 1172,
+    y: 524,
+    scale: 0.72,
+    enemyKinds: ['violet-moss-blob'],
+    spawnPoint: { x: 1164, y: 526 },
+    designIntent: 'A damp pocket source for blobs and herbs, tying danger to living ground conditions.'
+  },
+  {
+    id: 'deadwood-root-hole-habitat',
+    triggerId: 'deadwood-skitter-trigger',
+    label: 'Root Hole Den',
+    textureKey: assetKeys.rootHoleHabitat,
+    x: 1238,
+    y: 452,
+    scale: 0.82,
+    enemyKinds: ['mire-spider', 'thorn-shell-mite'],
+    spawnPoint: { x: 1224, y: 472 },
+    designIntent: 'A visible den mouth so enemies feel like they emerge from the world.'
+  }
+] as const satisfies readonly ZoneOneHabitatAnchor[];
+
+export const getZoneOneHabitatAnchors = (): readonly ZoneOneHabitatAnchor[] => zoneOneHabitatAnchors;
+
+export const getZoneOneHabitatAnchorsForTrigger = (triggerId: ZoneOneTriggerId): readonly ZoneOneHabitatAnchor[] =>
+  zoneOneHabitatAnchors.filter((anchor) => anchor.triggerId === triggerId);
+
+export const isPointInsideZoneOneTrigger = (trigger: ZoneOneEnemyWaveTrigger, x: number, y: number): boolean =>
+  x >= trigger.bounds.x &&
+  x <= trigger.bounds.x + trigger.bounds.width &&
+  y >= trigger.bounds.y &&
+  y <= trigger.bounds.y + trigger.bounds.height;

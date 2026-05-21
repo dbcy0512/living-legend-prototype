@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  getZoneOneCampSanctuary,
   getZoneOneEnemyWaveTriggers,
+  getZoneOneHabitatAnchorsForTrigger,
   getZoneOneRegion,
-  getZoneOneRegions
+  getZoneOneRegions,
+  isPointInsideZoneOneTrigger
 } from '../src/game/content/maps/zoneOneConcept';
 
 describe('zone one concept map', () => {
@@ -29,7 +32,18 @@ describe('zone one concept map', () => {
     expect(triggers).toHaveLength(3);
     expect(triggers.every((trigger) => trigger.regionId !== 'camp-clearing-hub')).toBe(true);
     expect(triggers[0].enemyKinds).toContain('mire-spider');
+    expect(triggers[0].triggerWhen).toBe('gather-resource');
     expect(triggers[1].triggerWhen).toBe('linger-in-region');
   });
-});
 
+  it('defines a tight camp sanctuary and visible habitat anchors for the first action trigger', () => {
+    const sanctuary = getZoneOneCampSanctuary();
+    const trigger = getZoneOneEnemyWaveTriggers()[0];
+    const anchors = getZoneOneHabitatAnchorsForTrigger(trigger.id);
+
+    expect(sanctuary.radius).toBeLessThan(getZoneOneRegion('camp-clearing-hub').radius.x);
+    expect(anchors.length).toBeGreaterThanOrEqual(3);
+    expect(anchors.every((anchor) => isPointInsideZoneOneTrigger(trigger, anchor.spawnPoint.x, anchor.spawnPoint.y))).toBe(true);
+    expect(anchors.some((anchor) => anchor.enemyKinds.includes('violet-moss-blob'))).toBe(true);
+  });
+});

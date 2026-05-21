@@ -6,6 +6,7 @@ import { tickPlayerThought } from '../rules/thoughts';
 import { tryStartWeaponAbility, updateAbility } from './abilitySystem';
 import { updateCombat } from './combatSystem';
 import { updateEnemies } from './enemySystem';
+import { updateEncounters } from './encounterSystem';
 import { selectOrUseHotbarSlot, updateHotbar } from './hotbarSystem';
 import { updateInventory } from './inventorySystem';
 import { updatePlayer } from './playerSystem';
@@ -52,6 +53,7 @@ export const updateSimulation = (state: GameState, actions: ActionState, deltaMs
   updateAbility(state, clampedDelta);
   updateCombat(state, actions, clampedDelta);
   updateEnemies(state, clampedDelta);
+  updateEncounters(state);
   updateEvolution(state);
 };
 
@@ -66,6 +68,7 @@ const resetGameState = (state: GameState): void => {
   Object.assign(state.equipment, fresh.equipment);
   Object.assign(state.hotbar, fresh.hotbar);
   Object.assign(state.ecosystem, fresh.ecosystem);
+  Object.assign(state.encounters, fresh.encounters);
   Object.assign(state.ui, fresh.ui);
   Object.assign(state.behaviorMemory.body, fresh.behaviorMemory.body);
   Object.assign(state.behaviorMemory.combat, fresh.behaviorMemory.combat);

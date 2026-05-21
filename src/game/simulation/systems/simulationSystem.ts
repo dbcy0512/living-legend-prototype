@@ -2,6 +2,7 @@ import type { ActionState } from '../../input/actions';
 import { getCraftingRecipes } from '../../content/craftingRecipes';
 import { createGameState, type GameState } from '../state';
 import { updateEvolution } from '../rules/evolutionRules';
+import { tickPlayerThought } from '../rules/thoughts';
 import { updateCombat } from './combatSystem';
 import { updateEnemies } from './enemySystem';
 import { selectOrUseHotbarSlot, updateHotbar } from './hotbarSystem';
@@ -42,6 +43,7 @@ export const updateSimulation = (state: GameState, actions: ActionState, deltaMs
   }
 
   const clampedDelta = Math.min(deltaMs, 50);
+  tickPlayerThought(state, clampedDelta);
   updateWorld(state, clampedDelta);
   updateInventory(state, actions, clampedDelta);
   updateHotbar(state, clampedDelta);

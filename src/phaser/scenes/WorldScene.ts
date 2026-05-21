@@ -83,6 +83,10 @@ export class WorldScene extends Phaser.Scene {
   private combatFx!: Phaser.GameObjects.Graphics;
   private occlusionRevealFx!: Phaser.GameObjects.Graphics;
   private collisionDebug!: Phaser.GameObjects.Graphics;
+  private thoughtBubble!: Phaser.GameObjects.Container;
+  private thoughtBubbleBg!: Phaser.GameObjects.Graphics;
+  private thoughtBubbleText!: Phaser.GameObjects.Text;
+  private lastThoughtMessage = '';
   private ecosystemDebugText!: Phaser.GameObjects.Text;
   private collisionDebugVisible = false;
   private wasPrimaryPointerDown = false;
@@ -415,6 +419,7 @@ export class WorldScene extends Phaser.Scene {
 
   private createActors(): void {
     this.player = this.createActor(assetKeys.player, this.state.player.x, this.state.player.y);
+    this.createThoughtBubble();
     for (const enemy of this.state.enemies) {
       this.enemySprites.set(enemy.id, this.createEnemyActor(enemy.x, enemy.y));
     }
@@ -451,6 +456,7 @@ export class WorldScene extends Phaser.Scene {
     this.player.setPosition(this.state.player.x, this.state.player.y);
     this.player.setDepth(actorDepthBase + this.state.player.y * 0.001);
     this.syncPlayerView(coldPressure);
+    this.syncThoughtBubble();
 
     for (const enemy of this.state.enemies) {
       const sprite = this.enemySprites.get(enemy.id);
@@ -492,6 +498,68 @@ export class WorldScene extends Phaser.Scene {
     this.drawColdFx();
     this.drawCombatFx();
     this.drawCollisionDebug();
+  }
+
+  private createThoughtBubble(): void {
+    this.thoughtBubbleBg = this.add.graphics();
+    this.thoughtBubbleText = this.add.text(0, -3, '', {
+      fontFamily: 'Georgia, "Times New Roman", serif',
+      fontSize: '13px',
+      color: '#3d2818',
+      align: 'center',
+      wordWrap: { width: 150, useAdvancedWrap: true }
+    });
+    this.thoughtBubbleText.setOrigin(0.5);
+    this.thoughtBubble = this.add.container(this.state.player.x, this.state.player.y - 74, [
+      this.thoughtBubbleBg,
+      this.thoughtBubbleText
+    ]);
+    this.thoughtBubble.setDepth(104);
+    this.thoughtBubble.setVisible(false);
+  }
+
+  private syncThoughtBubble(): void {
+    const message = this.state.ui.thoughtMessage;
+    const visible = message.length > 0 && this.state.ui.thoughtTimerMs > 0;
+    this.thoughtBubble.setVisible(visible);
+    if (!visible) {
+      this.lastThoughtMessage = '';
+      return;
+    }
+
+    const lift = this.state.equipment.mainHand === 'bare-hands' ? 72 : 82;
+    const bob = Math.sin(this.state.world.windPhase * 2.2) * 1.8;
+    this.thoughtBubble.setPosition(this.state.player.x, this.state.player.y - lift + bob);
+    this.thoughtBubble.setDepth(104);
+    this.thoughtBubble.setAlpha(Math.min(1, this.state.ui.thoughtTimerMs / 220));
+
+    if (message !== this.lastThoughtMessage) {
+      this.lastThoughtMessage = message;
+      this.thoughtBubbleText.setText(message);
+      this.drawThoughtBubble();
+    }
+  }
+
+  private drawThoughtBubble(): void {
+    const width = Phaser.Math.Clamp(this.thoughtBubbleText.displayWidth + 28, 74, 178);
+    const height = Phaser.Math.Clamp(this.thoughtBubbleText.displayHeight + 18, 34, 72);
+    const left = -width / 2;
+    const top = -height / 2;
+    const right = width / 2;
+    const bottom = height / 2;
+
+    this.thoughtBubbleBg.clear();
+    this.thoughtBubbleBg.fillStyle(0xf7efd8, 0.96);
+    this.thoughtBubbleBg.lineStyle(2, 0x6b4426, 0.78);
+    this.thoughtBubbleBg.fillRoundedRect(left, top, width, height, 12);
+    this.thoughtBubbleBg.strokeRoundedRect(left, top, width, height, 12);
+    this.thoughtBubbleBg.fillStyle(0xf7efd8, 0.96);
+    this.thoughtBubbleBg.fillTriangle(-9, bottom - 1, 2, bottom + 12, 13, bottom - 1);
+    this.thoughtBubbleBg.lineStyle(2, 0x6b4426, 0.72);
+    this.thoughtBubbleBg.lineBetween(-9, bottom - 1, 2, bottom + 12);
+    this.thoughtBubbleBg.lineBetween(2, bottom + 12, 13, bottom - 1);
+    this.thoughtBubbleBg.lineStyle(1, 0xfffbef, 0.68);
+    this.thoughtBubbleBg.lineBetween(left + 12, top + 6, right - 14, top + 6);
   }
 
   private syncPlayerView(coldPressure: number): void {

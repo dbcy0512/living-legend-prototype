@@ -2,6 +2,7 @@ import { getCraftingRecipe, getCraftingRecipes, type CraftingInputKind, type Cra
 import type { CampfireState, GameState } from '../state';
 import { canAddSatchelItem } from '../rules/satchel';
 import { clamp, distance } from '../rules/math';
+import { getCraftingFailureThought, getCraftingSuccessThought, setPlayerThought } from '../rules/thoughts';
 
 const activeFireCraftingReach = 118;
 
@@ -42,12 +43,14 @@ export const craftRecipe = (state: GameState, recipeId: CraftingRecipeId): boole
   const recipe = getCraftingRecipe(recipeId);
   if (!recipe) {
     state.ui.craftMessage = 'That thought has no shape yet.';
+    setPlayerThought(state, getCraftingFailureThought('unknown-recipe'));
     return false;
   }
 
   const availability = getCraftingAvailability(state, recipeId);
   if (!availability.canCraft) {
     state.ui.craftMessage = getCraftingFailureMessage(recipe.name, availability.reason);
+    setPlayerThought(state, getCraftingFailureThought(availability.reason));
     return false;
   }
 
@@ -62,6 +65,7 @@ export const craftRecipe = (state: GameState, recipeId: CraftingRecipeId): boole
     const fire = getNearbyActiveFire(state);
     if (!fire) {
       state.ui.craftMessage = 'The flame is too far away.';
+      setPlayerThought(state, 'Too far from the flame.');
       return false;
     }
     fire.fuelMs += recipe.effect.fuelMs;
@@ -69,7 +73,7 @@ export const craftRecipe = (state: GameState, recipeId: CraftingRecipeId): boole
     state.player.health = clamp(state.player.health + recipe.effect.health, 0, state.player.maxHealth);
   } else {
     state.inventory[recipe.effect.item] += recipe.effect.amount;
-    state.ui.inventoryMessage = `${recipe.name} tucked into the satchel.`;
+    state.ui.inventoryMessage = '';
     if (recipe.effect.item === 'poultices') {
       state.ui.hotbarMessage = 'Poultice ready.';
     } else if (recipe.effect.item === 'branchClubs') {
@@ -83,6 +87,7 @@ export const craftRecipe = (state: GameState, recipeId: CraftingRecipeId): boole
 
   state.ui.lastCraftedRecipeId = recipe.id;
   state.ui.craftMessage = `${recipe.name} made.`;
+  setPlayerThought(state, getCraftingSuccessThought(recipe.id));
   return true;
 };
 

@@ -12,6 +12,7 @@ import {
   type SatchelSummary
 } from '../rules/satchel';
 import { clamp, distance } from '../rules/math';
+import { getGatherThought, setPlayerThought } from '../rules/thoughts';
 import { craftRecipe } from './craftingSystem';
 
 const campfireWoodCost = 2;
@@ -70,10 +71,12 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
     if (node) {
       if (!addSatchelItem(state.inventory, node.kind, 1)) {
         state.ui.inventoryMessage = 'No room in the satchel.';
+        setPlayerThought(state, 'No room in the satchel.');
         syncOpeningPrompt(state);
         return;
       }
-      state.ui.inventoryMessage = `${getInventoryKindLabel(node.kind)} gathered.`;
+      state.ui.inventoryMessage = '';
+      setPlayerThought(state, getGatherThought(node.kind));
       state.behaviorMemory.tools.gathered[node.kind] += 1;
       node.amount -= 1;
       if (node.amount <= 0) {
@@ -164,6 +167,7 @@ export const rebuildFirstFire = (state: GameState): boolean => {
   state.world.openingStage = 'first-flame';
   state.world.openingPrompt = 'spark-caught';
   state.world.cold = Math.min(state.world.cold, 62);
+  setPlayerThought(state, 'The cold lets go a little.');
   return true;
 };
 
@@ -223,31 +227,6 @@ export const getCampfirePlacementPreview = (state: GameState): CampfirePlacement
 };
 
 const getFirstFire = (state: GameState) => state.campfires.find((campfire) => campfire.id === 'first-fire');
-
-const getInventoryKindLabel = (kind: SatchelItemKind): string => {
-  switch (kind) {
-    case 'twigs':
-      return 'Twig';
-    case 'dryGrass':
-      return 'Dry grass';
-    case 'bark':
-      return 'Bark';
-    case 'wood':
-      return 'Wood';
-    case 'stone':
-      return 'Stone';
-    case 'herbs':
-      return 'Herb';
-    case 'food':
-      return 'Food';
-    case 'poultices':
-      return 'Poultice';
-    case 'stoneEdges':
-      return 'Stone Edge';
-    case 'branchClubs':
-      return 'Branch Club';
-  }
-};
 
 const hasCampfireResources = (inventory: Inventory): boolean =>
   inventory.wood >= campfireWoodCost && inventory.stone >= campfireStoneCost;

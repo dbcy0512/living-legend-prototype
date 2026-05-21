@@ -173,6 +173,8 @@ export type UiState = {
   selectedHotbarSlot: number;
   hotbarMessage: string;
   inventoryMessage: string;
+  thoughtMessage: string;
+  thoughtTimerMs: number;
   lastCraftedRecipeId?: string;
   craftMessage: string;
 };
@@ -280,6 +282,8 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       selectedHotbarSlot: 0,
       hotbarMessage: '',
       inventoryMessage: '',
+      thoughtMessage: '',
+      thoughtTimerMs: 0,
       craftMessage: ''
     },
     respawnPoint: {

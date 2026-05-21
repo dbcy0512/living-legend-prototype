@@ -1,7 +1,7 @@
 import type { ActionState } from '../../input/actions';
 import { startingArea } from '../../content/maps/startingArea';
-import type { GameState } from '../state';
-import { resolveMapCollisions } from '../rules/collision';
+import type { CampfireState, GameState } from '../state';
+import { resolveCircleObstacleCollision, resolveMapCollisions, type CircleObstacle } from '../rules/collision';
 import { clamp, normalizeAxis } from '../rules/math';
 
 const rollCost = 26;
@@ -9,6 +9,7 @@ const cleanerRollCost = 22;
 const rollDurationMs = 280;
 const rollCooldownMs = 420;
 const cleanerRollCooldownMs = 360;
+const campfireCollisionRadius = 28;
 
 export const updatePlayer = (state: GameState, actions: ActionState, deltaMs: number): void => {
   if (state.world.status !== 'playing') {
@@ -53,7 +54,8 @@ export const updatePlayer = (state: GameState, actions: ActionState, deltaMs: nu
     startingArea.width - startingArea.boundsPadding.x
   );
   const resolvedX = resolveMapCollisions(nextX, player.y);
-  player.x = clamp(resolvedX.x, startingArea.boundsPadding.x, startingArea.width - startingArea.boundsPadding.x);
+  const campfireResolvedX = resolveCampfireCollisions(state.campfires, resolvedX.x, resolvedX.y);
+  player.x = clamp(campfireResolvedX.x, startingArea.boundsPadding.x, startingArea.width - startingArea.boundsPadding.x);
 
   const nextY = clamp(
     player.y + axis.y * moveSpeed * seconds,
@@ -61,11 +63,36 @@ export const updatePlayer = (state: GameState, actions: ActionState, deltaMs: nu
     startingArea.height - startingArea.boundsPadding.y
   );
   const resolvedY = resolveMapCollisions(player.x, nextY);
-  player.x = clamp(resolvedY.x, startingArea.boundsPadding.x, startingArea.width - startingArea.boundsPadding.x);
-  player.y = clamp(resolvedY.y, startingArea.boundsPadding.y, startingArea.height - startingArea.boundsPadding.y);
+  const campfireResolvedY = resolveCampfireCollisions(state.campfires, resolvedY.x, resolvedY.y);
+  player.x = clamp(campfireResolvedY.x, startingArea.boundsPadding.x, startingArea.width - startingArea.boundsPadding.x);
+  player.y = clamp(campfireResolvedY.y, startingArea.boundsPadding.y, startingArea.height - startingArea.boundsPadding.y);
 
   const hungerPenalty = player.hunger < 18 ? 0.35 : 1;
   const coldPressure = state.world.openingStage === 'open' ? 0 : state.world.cold / state.world.maxCold;
   const coldPenalty = 1 - coldPressure * 0.65;
   player.stamina = clamp(player.stamina + 18 * hungerPenalty * coldPenalty * seconds, 0, player.maxStamina);
+};
+
+export const getCampfireCollisionObstacles = (campfires: readonly CampfireState[]): CircleObstacle[] =>
+  campfires.map((campfire) => ({
+    id: `collision-${campfire.id}`,
+    kind: 'campfire',
+    x: campfire.x,
+    y: campfire.y + 8,
+    radius: campfireCollisionRadius
+  }));
+
+const resolveCampfireCollisions = (campfires: readonly CampfireState[], x: number, y: number) => {
+  let resolvedX = x;
+  let resolvedY = y;
+  let blocked = false;
+
+  for (const obstacle of getCampfireCollisionObstacles(campfires)) {
+    const resolved = resolveCircleObstacleCollision(resolvedX, resolvedY, obstacle);
+    resolvedX = resolved.x;
+    resolvedY = resolved.y;
+    blocked = blocked || resolved.blocked;
+  }
+
+  return { x: resolvedX, y: resolvedY, blocked };
 };

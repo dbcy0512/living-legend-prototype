@@ -2,7 +2,7 @@ import { startingArea } from '../../content/maps/startingArea';
 
 export type CircleObstacle = {
   id: string;
-  kind: 'tree';
+  kind: 'tree' | 'campfire';
   x: number;
   y: number;
   segmentEndY?: number;
@@ -91,12 +91,17 @@ export const resolveCircleObstacleCollision = (
   };
 };
 
-export const resolveMapCollisions = (x: number, y: number, actorRadius = playerCollisionRadius): CollisionResult => {
+export const resolveObstacleListCollisions = (
+  x: number,
+  y: number,
+  obstacles: readonly CircleObstacle[],
+  actorRadius = playerCollisionRadius
+): CollisionResult => {
   let resolvedX = x;
   let resolvedY = y;
   let blocked = false;
 
-  for (const obstacle of startingArea.collision) {
+  for (const obstacle of obstacles) {
     const resolved = resolveCircleObstacleCollision(resolvedX, resolvedY, obstacle, actorRadius);
     resolvedX = resolved.x;
     resolvedY = resolved.y;
@@ -109,3 +114,6 @@ export const resolveMapCollisions = (x: number, y: number, actorRadius = playerC
     blocked
   };
 };
+
+export const resolveMapCollisions = (x: number, y: number, actorRadius = playerCollisionRadius): CollisionResult =>
+  resolveObstacleListCollisions(x, y, startingArea.collision, actorRadius);

@@ -21,8 +21,9 @@ PixelLab generation date: 2026-05-21.
 
 - `source/pixellab-2026-05-21-starter-child-cold-v2/`
   - PixelLab character id: `aba028d2-7a81-4553-b952-1b570d22325c`.
-  - Reason not accepted: cleaner anime child identity than v1, but still not enough cold/vulnerability in the posture.
+  - Runtime status: normalized into `starter-child-warm-v1-*.png` and used as the first warmer posture set.
+  - Reason: cleaner anime child identity than v1 and less tucked posture than v3, making it useful once cold pressure lets go.
 
 ## Current Rule
 
-Do not wire character source rotations directly into runtime. First approve the visual direction, then normalize to the `starter-child-character-standard-v1` frame contract and only then add manifest/runtime animation keys.
+Do not wire character source rotations directly into runtime. First approve the visual direction, then normalize to the `starter-child-character-standard-v1` frame contract and only then add manifest/runtime animation keys. Runtime character state should stay dynamic: cold, warming, hurt, exhausted, and combat states need separate texture or animation sets as those systems come online.

@@ -39,6 +39,14 @@ export class BootScene extends Phaser.Scene {
     this.load.image(assetKeys.playerSouthWest, 'assets/characters/starter-child-cold-v3-south-west.png');
     this.load.image(assetKeys.playerNorthEast, 'assets/characters/starter-child-cold-v3-north-east.png');
     this.load.image(assetKeys.playerNorthWest, 'assets/characters/starter-child-cold-v3-north-west.png');
+    this.load.image(assetKeys.playerWarmSouth, 'assets/characters/starter-child-warm-v1-south.png');
+    this.load.image(assetKeys.playerWarmNorth, 'assets/characters/starter-child-warm-v1-north.png');
+    this.load.image(assetKeys.playerWarmEast, 'assets/characters/starter-child-warm-v1-east.png');
+    this.load.image(assetKeys.playerWarmWest, 'assets/characters/starter-child-warm-v1-west.png');
+    this.load.image(assetKeys.playerWarmSouthEast, 'assets/characters/starter-child-warm-v1-south-east.png');
+    this.load.image(assetKeys.playerWarmSouthWest, 'assets/characters/starter-child-warm-v1-south-west.png');
+    this.load.image(assetKeys.playerWarmNorthEast, 'assets/characters/starter-child-warm-v1-north-east.png');
+    this.load.image(assetKeys.playerWarmNorthWest, 'assets/characters/starter-child-warm-v1-north-west.png');
     this.load.image(assetKeys.enemy, 'assets/enemies/wolf-idle-watch-game-v1.png');
     this.load.spritesheet(assetKeys.wolfIdleWatch, 'assets/enemies/wolf-idle-watch-sheet-v2.png', {
       frameWidth: 96,

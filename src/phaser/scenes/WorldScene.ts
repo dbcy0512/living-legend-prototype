@@ -569,12 +569,13 @@ export class WorldScene extends Phaser.Scene {
     const shadow = this.player.getByName('player-shadow') as Phaser.GameObjects.Image | undefined;
     const heldItem = this.player.getByName('player-held-item') as Phaser.GameObjects.Image | undefined;
     const rolling = this.state.combat.phase === 'rolling';
+    const coldBody = this.isPlayerColdBody(coldPressure);
 
     this.player.setScale(rolling ? 0.9 : 1);
     this.player.rotation = rolling ? Math.sin(this.state.world.windPhase * 18) * 0.14 : 0;
 
     if (body) {
-      body.setTexture(this.getPlayerTextureKey());
+      body.setTexture(this.getPlayerTextureKey(coldBody));
       body.setScale(playerBodyScale * (1 - coldPressure * 0.07), playerBodyScale * (1 + coldPressure * 0.08));
       body.setY(coldPressure * 2);
       if (coldPressure > 0.18) {
@@ -592,16 +593,20 @@ export class WorldScene extends Phaser.Scene {
     this.syncPlayerEquipmentView(heldItem, coldPressure);
   }
 
-  private getPlayerTextureKey(): string {
+  private isPlayerColdBody(coldPressure: number): boolean {
+    return this.state.world.openingStage !== 'open' && coldPressure > 0.28;
+  }
+
+  private getPlayerTextureKey(coldBody: boolean): string {
     switch (this.state.player.facing) {
       case 'north':
-        return assetKeys.playerNorth;
+        return coldBody ? assetKeys.playerNorth : assetKeys.playerWarmNorth;
       case 'south':
-        return assetKeys.playerSouth;
+        return coldBody ? assetKeys.playerSouth : assetKeys.playerWarmSouth;
       case 'west':
-        return assetKeys.playerWest;
+        return coldBody ? assetKeys.playerWest : assetKeys.playerWarmWest;
       case 'east':
-        return assetKeys.playerEast;
+        return coldBody ? assetKeys.playerEast : assetKeys.playerWarmEast;
     }
   }
 
@@ -782,6 +787,12 @@ export class WorldScene extends Phaser.Scene {
 
     this.collisionDebug.lineStyle(2, 0xfff3a3, 0.85);
     this.collisionDebug.strokeCircle(this.state.player.x, this.state.player.y, 14);
+    this.collisionDebug.lineStyle(2, 0xff8a3d, 0.9);
+    this.collisionDebug.fillStyle(0xff8a3d, 0.12);
+    for (const campfire of this.state.campfires) {
+      this.collisionDebug.fillCircle(campfire.x, campfire.y + 8, 28);
+      this.collisionDebug.strokeCircle(campfire.x, campfire.y + 8, 28);
+    }
 
     this.collisionDebug.lineStyle(1, 0xb7f7c6, 0.62);
     for (const tree of this.treeViews) {

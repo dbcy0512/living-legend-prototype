@@ -4,7 +4,7 @@ import { startingArea } from '../src/game/content/maps/startingArea';
 import { getPlayerCollisionRadius, resolveCircleObstacleCollision } from '../src/game/simulation/rules/collision';
 import { createGameState } from '../src/game/simulation/state';
 import { updateSimulation } from '../src/game/simulation/systems/simulationSystem';
-import { updatePlayer } from '../src/game/simulation/systems/playerSystem';
+import { getCampfireCollisionObstacles, updatePlayer } from '../src/game/simulation/systems/playerSystem';
 
 describe('player stamina and dodge', () => {
   it('spends stamina and grants brief invulnerability when dodge roll starts', () => {
@@ -79,5 +79,19 @@ describe('player stamina and dodge', () => {
     const result = resolveCircleObstacleCollision(obstacle.x, tooLowForTrunk, obstacle);
 
     expect(result.blocked).toBe(false);
+  });
+
+  it('blocks movement into campfire collision from world state', () => {
+    const state = createGameState();
+    const actions = idleActions();
+    actions.moveY = 1;
+    const fire = state.campfires[0];
+    const fireCollision = getCampfireCollisionObstacles(state.campfires)[0];
+    state.player.x = fire.x;
+    state.player.y = fireCollision.y - fireCollision.radius - getPlayerCollisionRadius() - 2;
+
+    updatePlayer(state, actions, 200);
+
+    expect(state.player.y).toBeLessThanOrEqual(fireCollision.y - fireCollision.radius - getPlayerCollisionRadius());
   });
 });

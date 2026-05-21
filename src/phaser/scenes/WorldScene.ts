@@ -582,13 +582,8 @@ export class WorldScene extends Phaser.Scene {
     const body = this.add.sprite(0, 0, definition.assetKey);
     body.setName('enemy-body');
     body.setOrigin(0.5, 0.78);
-    if (enemy.kind === 'mire-spider') {
-      body.setScale(0.76);
-    } else if (enemy.kind === 'violet-moss-blob') {
-      body.setScale(0.82);
-    } else {
-      body.setScale(0.78);
-    }
+    body.setData('enemy-kind', enemy.kind);
+    body.setScale(this.getEnemyBaseScale(enemy.kind));
     const container = this.add.container(enemy.x, enemy.y, [shadow, body]);
     container.setDepth(actorDepthBase + enemy.y * 0.001);
     return container;
@@ -611,8 +606,7 @@ export class WorldScene extends Phaser.Scene {
       sprite.setPosition(enemy.x, enemy.y);
       sprite.setDepth(actorDepthBase + enemy.y * 0.001);
       sprite.setAlpha(enemy.health > 0 ? 1 : 0.18);
-      sprite.setScale(enemy.mode === 'telegraphing' || enemy.mode === 'lunging' ? 1.08 : 1);
-      this.syncEnemyAnimation(sprite, enemy.mode);
+      this.syncEnemyAnimation(sprite, enemy);
     }
 
     for (const node of this.state.resources) {
@@ -916,24 +910,71 @@ export class WorldScene extends Phaser.Scene {
     this.campfireGlow.strokePath();
   }
 
-  private syncEnemyAnimation(sprite: Phaser.GameObjects.Container, mode: string): void {
+  private syncEnemyAnimation(sprite: Phaser.GameObjects.Container, enemy: EnemyState): void {
     const body = sprite.getByName('enemy-body') as Phaser.GameObjects.Sprite | undefined;
     if (!body) {
       return;
     }
 
     if (body.texture.key !== assetKeys.wolfIdleWatch) {
+      this.syncSmallEnemyMotion(sprite, body, enemy);
       return;
     }
-    if (mode === 'watching' && body.anims.currentAnim?.key !== animationKeys.wolfIdleWatch) {
+    if (enemy.mode === 'watching' && body.anims.currentAnim?.key !== animationKeys.wolfIdleWatch) {
       body.play(animationKeys.wolfIdleWatch);
       return;
     }
 
-    if (mode !== 'watching' && body.anims.isPlaying) {
+    if (enemy.mode !== 'watching' && body.anims.isPlaying) {
       body.stop();
       body.setFrame(0);
     }
+  }
+
+  private syncSmallEnemyMotion(
+    sprite: Phaser.GameObjects.Container,
+    body: Phaser.GameObjects.Sprite,
+    enemy: EnemyState
+  ): void {
+    const phase = this.getStableResourceIndex(enemy.id) * 0.31;
+    const time = this.time.now * 0.001;
+    const attacking = enemy.mode === 'telegraphing' || enemy.mode === 'lunging';
+    const wounded = enemy.mode === 'recovering';
+
+    sprite.setScale(attacking ? 1.08 : wounded ? 0.96 : 1);
+    body.setScale(this.getEnemyBaseScale(enemy.kind));
+
+    if (enemy.kind === 'mire-spider') {
+      const skitter = Math.sin(time * 9.2 + phase);
+      body.setRotation(Phaser.Math.DegToRad(skitter * (attacking ? 5 : 2.4)));
+      body.setY(Math.abs(skitter) * -2);
+      body.setScale(this.getEnemyBaseScale(enemy.kind) * (1 + Math.abs(skitter) * 0.035), this.getEnemyBaseScale(enemy.kind) * (1 - Math.abs(skitter) * 0.02));
+      return;
+    }
+
+    if (enemy.kind === 'violet-moss-blob') {
+      const pulse = Math.sin(time * 3.2 + phase);
+      const squash = attacking ? 0.1 : 0.045;
+      body.setRotation(Phaser.Math.DegToRad(pulse * 1.2));
+      body.setY(pulse * -1.5);
+      body.setScale(this.getEnemyBaseScale(enemy.kind) * (1 + pulse * squash), this.getEnemyBaseScale(enemy.kind) * (1 - pulse * squash * 0.62));
+      return;
+    }
+
+    const twitch = Math.sin(time * 5.8 + phase);
+    body.setRotation(Phaser.Math.DegToRad(twitch * (attacking ? 4 : 1.7)));
+    body.setY(Math.max(0, twitch) * -1.8);
+    body.setScale(this.getEnemyBaseScale(enemy.kind) * (1 + Math.max(0, twitch) * 0.025));
+  }
+
+  private getEnemyBaseScale(kind: EnemyState['kind']): number {
+    if (kind === 'mire-spider') {
+      return 0.72;
+    }
+    if (kind === 'violet-moss-blob') {
+      return 0.78;
+    }
+    return 0.74;
   }
 
   private drawGatherPreview(): void {

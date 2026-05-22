@@ -171,6 +171,23 @@ export type ZoneOnePreparedGroundPatch = {
   designIntent: string;
 };
 
+export type ZoneOneLivingCue = {
+  id: string;
+  regionId: ZoneOneRegionId;
+  kind: 'water-ripple' | 'reed-sway' | 'grass-sway' | 'insect-mote' | 'spore-mote' | 'leaf-drift' | 'trail-dust';
+  center: {
+    x: number;
+    y: number;
+  };
+  radius: {
+    x: number;
+    y: number;
+  };
+  intensity: 1 | 2 | 3;
+  activeWhen: 'always' | 'day' | 'night' | 'dawn-dusk';
+  designIntent: string;
+};
+
 const zoneOneRegions = [
   {
     id: 'camp-clearing-hub',
@@ -896,6 +913,26 @@ const zoneOnePreparedGroundPatches = [
     designIntent: 'Shows the damp shoreline transition between usable water and clay/mud logic.'
   },
   {
+    id: 'animal-trail-trampled-path',
+    regionId: 'animal-trails',
+    material: 'trampled-animal-trail',
+    center: { x: 2180, y: 1120 },
+    radius: { x: 330, y: 112 },
+    opacity: 0.24,
+    scatterDensity: 2,
+    designIntent: 'Makes animal trails read as repeated movement through grass before enemies use the corridor.'
+  },
+  {
+    id: 'deep-forest-leaf-floor',
+    regionId: 'deep-forest',
+    material: 'leaf-litter',
+    center: { x: 1400, y: 390 },
+    radius: { x: 310, y: 170 },
+    opacity: 0.26,
+    scatterDensity: 3,
+    designIntent: 'Gives the deep forest a heavier old-leaf floor that can carry future stealth and tracking meaning.'
+  },
+  {
     id: 'clay-mud-wet-bank',
     regionId: 'clay-mud-bank',
     material: 'muddy-bank',
@@ -938,6 +975,81 @@ const zoneOnePreparedGroundPatches = [
 ] as const satisfies readonly ZoneOnePreparedGroundPatch[];
 
 export const getZoneOnePreparedGroundPatches = (): readonly ZoneOnePreparedGroundPatch[] => zoneOnePreparedGroundPatches;
+
+const zoneOneLivingCues = [
+  {
+    id: 'water-pool-surface-ripples',
+    regionId: 'water-source',
+    kind: 'water-ripple',
+    center: { x: 430, y: 1240 },
+    radius: { x: 245, y: 118 },
+    intensity: 3,
+    activeWhen: 'always',
+    designIntent: 'The pond surface should move subtly so the water source feels useful and alive.'
+  },
+  {
+    id: 'water-reed-wind-sway',
+    regionId: 'water-source',
+    kind: 'reed-sway',
+    center: { x: 585, y: 1168 },
+    radius: { x: 120, y: 62 },
+    intensity: 2,
+    activeWhen: 'always',
+    designIntent: 'Reeds should react to wind and imply future reed harvesting.'
+  },
+  {
+    id: 'camp-dry-grass-wind',
+    regionId: 'camp-clearing-hub',
+    kind: 'grass-sway',
+    center: { x: 1540, y: 840 },
+    radius: { x: 148, y: 68 },
+    intensity: 2,
+    activeWhen: 'always',
+    designIntent: 'The tinder patch should move lightly so dry grass is easier to notice.'
+  },
+  {
+    id: 'herb-berry-insect-life',
+    regionId: 'herb-berry-patch',
+    kind: 'insect-mote',
+    center: { x: 590, y: 450 },
+    radius: { x: 210, y: 124 },
+    intensity: 2,
+    activeWhen: 'day',
+    designIntent: 'The food and herb pocket should feel like a living plant patch, not only pickups.'
+  },
+  {
+    id: 'deadwood-spore-breath',
+    regionId: 'deadwood-mushrooms',
+    kind: 'spore-mote',
+    center: { x: 2208, y: 868 },
+    radius: { x: 210, y: 86 },
+    intensity: 2,
+    activeWhen: 'always',
+    designIntent: 'Deadwood should breathe with rot and spores before enemies are triggered.'
+  },
+  {
+    id: 'deep-forest-leaf-drift',
+    regionId: 'deep-forest',
+    kind: 'leaf-drift',
+    center: { x: 1400, y: 390 },
+    radius: { x: 260, y: 138 },
+    intensity: 2,
+    activeWhen: 'always',
+    designIntent: 'The deeper forest should feel older and less still than camp.'
+  },
+  {
+    id: 'animal-trail-dust-movement',
+    regionId: 'animal-trails',
+    kind: 'trail-dust',
+    center: { x: 2180, y: 1120 },
+    radius: { x: 285, y: 92 },
+    intensity: 1,
+    activeWhen: 'dawn-dusk',
+    designIntent: 'Animal trails should imply repeated movement even before the player sees an animal.'
+  }
+] as const satisfies readonly ZoneOneLivingCue[];
+
+export const getZoneOneLivingCues = (): readonly ZoneOneLivingCue[] => zoneOneLivingCues;
 
 export const isPointInsideZoneOneTrigger = (trigger: ZoneOneEnemyWaveTrigger, x: number, y: number): boolean =>
   x >= trigger.bounds.x &&

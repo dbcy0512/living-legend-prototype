@@ -3,7 +3,7 @@ import { idleActions, type ActionState } from '../../game/input/actions';
 import { animationKeys, assetKeys } from '../../game/assets/manifest';
 import { getEnemyDefinition } from '../../game/content/enemies';
 import { startingArea, startingAreaLayout, viewportSize } from '../../game/content/maps/startingArea';
-import { getZoneOneHabitatAnchors, getZoneOnePreparedGroundPatches } from '../../game/content/maps/zoneOneConcept';
+import { getZoneOneHabitatAnchors, getZoneOneLivingCues, getZoneOnePreparedGroundPatches } from '../../game/content/maps/zoneOneConcept';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
 import { getResourceProfile, isEcosystemResourceSource } from '../../game/content/resources';
 import type { CampfireState, EnemyState, GameState, ResourceNode } from '../../game/simulation/state';
@@ -1283,6 +1283,8 @@ export class WorldScene extends Phaser.Scene {
   private drawAmbientFx(): void {
     const world = this.state.world;
     this.ambientFx.clear();
+    this.drawLivingMapCues();
+
     const fireflyAlpha = Math.max(world.rawNightPressure, world.dawnDuskGlow * 0.7) * 0.72;
     if (fireflyAlpha <= 0.05) {
       return;
@@ -1296,6 +1298,124 @@ export class WorldScene extends Phaser.Scene {
       const pulse = (Math.sin(world.windPhase * 3.4 + i) + 1) / 2;
       this.ambientFx.fillStyle(i % 3 === 0 ? 0x8ff7ff : 0xfff3a3, fireflyAlpha * (0.32 + pulse * 0.5));
       this.ambientFx.fillCircle(baseX + driftX, baseY + driftY, 1.5 + pulse * 1.4);
+    }
+  }
+
+  private drawLivingMapCues(): void {
+    const world = this.state.world;
+    for (const cue of getZoneOneLivingCues()) {
+      if (!this.isLivingCueActive(cue.activeWhen)) {
+        continue;
+      }
+
+      switch (cue.kind) {
+        case 'water-ripple':
+          this.drawWaterRipples(cue.center.x, cue.center.y, cue.radius.x, cue.radius.y, cue.intensity);
+          break;
+        case 'reed-sway':
+          this.drawSwayLines(cue.center.x, cue.center.y, cue.radius.x, cue.radius.y, cue.intensity, 0x9abf62, 0.34);
+          break;
+        case 'grass-sway':
+          this.drawSwayLines(cue.center.x, cue.center.y, cue.radius.x, cue.radius.y, cue.intensity, 0xd8cc76, 0.28);
+          break;
+        case 'insect-mote':
+          this.drawMotes(cue.center.x, cue.center.y, cue.radius.x, cue.radius.y, cue.intensity, 0xf4e7a1, 0.38);
+          break;
+        case 'spore-mote':
+          this.drawMotes(cue.center.x, cue.center.y, cue.radius.x, cue.radius.y, cue.intensity, 0xb6d18a, 0.26);
+          break;
+        case 'leaf-drift':
+          this.drawLeafDrift(cue.center.x, cue.center.y, cue.radius.x, cue.radius.y, cue.intensity);
+          break;
+        case 'trail-dust':
+          this.drawMotes(cue.center.x, cue.center.y, cue.radius.x, cue.radius.y, cue.intensity, 0xb79c62, 0.24);
+          break;
+      }
+    }
+
+    if (world.localNightPressure > 0.45) {
+      this.drawMotes(2180, 850, 245, 104, 1, 0x9fd3aa, 0.18);
+    }
+  }
+
+  private isLivingCueActive(activeWhen: ReturnType<typeof getZoneOneLivingCues>[number]['activeWhen']): boolean {
+    const world = this.state.world;
+    if (activeWhen === 'always') {
+      return true;
+    }
+    if (activeWhen === 'day') {
+      return world.rawNightPressure < 0.35;
+    }
+    if (activeWhen === 'night') {
+      return world.rawNightPressure > 0.45;
+    }
+    return world.dawnDuskGlow > 0.22;
+  }
+
+  private drawWaterRipples(x: number, y: number, radiusX: number, radiusY: number, intensity: number): void {
+    for (let index = 0; index < intensity + 2; index += 1) {
+      const phase = this.state.world.windPhase * (0.8 + index * 0.12) + index * 1.7;
+      const offsetX = Math.sin(phase) * radiusX * 0.22;
+      const offsetY = Math.cos(phase * 0.8) * radiusY * 0.18;
+      const pulse = (Math.sin(phase * 1.6) + 1) / 2;
+      this.ambientFx.lineStyle(1, 0xa7f3f0, 0.16 + pulse * 0.16);
+      this.ambientFx.strokeEllipse(
+        x + offsetX,
+        y + offsetY,
+        radiusX * (0.34 + pulse * 0.18),
+        radiusY * (0.12 + pulse * 0.1)
+      );
+    }
+  }
+
+  private drawSwayLines(
+    x: number,
+    y: number,
+    radiusX: number,
+    radiusY: number,
+    intensity: number,
+    color: number,
+    alpha: number
+  ): void {
+    const count = intensity * 5;
+    this.ambientFx.lineStyle(2, color, alpha);
+    for (let index = 0; index < count; index += 1) {
+      const slot = index / Math.max(1, count - 1);
+      const baseX = x - radiusX * 0.72 + slot * radiusX * 1.44;
+      const baseY = y + Math.sin(index * 1.8) * radiusY * 0.42;
+      const lean = Math.sin(this.state.world.windPhase * 1.2 + index * 0.9) * 8;
+      this.ambientFx.lineBetween(baseX, baseY, baseX + lean, baseY - 14 - intensity * 3);
+    }
+  }
+
+  private drawMotes(
+    x: number,
+    y: number,
+    radiusX: number,
+    radiusY: number,
+    intensity: number,
+    color: number,
+    alpha: number
+  ): void {
+    const count = intensity * 6;
+    for (let index = 0; index < count; index += 1) {
+      const phase = this.state.world.windPhase * (0.9 + index * 0.04) + index * 1.31;
+      const driftX = Math.sin(phase) * radiusX * 0.58;
+      const driftY = Math.cos(phase * 1.17) * radiusY * 0.48;
+      const pulse = (Math.sin(phase * 2.2) + 1) / 2;
+      this.ambientFx.fillStyle(color, alpha * (0.35 + pulse * 0.65));
+      this.ambientFx.fillCircle(x + driftX, y + driftY, 1 + pulse * 1.2);
+    }
+  }
+
+  private drawLeafDrift(x: number, y: number, radiusX: number, radiusY: number, intensity: number): void {
+    const count = intensity * 4;
+    for (let index = 0; index < count; index += 1) {
+      const phase = this.state.world.windPhase * (0.62 + index * 0.06) + index * 1.5;
+      const driftX = Math.sin(phase) * radiusX * 0.62;
+      const driftY = Math.cos(phase * 0.7) * radiusY * 0.46;
+      this.ambientFx.fillStyle(index % 2 === 0 ? 0x8a7a3c : 0x405f36, 0.32);
+      this.ambientFx.fillEllipse(x + driftX, y + driftY, 8, 3);
     }
   }
 

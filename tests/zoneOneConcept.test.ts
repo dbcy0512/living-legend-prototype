@@ -3,6 +3,7 @@ import {
   getZoneOneCampSanctuary,
   getZoneOneEnemyWaveTriggers,
   getZoneOneHabitatAnchorsForTrigger,
+  getZoneOneLivingCues,
   getZoneOnePreparedGroundPatches,
   getZoneOneRegion,
   getZoneOneRegions,
@@ -184,6 +185,22 @@ describe('zone one concept map', () => {
     expect(reedBend?.material).toBe('reed-bank');
     expect(wetBank?.regionId).toBe('water-source');
     expect(wetBank?.material).toBe('muddy-bank');
+  });
+
+  it('authors living map cues for POIs that should not feel static', () => {
+    const cues = getZoneOneLivingCues();
+    const regionIds = new Set(getZoneOneRegions().map((region) => region.id));
+
+    expect(cues.length).toBeGreaterThanOrEqual(7);
+    expect(cues.every((cue) => regionIds.has(cue.regionId))).toBe(true);
+    expect(cues.map((cue) => cue.kind)).toContain('water-ripple');
+    expect(cues.map((cue) => cue.kind)).toContain('reed-sway');
+    expect(cues.map((cue) => cue.kind)).toContain('grass-sway');
+    expect(cues.map((cue) => cue.kind)).toContain('insect-mote');
+    expect(cues.map((cue) => cue.kind)).toContain('spore-mote');
+    expect(cues.map((cue) => cue.kind)).toContain('leaf-drift');
+    expect(cues.map((cue) => cue.kind)).toContain('trail-dust');
+    expect(cues.every((cue) => cue.intensity >= 1 && cue.intensity <= 3)).toBe(true);
   });
 
   it('spaces zone one POIs far enough to read as separate destinations', () => {

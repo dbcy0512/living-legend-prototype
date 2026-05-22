@@ -8,6 +8,7 @@ import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
 import { getResourceProfile, isEcosystemResourceSource } from '../../game/content/resources';
 import type { CampfireState, EnemyState, GameState, ResourceNode } from '../../game/simulation/state';
 import { getCampfireCollisionObstacles, getPlayerCollisionRadius } from '../../game/simulation/rules/collision';
+import { getCampfireLightStrength, resolveCampfireLighting, type CampfireLightingProfile } from '../../game/simulation/rules/lighting';
 import { isPlayerUnderThreat } from '../../game/simulation/systems/enemySystem';
 import { getNearestGatherableResource } from '../../game/simulation/systems/inventorySystem';
 import { updateSimulation } from '../../game/simulation/systems/simulationSystem';
@@ -241,6 +242,7 @@ export class WorldScene extends Phaser.Scene {
     this.threatTint.setScrollFactor(0);
     this.threatTint.setDepth(103);
     this.campfireGlow = this.add.graphics();
+    this.campfireGlow.setBlendMode(Phaser.BlendModes.ADD);
     this.campfireGlow.setDepth(9);
     this.gatherPreview = this.add.graphics();
     this.gatherPreview.setDepth(14);
@@ -730,11 +732,9 @@ export class WorldScene extends Phaser.Scene {
     this.syncCampfires();
     this.drawGatherPreview();
 
-    const safetyRelief = world.rawNightPressure - world.localNightPressure;
-    const nightAlpha = 0.06 + world.mood * 0.32 - safetyRelief * 0.16;
-    this.skyTint.setFillStyle(0x111827, nightAlpha);
-    this.dawnDuskTint.setAlpha(world.dawnDuskGlow * 0.16);
-    this.coldTint.setAlpha(coldPressure * 0.18);
+    this.skyTint.setFillStyle(world.lighting.ambient.color, world.lighting.ambient.alpha);
+    this.dawnDuskTint.setFillStyle(world.lighting.dawnDusk.color, world.lighting.dawnDusk.alpha);
+    this.coldTint.setFillStyle(world.lighting.cold.color, world.lighting.cold.alpha);
     this.syncTreeOcclusion();
     this.drawThreatFx();
     this.drawAmbientFx();
@@ -984,10 +984,29 @@ export class WorldScene extends Phaser.Scene {
       litLayer?.setScale(1);
       this.syncCampfireFlameFx(campfire, isActive, firstFlamePulse);
       if (isActive) {
+        const fireLight = resolveCampfireLighting({
+          fireStrength: getCampfireLightStrength(campfire),
+          lifePulse: this.state.world.lifePulse,
+          firstFlamePulse
+        });
+        this.drawCampfireLight(campfire, fireLight);
         this.drawFireSparks(campfire, firstFlamePulse);
         this.drawCampfireIntegrity(campfire);
       }
     }
+  }
+
+  private drawCampfireLight(campfire: CampfireState, fireLight: CampfireLightingProfile): void {
+    if (fireLight.alpha <= 0 || fireLight.radius <= 0) {
+      return;
+    }
+
+    this.campfireGlow.fillStyle(fireLight.color, fireLight.alpha * 0.16);
+    this.campfireGlow.fillCircle(campfire.x, campfire.y + 3, fireLight.radius);
+    this.campfireGlow.fillStyle(0xff8a2a, fireLight.alpha * 0.22);
+    this.campfireGlow.fillCircle(campfire.x, campfire.y + 1, fireLight.radius * 0.62);
+    this.campfireGlow.fillStyle(0xfff3a3, fireLight.alpha * 0.34);
+    this.campfireGlow.fillCircle(campfire.x, campfire.y - 4, fireLight.coreRadius);
   }
 
   private drawCampfireIntegrity(campfire: CampfireState): void {

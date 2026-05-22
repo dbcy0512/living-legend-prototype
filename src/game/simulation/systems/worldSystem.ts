@@ -2,6 +2,7 @@ import type { GameState } from '../state';
 import { createEcosystemResourceSeeds } from '../../content/ecosystem';
 import { clamp, distance } from '../rules/math';
 import { getWorldCyclePhase } from '../rules/dayNight';
+import { getCampfireLightStrength, resolveWorldLighting } from '../rules/lighting';
 import { forceEnemyRespawnGrace, isPlayerUnderThreat } from './enemySystem';
 
 const ecosystemRegenerationTime = 0.28;
@@ -37,6 +38,15 @@ export const updateWorld = (state: GameState, deltaMs: number): void => {
   updateEcosystemLifecycle(state);
 
   updateCold(state, seconds);
+  world.lighting = resolveWorldLighting({
+    rawNightPressure: world.rawNightPressure,
+    localNightPressure: world.localNightPressure,
+    dawnDuskGlow: world.dawnDuskGlow,
+    mood: world.mood,
+    coldRatio: world.cold / world.maxCold,
+    fireStrength: getActiveFireLightStrength(state),
+    lifePulse: world.lifePulse
+  });
 
   if (world.openingStage === 'open') {
     player.hunger = clamp(player.hunger - seconds * (0.18 + localNightPressure * 0.08), 0, player.maxHunger);
@@ -117,6 +127,12 @@ export const getDawnDuskGlow = (timeOfDay: number): number => {
   const dusk = bellCurve(timeOfDay, 0.68, 0.08);
   return clamp(Math.max(dawn, dusk), 0, 1);
 };
+
+export const getActiveFireLightStrength = (state: GameState): number =>
+  state.campfires.reduce(
+    (strongest, campfire) => Math.max(strongest, getCampfireLightStrength(campfire)),
+    0
+  );
 
 const updateCold = (state: GameState, seconds: number): void => {
   const world = state.world;

@@ -63,6 +63,27 @@ describe('living world pressure', () => {
     expect(getLocalNightPressure(state, 1)).toBeLessThan(1);
   });
 
+  it('keeps the renderer lighting profile derived from living world pressure', () => {
+    const state = createGameState();
+    state.world.timeOfDay = 0.9;
+    state.world.openingStage = 'open';
+    state.campfires.push({
+      id: 'campfire-test',
+      x: state.player.x,
+      y: state.player.y,
+      radius: 150,
+      fuelMs: 18000,
+      integrity: 100,
+      maxIntegrity: 100
+    });
+
+    updateWorld(state, 1000);
+
+    expect(state.world.lighting.ambient.alpha).toBeGreaterThan(0);
+    expect(state.world.lighting.campfire.radius).toBeGreaterThan(100);
+    expect(state.world.lighting.campfire.alpha).toBeGreaterThan(0);
+  });
+
   it('warms the player near the first flame and then opens the survival loop', () => {
     const state = createGameState();
     state.world.openingStage = 'first-flame';

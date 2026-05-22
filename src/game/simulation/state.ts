@@ -9,6 +9,7 @@ import type { MeleeSeed } from '../content/meleeSeeds';
 import { createStartingResourceSeeds, type ResourceKind, type ResourceSource } from '../content/resources';
 import type { WeaponAbilityId, WeaponAbilityStatusTag } from '../content/weaponAbilities';
 import type { WorldCyclePhase } from './rules/dayNight';
+import { createDefaultWorldLighting, type WorldLightingProfile } from './rules/lighting';
 
 export type Inventory = {
   twigs: number;
@@ -75,6 +76,7 @@ export type WorldState = {
   rawNightPressure: number;
   localNightPressure: number;
   dawnDuskGlow: number;
+  lighting: WorldLightingProfile;
   cold: number;
   maxCold: number;
   openingStage: 'cold' | 'first-flame' | 'open';
@@ -294,6 +296,7 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       rawNightPressure: 0,
       localNightPressure: 0,
       dawnDuskGlow: 0,
+      lighting: createDefaultWorldLighting(),
       cold: 100,
       maxCold: 100,
       openingStage: 'cold',

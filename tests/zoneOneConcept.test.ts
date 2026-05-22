@@ -167,6 +167,9 @@ describe('zone one concept map', () => {
     const campDryGrass = patches.find((patch) => patch.id === 'camp-dry-grass-edge');
     const herbBerry = patches.find((patch) => patch.id === 'herb-berry-flower-meadow');
     const stoneOutcrop = patches.find((patch) => patch.id === 'stone-outcrop-rubble-field');
+    const waterPool = patches.find((patch) => patch.id === 'water-source-pool');
+    const reedBend = patches.find((patch) => patch.id === 'water-source-reed-bend');
+    const wetBank = patches.find((patch) => patch.id === 'water-source-wet-bank');
 
     expect(campDryGrass?.regionId).toBe('camp-clearing-hub');
     expect(campDryGrass?.material).toBe('dry-clearing-edge');
@@ -175,6 +178,12 @@ describe('zone one concept map', () => {
     expect(herbBerry?.material).toBe('flower-meadow');
     expect(stoneOutcrop?.regionId).toBe('stone-outcrop');
     expect(stoneOutcrop?.material).toBe('stone-rubble');
+    expect(waterPool?.regionId).toBe('water-source');
+    expect(waterPool?.material).toBe('water-body');
+    expect(reedBend?.regionId).toBe('water-source');
+    expect(reedBend?.material).toBe('reed-bank');
+    expect(wetBank?.regionId).toBe('water-source');
+    expect(wetBank?.material).toBe('muddy-bank');
   });
 
   it('spaces zone one POIs far enough to read as separate destinations', () => {

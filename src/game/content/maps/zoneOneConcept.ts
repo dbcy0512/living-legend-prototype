@@ -149,6 +149,8 @@ export type ZoneOnePreparedGroundPatch = {
     | 'damp-deadwood-floor'
     | 'rotting-log-litter'
     | 'soft-shade-edge'
+    | 'water-body'
+    | 'reed-bank'
     | 'muddy-bank'
     | 'trampled-animal-trail'
     | 'leaf-litter'
@@ -862,6 +864,46 @@ const zoneOnePreparedGroundPatches = [
     opacity: 0.32,
     scatterDensity: 3,
     designIntent: 'Makes the stone outcrop read as exposed rubble and hard ground instead of stones dropped on grass.'
+  },
+  {
+    id: 'water-source-pool',
+    regionId: 'water-source',
+    material: 'water-body',
+    center: { x: 430, y: 1240 },
+    radius: { x: 285, y: 162 },
+    opacity: 0.82,
+    scatterDensity: 2,
+    designIntent: 'Makes the water source a real visible pond instead of a dark ground patch.'
+  },
+  {
+    id: 'water-source-reed-bend',
+    regionId: 'water-source',
+    material: 'reed-bank',
+    center: { x: 585, y: 1168 },
+    radius: { x: 132, y: 74 },
+    opacity: 0.48,
+    scatterDensity: 3,
+    designIntent: 'Creates a readable reed bend where future reeds, fish, and water gathering can anchor.'
+  },
+  {
+    id: 'water-source-wet-bank',
+    regionId: 'water-source',
+    material: 'muddy-bank',
+    center: { x: 565, y: 1318 },
+    radius: { x: 210, y: 84 },
+    opacity: 0.34,
+    scatterDensity: 2,
+    designIntent: 'Shows the damp shoreline transition between usable water and clay/mud logic.'
+  },
+  {
+    id: 'clay-mud-wet-bank',
+    regionId: 'clay-mud-bank',
+    material: 'muddy-bank',
+    center: { x: 860, y: 1285 },
+    radius: { x: 205, y: 108 },
+    opacity: 0.38,
+    scatterDensity: 2,
+    designIntent: 'Makes the clay and mud pocket visibly wet and connected to the nearby water source.'
   },
   {
     id: 'deadwood-damp-floor',

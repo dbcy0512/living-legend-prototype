@@ -290,8 +290,8 @@ export class WorldScene extends Phaser.Scene {
     this.ground.fillEllipse(590, 450, 520, 250);
     this.ground.fillStyle(0x263f35, 0.25);
     this.ground.fillEllipse(470, 790, 470, 210);
-    this.ground.fillStyle(0x132823, 0.34);
-    this.ground.fillEllipse(450, 1240, 620, 320);
+    this.ground.fillStyle(0x1b352b, 0.18);
+    this.ground.fillEllipse(450, 1240, 660, 350);
     this.ground.fillStyle(0x2a332b, 0.3);
     this.ground.fillEllipse(860, 1285, 390, 210);
     this.ground.fillStyle(0x16312d, 0.34);
@@ -336,9 +336,19 @@ export class WorldScene extends Phaser.Scene {
           this.ground.fillStyle(0x0e1c1a, alpha);
           this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
           break;
+        case 'water-body':
+          this.drawWaterBodyPatch(patch, alpha);
+          break;
+        case 'reed-bank':
+          this.ground.fillStyle(0x435a2f, alpha);
+          this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          this.drawPreparedPatchScatter(patch, 0x87a84a, 0x355f35);
+          this.drawReedPatch(patch);
+          break;
         case 'muddy-bank':
           this.ground.fillStyle(0x3b2c22, alpha);
           this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          this.drawPreparedPatchScatter(patch, 0x6f5740, 0x2f241c);
           break;
         case 'trampled-animal-trail':
           this.ground.fillStyle(0x5b5330, alpha);
@@ -426,6 +436,42 @@ export class WorldScene extends Phaser.Scene {
       this.ground.lineBetween(patch.center.x - 72, patch.center.y - 18, patch.center.x - 38, patch.center.y - 32);
       this.ground.lineBetween(patch.center.x + 12, patch.center.y + 22, patch.center.x + 58, patch.center.y + 8);
       this.ground.lineBetween(patch.center.x + 78, patch.center.y - 12, patch.center.x + 104, patch.center.y - 28);
+    }
+  }
+
+  private drawWaterBodyPatch(
+    patch: ReturnType<typeof getZoneOnePreparedGroundPatches>[number],
+    alpha: number
+  ): void {
+    this.ground.fillStyle(0x173f4d, alpha);
+    this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+    this.ground.fillStyle(0x2f6f85, alpha * 0.68);
+    this.ground.fillEllipse(patch.center.x - 34, patch.center.y - 18, patch.radius.x * 1.42, patch.radius.y * 1.08);
+    this.ground.fillStyle(0x68a9aa, alpha * 0.34);
+    this.ground.fillEllipse(patch.center.x - 74, patch.center.y - 42, patch.radius.x * 0.54, patch.radius.y * 0.34);
+    this.ground.lineStyle(4, 0x0f2730, 0.62);
+    this.ground.strokeEllipse(patch.center.x, patch.center.y + 4, patch.radius.x * 2.02, patch.radius.y * 1.96);
+    this.ground.lineStyle(2, 0xa7f3f0, 0.32);
+    this.ground.lineBetween(patch.center.x - 166, patch.center.y - 42, patch.center.x - 72, patch.center.y - 58);
+    this.ground.lineBetween(patch.center.x - 34, patch.center.y + 10, patch.center.x + 92, patch.center.y - 4);
+    this.ground.lineBetween(patch.center.x + 32, patch.center.y + 66, patch.center.x + 154, patch.center.y + 44);
+  }
+
+  private drawReedPatch(patch: ReturnType<typeof getZoneOnePreparedGroundPatches>[number]): void {
+    const reeds = [
+      { x: -0.48, y: 0.24, h: 24 },
+      { x: -0.22, y: -0.12, h: 30 },
+      { x: 0.04, y: 0.1, h: 26 },
+      { x: 0.3, y: -0.24, h: 34 },
+      { x: 0.54, y: 0.18, h: 22 }
+    ];
+
+    this.ground.lineStyle(3, 0x7da050, 0.74);
+    for (const reed of reeds) {
+      const x = patch.center.x + reed.x * patch.radius.x;
+      const y = patch.center.y + reed.y * patch.radius.y;
+      this.ground.lineBetween(x, y, x + 4, y - reed.h);
+      this.ground.lineBetween(x + 6, y + 2, x + 1, y - reed.h * 0.82);
     }
   }
 

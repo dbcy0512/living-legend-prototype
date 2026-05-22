@@ -47,6 +47,38 @@ export class BootScene extends Phaser.Scene {
     this.load.image(assetKeys.playerSouthWest, 'assets/characters/starter-child-cold-v3-south-west.png');
     this.load.image(assetKeys.playerNorthEast, 'assets/characters/starter-child-cold-v3-north-east.png');
     this.load.image(assetKeys.playerNorthWest, 'assets/characters/starter-child-cold-v3-north-west.png');
+    this.load.spritesheet(assetKeys.playerColdIdleSouth, 'assets/characters/starter-child-cold-idle-v1-south.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
+    this.load.spritesheet(assetKeys.playerColdIdleNorth, 'assets/characters/starter-child-cold-idle-v1-north.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
+    this.load.spritesheet(assetKeys.playerColdIdleEast, 'assets/characters/starter-child-cold-idle-v1-east.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
+    this.load.spritesheet(assetKeys.playerColdIdleWest, 'assets/characters/starter-child-cold-idle-v1-west.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
+    this.load.spritesheet(assetKeys.playerColdWalkSouth, 'assets/characters/starter-child-cold-walk-v1-south.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
+    this.load.spritesheet(assetKeys.playerColdWalkNorth, 'assets/characters/starter-child-cold-walk-v1-north.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
+    this.load.spritesheet(assetKeys.playerColdWalkEast, 'assets/characters/starter-child-cold-walk-v1-east.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
+    this.load.spritesheet(assetKeys.playerColdWalkWest, 'assets/characters/starter-child-cold-walk-v1-west.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
     this.load.image(assetKeys.playerWarmSouth, 'assets/characters/starter-child-warm-v1-south.png');
     this.load.image(assetKeys.playerWarmNorth, 'assets/characters/starter-child-warm-v1-north.png');
     this.load.image(assetKeys.playerWarmEast, 'assets/characters/starter-child-warm-v1-east.png');
@@ -55,6 +87,22 @@ export class BootScene extends Phaser.Scene {
     this.load.image(assetKeys.playerWarmSouthWest, 'assets/characters/starter-child-warm-v1-south-west.png');
     this.load.image(assetKeys.playerWarmNorthEast, 'assets/characters/starter-child-warm-v1-north-east.png');
     this.load.image(assetKeys.playerWarmNorthWest, 'assets/characters/starter-child-warm-v1-north-west.png');
+    this.load.spritesheet(assetKeys.playerWarmIdleSouth, 'assets/characters/starter-child-warm-idle-v1-south.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
+    this.load.spritesheet(assetKeys.playerWarmIdleNorth, 'assets/characters/starter-child-warm-idle-v1-north.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
+    this.load.spritesheet(assetKeys.playerWarmIdleEast, 'assets/characters/starter-child-warm-idle-v1-east.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
+    this.load.spritesheet(assetKeys.playerWarmIdleWest, 'assets/characters/starter-child-warm-idle-v1-west.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    });
     this.load.image(assetKeys.enemyMireSpider, 'assets/enemies/mire-spider-v2.png');
     this.load.image(assetKeys.enemyVioletMossBlob, 'assets/enemies/violet-moss-blob-v2.png');
     this.load.image(assetKeys.enemyThornShellMite, 'assets/enemies/thorn-shell-mite-v2.png');
@@ -72,16 +120,49 @@ export class BootScene extends Phaser.Scene {
   }
 
   private createAnimations(): void {
-    if (this.anims.exists(animationKeys.wolfIdleWatch)) {
+    if (!this.anims.exists(animationKeys.wolfIdleWatch)) {
+      this.anims.create({
+        key: animationKeys.wolfIdleWatch,
+        frames: this.anims.generateFrameNumbers(assetKeys.wolfIdleWatch, { frames: [0, 1, 2, 1] }),
+        frameRate: 4,
+        repeat: -1,
+        repeatDelay: 1400
+      });
+    }
+
+    this.createDirectionalAnimation(animationKeys.playerColdIdleSouth, assetKeys.playerColdIdleSouth, 4, 5, 180);
+    this.createDirectionalAnimation(animationKeys.playerColdIdleNorth, assetKeys.playerColdIdleNorth, 4, 5, 180);
+    this.createDirectionalAnimation(animationKeys.playerColdIdleEast, assetKeys.playerColdIdleEast, 4, 5, 180);
+    this.createDirectionalAnimation(animationKeys.playerColdIdleWest, assetKeys.playerColdIdleWest, 4, 5, 180);
+    this.createDirectionalAnimation(animationKeys.playerColdWalkSouth, assetKeys.playerColdWalkSouth, 6, 8, 0);
+    this.createDirectionalAnimation(animationKeys.playerColdWalkNorth, assetKeys.playerColdWalkNorth, 6, 8, 0);
+    this.createDirectionalAnimation(animationKeys.playerColdWalkEast, assetKeys.playerColdWalkEast, 6, 8, 0);
+    this.createDirectionalAnimation(animationKeys.playerColdWalkWest, assetKeys.playerColdWalkWest, 6, 8, 0);
+    this.createDirectionalAnimation(animationKeys.playerWarmIdleSouth, assetKeys.playerWarmIdleSouth, 4, 4, 260);
+    this.createDirectionalAnimation(animationKeys.playerWarmIdleNorth, assetKeys.playerWarmIdleNorth, 4, 4, 260);
+    this.createDirectionalAnimation(animationKeys.playerWarmIdleEast, assetKeys.playerWarmIdleEast, 4, 4, 260);
+    this.createDirectionalAnimation(animationKeys.playerWarmIdleWest, assetKeys.playerWarmIdleWest, 4, 4, 260);
+  }
+
+  private createDirectionalAnimation(
+    key: string,
+    textureKey: string,
+    frameCount: number,
+    frameRate: number,
+    repeatDelay: number
+  ): void {
+    if (this.anims.exists(key)) {
       return;
     }
 
     this.anims.create({
-      key: animationKeys.wolfIdleWatch,
-      frames: this.anims.generateFrameNumbers(assetKeys.wolfIdleWatch, { frames: [0, 1, 2, 1] }),
-      frameRate: 4,
+      key,
+      frames: this.anims.generateFrameNumbers(textureKey, {
+        frames: Array.from({ length: frameCount }, (_, index) => index)
+      }),
+      frameRate,
       repeat: -1,
-      repeatDelay: 1400
+      repeatDelay
     });
   }
 

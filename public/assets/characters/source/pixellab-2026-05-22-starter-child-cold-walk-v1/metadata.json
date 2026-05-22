@@ -1,0 +1,233 @@
+{
+  "group_id": "b00c740a-4f67-491e-87d6-260e09f876d3",
+  "states": [
+    {
+      "character": {
+        "id": "aba028d2-7a81-4553-b952-1b570d22325c",
+        "name": "Starter Child Cold Seed v2",
+        "prompt": "Top-down 3/4 cel-shaded anime survival RPG runaway child in a cold idle survival stance, visibly not ready, shoulders raised, elbows tucked close, hands near chest for warmth, slight inward hunch, small cautious feet, worn simple ragged cloth tunic and short wrap, messy dark hair, bare hands, no weapon, no backpack, no armor, readable empty hand sockets for future tools and gear, gritty earth and cool dawn palette, vulnerable but still standing, transparent background, no scenery, no ground, no shadow, no labels, no UI, not heroic, not smiling, not chibi cute, not adult proportions.",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "high top-down",
+        "created_at": "2026-05-21T01:16:26.327146+00:00"
+      },
+      "folder": "Starter_Child_Cold_Seed_v2",
+      "frames": {
+        "rotations": {
+          "south": "Starter_Child_Cold_Seed_v2/rotations/south.png",
+          "south-east": "Starter_Child_Cold_Seed_v2/rotations/south-east.png",
+          "east": "Starter_Child_Cold_Seed_v2/rotations/east.png",
+          "north-east": "Starter_Child_Cold_Seed_v2/rotations/north-east.png",
+          "north": "Starter_Child_Cold_Seed_v2/rotations/north.png",
+          "north-west": "Starter_Child_Cold_Seed_v2/rotations/north-west.png",
+          "west": "Starter_Child_Cold_Seed_v2/rotations/west.png",
+          "south-west": "Starter_Child_Cold_Seed_v2/rotations/south-west.png"
+        },
+        "animations": {
+          "animating-0bbc4e87": {
+            "south-east": [
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south-east/frame_000.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south-east/frame_001.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south-east/frame_002.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south-east/frame_003.png"
+            ],
+            "south-west": [
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south-west/frame_000.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south-west/frame_001.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south-west/frame_002.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south-west/frame_003.png"
+            ],
+            "north-west": [
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north-west/frame_000.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north-west/frame_001.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north-west/frame_002.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north-west/frame_003.png"
+            ],
+            "west": [
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/west/frame_000.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/west/frame_001.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/west/frame_002.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/west/frame_003.png"
+            ],
+            "north": [
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north/frame_000.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north/frame_001.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north/frame_002.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north/frame_003.png"
+            ],
+            "north-east": [
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north-east/frame_000.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north-east/frame_001.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north-east/frame_002.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/north-east/frame_003.png"
+            ],
+            "south": [
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south/frame_000.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south/frame_001.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south/frame_002.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/south/frame_003.png"
+            ],
+            "east": [
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/east/frame_000.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/east/frame_001.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/east/frame_002.png",
+              "Starter_Child_Cold_Seed_v2/animations/animating-0bbc4e87/east/frame_003.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "21e5e1bc-deaf-4a23-9556-fb093a240444",
+        "name": "Change only the pose",
+        "prompt": "Top-down 3/4 cel-shaded anime survival RPG runaway child in a cold idle survival stance, visibly not ready, shoulders raised, elbows tucked close, hands near chest for warmth, slight inward hunch, small cautious feet, worn simple ragged cloth tunic and short wrap, messy dark hair, bare hands, no weapon, no backpack, no armor, readable empty hand sockets for future tools and gear, gritty earth and cool dawn palette, vulnerable but still standing, transparent background, no scenery, no ground, no shadow, no labels, no UI, not heroic, not smiling, not chibi cute, not adult proportions.",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "high top-down",
+        "created_at": "2026-05-21T01:19:51.850637+00:00"
+      },
+      "folder": "Change_only_the_pose",
+      "frames": {
+        "rotations": {
+          "south": "Change_only_the_pose/rotations/south.png",
+          "south-east": "Change_only_the_pose/rotations/south-east.png",
+          "east": "Change_only_the_pose/rotations/east.png",
+          "north-east": "Change_only_the_pose/rotations/north-east.png",
+          "north": "Change_only_the_pose/rotations/north.png",
+          "north-west": "Change_only_the_pose/rotations/north-west.png",
+          "west": "Change_only_the_pose/rotations/west.png",
+          "south-west": "Change_only_the_pose/rotations/south-west.png"
+        },
+        "animations": {
+          "animating-d753774c": {
+            "east": [
+              "Change_only_the_pose/animations/animating-d753774c/east/frame_000.png",
+              "Change_only_the_pose/animations/animating-d753774c/east/frame_001.png",
+              "Change_only_the_pose/animations/animating-d753774c/east/frame_002.png",
+              "Change_only_the_pose/animations/animating-d753774c/east/frame_003.png"
+            ],
+            "west": [
+              "Change_only_the_pose/animations/animating-d753774c/west/frame_000.png",
+              "Change_only_the_pose/animations/animating-d753774c/west/frame_001.png",
+              "Change_only_the_pose/animations/animating-d753774c/west/frame_002.png",
+              "Change_only_the_pose/animations/animating-d753774c/west/frame_003.png"
+            ],
+            "north-west": [
+              "Change_only_the_pose/animations/animating-d753774c/north-west/frame_000.png",
+              "Change_only_the_pose/animations/animating-d753774c/north-west/frame_001.png",
+              "Change_only_the_pose/animations/animating-d753774c/north-west/frame_002.png",
+              "Change_only_the_pose/animations/animating-d753774c/north-west/frame_003.png"
+            ],
+            "south": [
+              "Change_only_the_pose/animations/animating-d753774c/south/frame_000.png",
+              "Change_only_the_pose/animations/animating-d753774c/south/frame_001.png",
+              "Change_only_the_pose/animations/animating-d753774c/south/frame_002.png",
+              "Change_only_the_pose/animations/animating-d753774c/south/frame_003.png"
+            ],
+            "south-west": [
+              "Change_only_the_pose/animations/animating-d753774c/south-west/frame_000.png",
+              "Change_only_the_pose/animations/animating-d753774c/south-west/frame_001.png",
+              "Change_only_the_pose/animations/animating-d753774c/south-west/frame_002.png",
+              "Change_only_the_pose/animations/animating-d753774c/south-west/frame_003.png"
+            ],
+            "north-east": [
+              "Change_only_the_pose/animations/animating-d753774c/north-east/frame_000.png",
+              "Change_only_the_pose/animations/animating-d753774c/north-east/frame_001.png",
+              "Change_only_the_pose/animations/animating-d753774c/north-east/frame_002.png",
+              "Change_only_the_pose/animations/animating-d753774c/north-east/frame_003.png"
+            ],
+            "south-east": [
+              "Change_only_the_pose/animations/animating-d753774c/south-east/frame_000.png",
+              "Change_only_the_pose/animations/animating-d753774c/south-east/frame_001.png",
+              "Change_only_the_pose/animations/animating-d753774c/south-east/frame_002.png",
+              "Change_only_the_pose/animations/animating-d753774c/south-east/frame_003.png"
+            ],
+            "north": [
+              "Change_only_the_pose/animations/animating-d753774c/north/frame_000.png",
+              "Change_only_the_pose/animations/animating-d753774c/north/frame_001.png",
+              "Change_only_the_pose/animations/animating-d753774c/north/frame_002.png",
+              "Change_only_the_pose/animations/animating-d753774c/north/frame_003.png"
+            ]
+          },
+          "animating-dadf6b53": {
+            "north-west": [
+              "Change_only_the_pose/animations/animating-dadf6b53/north-west/frame_000.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north-west/frame_001.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north-west/frame_002.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north-west/frame_003.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north-west/frame_004.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north-west/frame_005.png"
+            ],
+            "north": [
+              "Change_only_the_pose/animations/animating-dadf6b53/north/frame_000.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north/frame_001.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north/frame_002.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north/frame_003.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north/frame_004.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north/frame_005.png"
+            ],
+            "east": [
+              "Change_only_the_pose/animations/animating-dadf6b53/east/frame_000.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/east/frame_001.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/east/frame_002.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/east/frame_003.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/east/frame_004.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/east/frame_005.png"
+            ],
+            "south-east": [
+              "Change_only_the_pose/animations/animating-dadf6b53/south-east/frame_000.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south-east/frame_001.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south-east/frame_002.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south-east/frame_003.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south-east/frame_004.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south-east/frame_005.png"
+            ],
+            "south-west": [
+              "Change_only_the_pose/animations/animating-dadf6b53/south-west/frame_000.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south-west/frame_001.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south-west/frame_002.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south-west/frame_003.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south-west/frame_004.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south-west/frame_005.png"
+            ],
+            "north-east": [
+              "Change_only_the_pose/animations/animating-dadf6b53/north-east/frame_000.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north-east/frame_001.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north-east/frame_002.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north-east/frame_003.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north-east/frame_004.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/north-east/frame_005.png"
+            ],
+            "west": [
+              "Change_only_the_pose/animations/animating-dadf6b53/west/frame_000.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/west/frame_001.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/west/frame_002.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/west/frame_003.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/west/frame_004.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/west/frame_005.png"
+            ],
+            "south": [
+              "Change_only_the_pose/animations/animating-dadf6b53/south/frame_000.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south/frame_001.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south/frame_002.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south/frame_003.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south/frame_004.png",
+              "Change_only_the_pose/animations/animating-dadf6b53/south/frame_005.png"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "3.0",
+  "export_date": "2026-05-22T04:32:31.492425"
+}

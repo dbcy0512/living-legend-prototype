@@ -23,6 +23,8 @@ describe('simulation status', () => {
     expect(state.equipment.mainHand).toBe('bare-hands');
     expect(state.equipment.tool).toBe('none');
     expect(state.equipment.body).toBe('worn-cloth');
+    expect(state.equipment.back).toBe('none');
+    expect(state.equipment.offHand).toBe('none');
     expect(state.hotbar.utilityCooldownMs).toBe(0);
   });
 

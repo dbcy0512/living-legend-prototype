@@ -27,3 +27,26 @@ PixelLab generation date: 2026-05-21.
 ## Current Rule
 
 Do not wire character source rotations directly into runtime. First approve the visual direction, then normalize to the `starter-child-character-standard-v1` frame contract and only then add manifest/runtime animation keys. Runtime character state should stay dynamic: cold, warming, hurt, exhausted, and combat states need separate texture or animation sets as those systems come online.
+
+## Runtime Animation Intake
+
+- `source/pixellab-2026-05-22-starter-child-cold-idle-v1/`
+  - PixelLab character id: `21e5e1bc-deaf-4a23-9556-fb093a240444`.
+  - Source animation: `breathing-idle`, 4 frames per direction.
+  - Runtime sheets: `starter-child-cold-idle-v1-{south,north,east,west}.png`.
+  - Use: cold-condition idle when the child has not fully warmed up.
+  - Normalization: 68 x 68 PixelLab frames scaled into 64 x 64 runtime frames.
+
+- `source/pixellab-2026-05-22-starter-child-warm-idle-v1/`
+  - PixelLab character id: `aba028d2-7a81-4553-b952-1b570d22325c`.
+  - Source animation: `breathing-idle`, 4 frames per direction.
+  - Runtime sheets: `starter-child-warm-idle-v1-{south,north,east,west}.png`.
+  - Use: warmer idle after the opening cold pressure lets go.
+  - Normalization: 68 x 68 PixelLab frames scaled into 64 x 64 runtime frames.
+
+- `source/pixellab-2026-05-22-starter-child-cold-walk-v1/`
+  - PixelLab character id: `21e5e1bc-deaf-4a23-9556-fb093a240444`.
+  - Source animation: `walking-6-frames`, 6 frames per direction.
+  - Runtime sheets: `starter-child-cold-walk-v1-{south,north,east,west}.png`.
+  - Use: first runtime walk animation. This temporarily serves all movement until a separate warm walk state is approved.
+  - Normalization: 68 x 68 PixelLab frames scaled into 64 x 64 runtime frames.

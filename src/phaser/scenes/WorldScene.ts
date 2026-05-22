@@ -5,6 +5,7 @@ import { getEnemyDefinition } from '../../game/content/enemies';
 import { startingArea, startingAreaLayout, viewportSize } from '../../game/content/maps/startingArea';
 import { getZoneOneHabitatAnchors, getZoneOneLivingCues, getZoneOnePreparedGroundPatches } from '../../game/content/maps/zoneOneConcept';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
+import { getStarterChildPaperDollLayers } from '../../game/content/paperDoll';
 import { getResourceProfile, isEcosystemResourceSource } from '../../game/content/resources';
 import type { CampfireState, EnemyState, GameState, ResourceNode } from '../../game/simulation/state';
 import { getCampfireCollisionObstacles, getPlayerCollisionRadius } from '../../game/simulation/rules/collision';
@@ -659,7 +660,7 @@ export class WorldScene extends Phaser.Scene {
   private createActor(textureKey: string, x: number, y: number): Phaser.GameObjects.Container {
     const shadow = this.add.image(0, 8, assetKeys.shadow);
     shadow.setName('player-shadow');
-    const body = this.add.image(0, 0, textureKey);
+    const body = this.add.sprite(0, 0, textureKey);
     body.setName('player-body');
     body.setOrigin(0.5, 0.74);
     const heldItem = this.add.image(12, 0, assetKeys.playerHeldBranchClub);
@@ -806,7 +807,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private syncPlayerView(coldPressure: number, deltaMs: number): void {
-    const body = this.player.getByName('player-body') as Phaser.GameObjects.Image | undefined;
+    const body = this.player.getByName('player-body') as Phaser.GameObjects.Sprite | undefined;
     const shadow = this.player.getByName('player-shadow') as Phaser.GameObjects.Image | undefined;
     const heldItem = this.player.getByName('player-held-item') as Phaser.GameObjects.Image | undefined;
     const rolling = this.state.combat.phase === 'rolling';
@@ -814,6 +815,7 @@ export class WorldScene extends Phaser.Scene {
     const frameSeconds = Math.min(deltaMs, 50) / 1000;
     const movedDistance = Math.hypot(this.state.player.x - this.previousPlayerX, this.state.player.y - this.previousPlayerY);
     const moving = movedDistance > 0.08;
+    const bodyAnimationKey = this.getPlayerAnimationKey(coldBody, moving, rolling);
     const phaseSpeed = moving ? 10.5 : coldBody ? 7.5 : 2.6;
     this.playerAnimPhase += frameSeconds * phaseSpeed;
     const step = Math.sin(this.playerAnimPhase);
@@ -826,17 +828,17 @@ export class WorldScene extends Phaser.Scene {
     let shadowScaleX = 1 - coldPressure * 0.12;
     let shadowScaleY = 1;
 
-    if (!rolling && moving) {
+    if (!bodyAnimationKey && !rolling && moving) {
       const stride = Math.abs(step);
       bodyY += -stride * 2.2;
       bodyAngle = step * (coldBody ? 1.2 : 1.8);
       shadowScaleX += stride * 0.08;
       shadowScaleY -= stride * 0.04;
-    } else if (!rolling && coldBody) {
+    } else if (!bodyAnimationKey && !rolling && coldBody) {
       bodyX = Math.sin(this.playerAnimPhase * 4.1) * coldPressure * 0.85;
       bodyY += breath * 0.7;
       bodyAngle = Math.sin(this.playerAnimPhase * 3.7) * coldPressure * 0.9;
-    } else if (!rolling) {
+    } else if (!bodyAnimationKey && !rolling) {
       bodyY += breath * 0.55;
       shadowScaleX += breath * 0.015;
       shadowScaleY -= breath * 0.01;
@@ -846,7 +848,16 @@ export class WorldScene extends Phaser.Scene {
     this.player.rotation = rolling ? Math.sin(this.state.world.windPhase * 18) * 0.14 : 0;
 
     if (body) {
-      body.setTexture(this.getPlayerTextureKey(coldBody));
+      if (bodyAnimationKey) {
+        if (body.anims.currentAnim?.key !== bodyAnimationKey) {
+          body.play(bodyAnimationKey);
+        }
+      } else {
+        if (body.anims.isPlaying) {
+          body.stop();
+        }
+        body.setTexture(this.getPlayerTextureKey(coldBody));
+      }
       body.setScale(baseBodyScaleX, baseBodyScaleY);
       body.setPosition(bodyX, bodyY);
       body.setAngle(bodyAngle);
@@ -862,7 +873,7 @@ export class WorldScene extends Phaser.Scene {
       shadow.setAlpha(0.34 - coldPressure * 0.08);
     }
 
-    this.syncPlayerEquipmentView(heldItem, coldPressure);
+    this.syncPlayerPaperDollView(heldItem, coldPressure);
     this.previousPlayerX = this.state.player.x;
     this.previousPlayerY = this.state.player.y;
   }
@@ -884,47 +895,59 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
-  private syncPlayerEquipmentView(heldItem: Phaser.GameObjects.Image | undefined, coldPressure: number): void {
+  private getPlayerAnimationKey(coldBody: boolean, moving: boolean, rolling: boolean): string | undefined {
+    if (rolling) {
+      return undefined;
+    }
+
+    if (moving) {
+      switch (this.state.player.facing) {
+        case 'north':
+          return animationKeys.playerColdWalkNorth;
+        case 'south':
+          return animationKeys.playerColdWalkSouth;
+        case 'west':
+          return animationKeys.playerColdWalkWest;
+        case 'east':
+          return animationKeys.playerColdWalkEast;
+      }
+    }
+
+    switch (this.state.player.facing) {
+      case 'north':
+        return coldBody ? animationKeys.playerColdIdleNorth : animationKeys.playerWarmIdleNorth;
+      case 'south':
+        return coldBody ? animationKeys.playerColdIdleSouth : animationKeys.playerWarmIdleSouth;
+      case 'west':
+        return coldBody ? animationKeys.playerColdIdleWest : animationKeys.playerWarmIdleWest;
+      case 'east':
+        return coldBody ? animationKeys.playerColdIdleEast : animationKeys.playerWarmIdleEast;
+    }
+  }
+
+  private syncPlayerPaperDollView(heldItem: Phaser.GameObjects.Image | undefined, coldPressure: number): void {
     if (!heldItem) {
       return;
     }
 
-    if (this.state.equipment.mainHand === 'bare-hands') {
+    const mainHandLayer = getStarterChildPaperDollLayers(
+      this.state.equipment,
+      this.state.player.facing,
+      coldPressure
+    ).find((layer) => layer.slot === 'mainHand');
+
+    if (!mainHandLayer?.visible || !mainHandLayer.textureKey) {
       heldItem.setVisible(false);
       return;
     }
 
     heldItem.setVisible(true);
-    heldItem.setTexture(
-      this.state.equipment.mainHand === 'branch-club'
-        ? assetKeys.playerHeldBranchClub
-        : assetKeys.playerHeldStoneEdge
-    );
+    heldItem.setTexture(mainHandLayer.textureKey);
     heldItem.setAlpha(1);
-    heldItem.setScale(0.78 - coldPressure * 0.04);
-
-    switch (this.state.player.facing) {
-      case 'north':
-        heldItem.setPosition(-11, 2 + coldPressure * 2);
-        heldItem.setAngle(-118);
-        heldItem.setDepth(-0.01);
-        break;
-      case 'south':
-        heldItem.setPosition(12, 3 + coldPressure * 2);
-        heldItem.setAngle(34);
-        heldItem.setDepth(0.01);
-        break;
-      case 'west':
-        heldItem.setPosition(-13, 1 + coldPressure * 2);
-        heldItem.setAngle(-34);
-        heldItem.setDepth(0.01);
-        break;
-      case 'east':
-        heldItem.setPosition(13, 1 + coldPressure * 2);
-        heldItem.setAngle(34);
-        heldItem.setDepth(0.01);
-        break;
-    }
+    heldItem.setScale(mainHandLayer.scale);
+    heldItem.setPosition(mainHandLayer.drawOffset.x, mainHandLayer.drawOffset.y);
+    heldItem.setAngle(mainHandLayer.angle);
+    heldItem.setDepth(mainHandLayer.depthOffset);
   }
 
   private syncTreeOcclusion(): void {

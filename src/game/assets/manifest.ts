@@ -8,6 +8,14 @@ export const assetKeys = {
   playerSouthWest: 'character:starter-child-south-west',
   playerNorthEast: 'character:starter-child-north-east',
   playerNorthWest: 'character:starter-child-north-west',
+  playerColdIdleSouth: 'character:starter-child-cold-idle-south',
+  playerColdIdleNorth: 'character:starter-child-cold-idle-north',
+  playerColdIdleEast: 'character:starter-child-cold-idle-east',
+  playerColdIdleWest: 'character:starter-child-cold-idle-west',
+  playerColdWalkSouth: 'character:starter-child-cold-walk-south',
+  playerColdWalkNorth: 'character:starter-child-cold-walk-north',
+  playerColdWalkEast: 'character:starter-child-cold-walk-east',
+  playerColdWalkWest: 'character:starter-child-cold-walk-west',
   playerWarmSouth: 'character:starter-child-warm-south',
   playerWarmNorth: 'character:starter-child-warm-north',
   playerWarmEast: 'character:starter-child-warm-east',
@@ -16,6 +24,10 @@ export const assetKeys = {
   playerWarmSouthWest: 'character:starter-child-warm-south-west',
   playerWarmNorthEast: 'character:starter-child-warm-north-east',
   playerWarmNorthWest: 'character:starter-child-warm-north-west',
+  playerWarmIdleSouth: 'character:starter-child-warm-idle-south',
+  playerWarmIdleNorth: 'character:starter-child-warm-idle-north',
+  playerWarmIdleEast: 'character:starter-child-warm-idle-east',
+  playerWarmIdleWest: 'character:starter-child-warm-idle-west',
   playerHeldBranchClub: 'character:held-branch-club',
   playerHeldStoneEdge: 'character:held-stone-edge',
   enemy: 'character:hollow-wolf',
@@ -70,5 +82,17 @@ export const assetKeys = {
 } as const;
 
 export const animationKeys = {
-  wolfIdleWatch: 'anim:wolf-idle-watch'
+  wolfIdleWatch: 'anim:wolf-idle-watch',
+  playerColdIdleSouth: 'anim:starter-child-cold-idle-south',
+  playerColdIdleNorth: 'anim:starter-child-cold-idle-north',
+  playerColdIdleEast: 'anim:starter-child-cold-idle-east',
+  playerColdIdleWest: 'anim:starter-child-cold-idle-west',
+  playerColdWalkSouth: 'anim:starter-child-cold-walk-south',
+  playerColdWalkNorth: 'anim:starter-child-cold-walk-north',
+  playerColdWalkEast: 'anim:starter-child-cold-walk-east',
+  playerColdWalkWest: 'anim:starter-child-cold-walk-west',
+  playerWarmIdleSouth: 'anim:starter-child-warm-idle-south',
+  playerWarmIdleNorth: 'anim:starter-child-warm-idle-north',
+  playerWarmIdleEast: 'anim:starter-child-warm-idle-east',
+  playerWarmIdleWest: 'anim:starter-child-warm-idle-west'
 } as const;

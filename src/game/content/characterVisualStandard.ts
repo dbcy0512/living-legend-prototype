@@ -1,6 +1,8 @@
+import type { EquipmentSlot } from './equipment';
+
 export type CharacterDirection = 'north' | 'south' | 'east' | 'west';
 
-export type CharacterEquipmentSocket = 'mainHand' | 'tool' | 'body' | 'back' | 'hands';
+export type CharacterEquipmentSocket = EquipmentSlot;
 
 export type CharacterConditionState = 'cold' | 'warming' | 'exhausted' | 'hurt' | 'under-threat';
 
@@ -62,7 +64,7 @@ export const starterChildCharacterStandard = {
     style: ['cel-shaded-anime', 'gritty-survival-fantasy', 'small-vulnerable-silhouette'],
     forbidden: ['baked-ground', 'scenery', 'labels', 'ui-elements', 'heroic-ready-stance']
   },
-  equipmentSockets: ['mainHand', 'tool', 'body', 'back', 'hands'],
+  equipmentSockets: ['head', 'body', 'hands', 'back', 'mainHand', 'offHand', 'tool', 'feet'],
   conditionStates: ['cold', 'warming', 'exhausted', 'hurt', 'under-threat'],
   animationGroups: {
     'idle-cold': allDirections,

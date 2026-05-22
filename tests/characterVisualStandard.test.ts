@@ -4,6 +4,8 @@ import {
   type CharacterDirection,
   type CharacterEquipmentSocket
 } from '../src/game/content/characterVisualStandard';
+import { getStarterEquipmentSlots } from '../src/game/content/equipment';
+import { getStarterChildPaperDollLayers } from '../src/game/content/paperDoll';
 import { createGameState } from '../src/game/simulation/state';
 
 describe('starter child character visual standard', () => {
@@ -26,6 +28,9 @@ describe('starter child character visual standard', () => {
     expect(sockets.has('body')).toBe(true);
     expect(sockets.has('back')).toBe(true);
     expect(sockets.has('hands')).toBe(true);
+    expect(sockets.has('head')).toBe(true);
+    expect(sockets.has('offHand')).toBe(true);
+    expect(sockets.has('feet')).toBe(true);
   });
 
   it('matches the current equipment state foundation', () => {
@@ -36,10 +41,38 @@ describe('starter child character visual standard', () => {
     expect(sockets.has('tool')).toBe(true);
     expect(sockets.has('body')).toBe(true);
     expect(state.equipment).toEqual({
+      head: 'none',
+      body: 'worn-cloth',
+      hands: 'bare-hands-wraps',
+      back: 'none',
       mainHand: 'bare-hands',
+      offHand: 'none',
       tool: 'none',
-      body: 'worn-cloth'
+      feet: 'bare-feet'
     });
+  });
+
+  it('keeps paper doll slots data-driven for future gear visuals', () => {
+    const slotDefinitions = getStarterEquipmentSlots();
+    const state = createGameState();
+
+    state.equipment.mainHand = 'branch-club';
+
+    const layers = getStarterChildPaperDollLayers(state.equipment, 'south', 0);
+    const mainHand = layers.find((layer) => layer.slot === 'mainHand');
+
+    expect(slotDefinitions.map((slot) => slot.slot)).toEqual([
+      'feet',
+      'body',
+      'hands',
+      'back',
+      'mainHand',
+      'offHand',
+      'tool',
+      'head'
+    ]);
+    expect(mainHand?.visible).toBe(true);
+    expect(mainHand?.textureKey).toBe('character:held-branch-club');
   });
 
   it('requires condition states that come from an alive world instead of class selection', () => {

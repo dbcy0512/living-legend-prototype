@@ -4,6 +4,7 @@ import {
   defaultEcosystemSeed,
 } from '../content/ecosystem';
 import { getEnemyDefinition, type EnemyKind } from '../content/enemies';
+import { createStarterEquipmentState, type EquipmentState } from '../content/equipment';
 import { getZoneOneEnemyWaveTriggers, type ZoneOneTriggerId } from '../content/maps/zoneOneConcept';
 import type { MeleeSeed } from '../content/meleeSeeds';
 import { createStartingResourceSeeds, type ResourceKind, type ResourceSource } from '../content/resources';
@@ -195,12 +196,6 @@ export type EvolutionState = {
   axeSeedAffinity: number;
 };
 
-export type EquipmentState = {
-  mainHand: MeleeSeed;
-  tool: 'none';
-  body: 'worn-cloth';
-};
-
 export type HotbarState = {
   utilityCooldownMs: number;
 };
@@ -324,11 +319,7 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       bladeSeedAffinity: 0,
       axeSeedAffinity: 0
     },
-    equipment: {
-      mainHand: 'bare-hands',
-      tool: 'none',
-      body: 'worn-cloth'
-    },
+    equipment: createStarterEquipmentState(),
     hotbar: {
       utilityCooldownMs: 0
     },

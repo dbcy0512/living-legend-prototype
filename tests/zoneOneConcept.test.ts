@@ -162,6 +162,21 @@ describe('zone one concept map', () => {
     ).toBe(true);
   });
 
+  it('prepares readable ground areas for the first resource POIs', () => {
+    const patches = getZoneOnePreparedGroundPatches();
+    const campDryGrass = patches.find((patch) => patch.id === 'camp-dry-grass-edge');
+    const herbBerry = patches.find((patch) => patch.id === 'herb-berry-flower-meadow');
+    const stoneOutcrop = patches.find((patch) => patch.id === 'stone-outcrop-rubble-field');
+
+    expect(campDryGrass?.regionId).toBe('camp-clearing-hub');
+    expect(campDryGrass?.material).toBe('dry-clearing-edge');
+    expect(campDryGrass?.scatterDensity).toBe(3);
+    expect(herbBerry?.regionId).toBe('herb-berry-patch');
+    expect(herbBerry?.material).toBe('flower-meadow');
+    expect(stoneOutcrop?.regionId).toBe('stone-outcrop');
+    expect(stoneOutcrop?.material).toBe('stone-rubble');
+  });
+
   it('spaces zone one POIs far enough to read as separate destinations', () => {
     const camp = getZoneOneRegion('camp-clearing-hub');
     const destinations = [

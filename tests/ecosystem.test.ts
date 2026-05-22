@@ -17,6 +17,7 @@ import {
   isTreeDependentResourceSeed,
   isZoneDependentResourceSeed
 } from '../src/game/content/ecosystem';
+import { getZoneOnePreparedGroundPatches } from '../src/game/content/maps/zoneOneConcept';
 import { createGameState } from '../src/game/simulation/state';
 
 describe('zone one ecosystem rules', () => {
@@ -142,6 +143,21 @@ describe('zone one ecosystem rules', () => {
         )
       ).toBe(true);
       expect(byRule.every((resource) => isInsideZoneDependentRegion(rule, resource.x, resource.y))).toBe(true);
+    }
+  });
+
+  it('keeps dry grass candidates inside the visible camp dry-edge patch', () => {
+    const dryGrassRule = getZoneDependentResourceRules().find((rule) => rule.id === 'wind-dry-grass-camp-clearing');
+    const dryGrassPatch = getZoneOnePreparedGroundPatches().find((patch) => patch.id === 'camp-dry-grass-edge');
+
+    expect(dryGrassRule).toBeDefined();
+    expect(dryGrassPatch).toBeDefined();
+    for (const candidate of dryGrassRule?.candidates ?? []) {
+      expect(
+        dryGrassPatch &&
+          Math.abs(candidate.x - dryGrassPatch.center.x) <= dryGrassPatch.radius.x &&
+          Math.abs(candidate.y - dryGrassPatch.center.y) <= dryGrassPatch.radius.y
+      ).toBe(true);
     }
   });
 

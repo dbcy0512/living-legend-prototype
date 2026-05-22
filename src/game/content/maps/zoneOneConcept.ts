@@ -152,6 +152,7 @@ export type ZoneOnePreparedGroundPatch = {
     | 'muddy-bank'
     | 'trampled-animal-trail'
     | 'leaf-litter'
+    | 'dry-clearing-edge'
     | 'stone-rubble'
     | 'flower-meadow'
     | 'camp-worn-earth';
@@ -822,6 +823,46 @@ export const getZoneOneHabitatAnchorsForTrigger = (triggerId: ZoneOneTriggerId):
   zoneOneHabitatAnchors.filter((anchor) => anchor.triggerId === triggerId);
 
 const zoneOnePreparedGroundPatches = [
+  {
+    id: 'camp-worn-fire-clearing',
+    regionId: 'camp-clearing-hub',
+    material: 'camp-worn-earth',
+    center: { x: 1400, y: 850 },
+    radius: { x: 275, y: 132 },
+    opacity: 0.2,
+    scatterDensity: 1,
+    designIntent: 'Makes the camp read as a used survival pocket instead of normal grass.'
+  },
+  {
+    id: 'camp-dry-grass-edge',
+    regionId: 'camp-clearing-hub',
+    material: 'dry-clearing-edge',
+    center: { x: 1540, y: 840 },
+    radius: { x: 165, y: 82 },
+    opacity: 0.34,
+    scatterDensity: 3,
+    designIntent: 'Creates a visible sun-dried tinder edge so dry grass has an obvious home near the first fire.'
+  },
+  {
+    id: 'herb-berry-flower-meadow',
+    regionId: 'herb-berry-patch',
+    material: 'flower-meadow',
+    center: { x: 590, y: 450 },
+    radius: { x: 245, y: 160 },
+    opacity: 0.26,
+    scatterDensity: 3,
+    designIntent: 'Shows the herb and berry patch as low living plant density before individual resource sprites appear.'
+  },
+  {
+    id: 'stone-outcrop-rubble-field',
+    regionId: 'stone-outcrop',
+    material: 'stone-rubble',
+    center: { x: 470, y: 790 },
+    radius: { x: 230, y: 145 },
+    opacity: 0.32,
+    scatterDensity: 3,
+    designIntent: 'Makes the stone outcrop read as exposed rubble and hard ground instead of stones dropped on grass.'
+  },
   {
     id: 'deadwood-damp-floor',
     regionId: 'deadwood-mushrooms',

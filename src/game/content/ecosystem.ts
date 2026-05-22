@@ -155,11 +155,11 @@ const zoneDependentResourceRules = [
     ecology: 'dry-clearing-edge',
     placementNote: 'Dry grass gathers on exposed clearing edges where wind and weak sun can dry it.',
     candidates: [
-      { x: 1248, y: 838 },
-      { x: 1420, y: 958 },
+      { x: 1488, y: 806 },
       { x: 1536, y: 782 },
-      { x: 1320, y: 1030 },
-      { x: 1650, y: 890 }
+      { x: 1588, y: 828 },
+      { x: 1508, y: 884 },
+      { x: 1644, y: 868 }
     ]
   }
 ] as const satisfies readonly ZoneDependentResourceRule[];

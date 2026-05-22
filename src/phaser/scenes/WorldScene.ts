@@ -348,17 +348,27 @@ export class WorldScene extends Phaser.Scene {
           this.ground.fillStyle(0x273e24, alpha);
           this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
           break;
+        case 'dry-clearing-edge':
+          this.ground.fillStyle(0x8f7d37, alpha);
+          this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          this.ground.lineStyle(2, 0xd7c46a, 0.16);
+          this.ground.strokeEllipse(patch.center.x, patch.center.y + 3, patch.radius.x * 1.88, patch.radius.y * 1.72);
+          this.drawPreparedPatchScatter(patch, 0xd8cc76, 0x8b6f36);
+          break;
         case 'stone-rubble':
           this.ground.fillStyle(0x5f655f, alpha);
           this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          this.drawPreparedPatchScatter(patch, 0x9ca3af, 0x475569);
           break;
         case 'flower-meadow':
           this.ground.fillStyle(0x5d7a35, alpha);
           this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          this.drawPreparedPatchScatter(patch, 0xdce879, 0x8fbf58);
           break;
         case 'camp-worn-earth':
           this.ground.fillStyle(0x5d4530, alpha);
           this.ground.fillEllipse(patch.center.x, patch.center.y, patch.radius.x * 2, patch.radius.y * 2);
+          this.drawPreparedPatchScatter(patch, 0x9a7040, 0x725033);
           break;
       }
     }
@@ -380,6 +390,43 @@ export class WorldScene extends Phaser.Scene {
     this.ground.lineBetween(2118, 884, 2160, 870);
     this.ground.lineBetween(2260, 858, 2308, 888);
     this.ground.lineBetween(2190, 930, 2240, 910);
+  }
+
+  private drawPreparedPatchScatter(
+    patch: ReturnType<typeof getZoneOnePreparedGroundPatches>[number],
+    primary: number,
+    secondary: number
+  ): void {
+    const points = [
+      { x: -0.62, y: -0.12, r: 4 },
+      { x: -0.34, y: 0.28, r: 3 },
+      { x: -0.08, y: -0.36, r: 3 },
+      { x: 0.22, y: 0.2, r: 4 },
+      { x: 0.48, y: -0.18, r: 3 },
+      { x: 0.66, y: 0.3, r: 2 }
+    ].slice(0, patch.scatterDensity * 2);
+
+    for (const [index, point] of points.entries()) {
+      const x = patch.center.x + point.x * patch.radius.x;
+      const y = patch.center.y + point.y * patch.radius.y;
+      this.ground.fillStyle(index % 2 === 0 ? primary : secondary, 0.42);
+      if (patch.material === 'flower-meadow') {
+        this.ground.fillCircle(x, y, point.r);
+        this.ground.fillStyle(0xf4e7a1, 0.65);
+        this.ground.fillCircle(x + 2, y - 1, Math.max(1, point.r - 2));
+      } else if (patch.material === 'stone-rubble') {
+        this.ground.fillEllipse(x, y, point.r * 3, point.r * 1.8);
+      } else {
+        this.ground.fillEllipse(x, y, point.r * 4, point.r * 1.2);
+      }
+    }
+
+    if (patch.material === 'dry-clearing-edge') {
+      this.ground.lineStyle(2, 0xd8cc76, 0.5);
+      this.ground.lineBetween(patch.center.x - 72, patch.center.y - 18, patch.center.x - 38, patch.center.y - 32);
+      this.ground.lineBetween(patch.center.x + 12, patch.center.y + 22, patch.center.x + 58, patch.center.y + 8);
+      this.ground.lineBetween(patch.center.x + 78, patch.center.y - 12, patch.center.x + 104, patch.center.y - 28);
+    }
   }
 
   private createLivingDetails(): void {

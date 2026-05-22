@@ -7,16 +7,49 @@ import {
 } from '../src/game/simulation/systems/craftingSystem';
 
 describe('crafting registry', () => {
-  it('exposes the first beginner recipes in slot order', () => {
+  it('exposes survival upkeep and the first station before progression paths', () => {
     const state = createGameState();
     const recipes = getAvailableCraftingRecipes(state);
 
-    expect(recipes.map(({ recipe }) => recipe.id)).toEqual([
+    expect(recipes.map(({ recipe }) => recipe.id)).toEqual(['feed-fire', 'basic-workbench']);
+  });
+
+  it('builds the basic workbench as the first material-gated progression station', () => {
+    const state = createGameState();
+    state.inventory.wood = 2;
+    state.inventory.bark = 1;
+    state.inventory.stone = 1;
+
+    expect(craftRecipe(state, 'basic-workbench')).toBe(true);
+    expect(state.progression.stations.basicWorkbenchBuilt).toBe(true);
+    expect(state.progression.exposedPathSteps).toEqual({
+      medicine: 1,
+      blade: 1,
+      axe: 1
+    });
+    expect(state.inventory.wood).toBe(0);
+    expect(state.inventory.bark).toBe(0);
+    expect(state.inventory.stone).toBe(0);
+    expect(getAvailableCraftingRecipes(state).map(({ recipe }) => recipe.id)).toEqual([
       'feed-fire',
       'simple-poultice',
       'stone-edge',
       'branch-club'
     ]);
+  });
+
+  it('blocks progression crafting until the workbench exists', () => {
+    const state = createGameState();
+    state.inventory.stone = 1;
+    state.inventory.bark = 1;
+    state.inventory.twigs = 1;
+
+    expect(getCraftingAvailability(state, 'stone-edge')).toEqual({
+      canCraft: false,
+      reason: 'needs-workbench'
+    });
+    expect(craftRecipe(state, 'stone-edge')).toBe(false);
+    expect(state.inventory.stoneEdges).toBe(0);
   });
 
   it('feeds a nearby active fire instead of creating another campfire', () => {
@@ -46,6 +79,7 @@ describe('crafting registry', () => {
 
   it('makes a simple poultice from herbs and bark', () => {
     const state = createGameState();
+    unlockWorkbench(state);
     state.player.health = 50;
     state.inventory.herbs = 1;
     state.inventory.bark = 1;
@@ -59,6 +93,7 @@ describe('crafting registry', () => {
 
   it('creates crude tool items from early materials', () => {
     const state = createGameState();
+    unlockWorkbench(state);
     state.inventory.stone = 1;
     state.inventory.bark = 2;
     state.inventory.twigs = 1;
@@ -75,6 +110,7 @@ describe('crafting registry', () => {
 
   it('allows crafting output when consumed ingredients free satchel space', () => {
     const state = createGameState();
+    unlockWorkbench(state);
     state.inventory.twigs = 1;
     state.inventory.dryGrass = 1;
     state.inventory.bark = 1;
@@ -90,6 +126,7 @@ describe('crafting registry', () => {
 
   it('rejects crafting output when the beginner satchel has no free slot', () => {
     const state = createGameState();
+    unlockWorkbench(state);
     state.inventory.twigs = 1;
     state.inventory.dryGrass = 1;
     state.inventory.bark = 2;
@@ -107,3 +144,10 @@ describe('crafting registry', () => {
     expect(state.inventory.wood).toBe(2);
   });
 });
+
+const unlockWorkbench = (state: ReturnType<typeof createGameState>): void => {
+  state.progression.stations.basicWorkbenchBuilt = true;
+  state.progression.exposedPathSteps.medicine = 1;
+  state.progression.exposedPathSteps.blade = 1;
+  state.progression.exposedPathSteps.axe = 1;
+};

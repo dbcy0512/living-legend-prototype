@@ -44,6 +44,8 @@ export const getCraftingSuccessThought = (recipeId: CraftingRecipeId): string =>
   switch (recipeId) {
     case 'feed-fire':
       return 'The flame takes it.';
+    case 'basic-workbench':
+      return 'A place to make better things.';
     case 'simple-poultice':
       return 'This might close a wound.';
     case 'stone-edge':
@@ -54,7 +56,14 @@ export const getCraftingSuccessThought = (recipeId: CraftingRecipeId): string =>
 };
 
 export const getCraftingFailureThought = (
-  reason: 'ready' | 'missing-items' | 'needs-active-fire' | 'satchel-full' | 'unknown-recipe'
+  reason:
+    | 'ready'
+    | 'missing-items'
+    | 'needs-active-fire'
+    | 'needs-workbench'
+    | 'already-built'
+    | 'satchel-full'
+    | 'unknown-recipe'
 ): string => {
   switch (reason) {
     case 'ready':
@@ -63,6 +72,10 @@ export const getCraftingFailureThought = (
       return 'Something is missing.';
     case 'needs-active-fire':
       return 'It needs a living flame.';
+    case 'needs-workbench':
+      return 'It needs a better place to make it.';
+    case 'already-built':
+      return 'That place already exists.';
     case 'satchel-full':
       return 'No room in the satchel.';
     case 'unknown-recipe':

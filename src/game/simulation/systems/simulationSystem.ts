@@ -1,5 +1,4 @@
 import type { ActionState } from '../../input/actions';
-import { getCraftingRecipes } from '../../content/craftingRecipes';
 import { createGameState, type GameState } from '../state';
 import { updateEvolution } from '../rules/evolutionRules';
 import { tickPlayerThought } from '../rules/thoughts';
@@ -7,6 +6,7 @@ import { tryStartWeaponAbility, updateAbility } from './abilitySystem';
 import { updateCombat } from './combatSystem';
 import { updateEnemies } from './enemySystem';
 import { updateEncounters } from './encounterSystem';
+import { getExposedCraftingRecipes } from './craftingSystem';
 import { selectOrUseHotbarSlot, updateHotbar } from './hotbarSystem';
 import { updateInventory } from './inventorySystem';
 import { updatePlayer } from './playerSystem';
@@ -33,9 +33,11 @@ export const updateSimulation = (state: GameState, actions: ActionState, deltaMs
     state.ui.craftingOpen = !state.ui.craftingOpen;
   }
   if (state.ui.craftingOpen && (actions.craftRecipeNext || actions.craftRecipePrevious)) {
-    const recipeCount = getCraftingRecipes().length;
-    const offset = actions.craftRecipeNext ? 1 : -1;
-    state.ui.selectedCraftingRecipeIndex = (state.ui.selectedCraftingRecipeIndex + offset + recipeCount) % recipeCount;
+    const recipeCount = getExposedCraftingRecipes(state).length;
+    if (recipeCount > 0) {
+      const offset = actions.craftRecipeNext ? 1 : -1;
+      state.ui.selectedCraftingRecipeIndex = (state.ui.selectedCraftingRecipeIndex + offset + recipeCount) % recipeCount;
+    }
   }
   if (actions.hotbarSlot !== undefined && !tryStartWeaponAbility(state, actions.hotbarSlot)) {
     selectOrUseHotbarSlot(state, actions.hotbarSlot);
@@ -65,6 +67,8 @@ const resetGameState = (state: GameState): void => {
   Object.assign(state.world, fresh.world);
   Object.assign(state.inventory, fresh.inventory);
   Object.assign(state.evolution, fresh.evolution);
+  Object.assign(state.progression.stations, fresh.progression.stations);
+  Object.assign(state.progression.exposedPathSteps, fresh.progression.exposedPathSteps);
   Object.assign(state.equipment, fresh.equipment);
   Object.assign(state.hotbar, fresh.hotbar);
   Object.assign(state.ecosystem, fresh.ecosystem);

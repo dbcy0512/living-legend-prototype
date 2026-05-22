@@ -197,6 +197,17 @@ export type EvolutionState = {
   axeSeedAffinity: number;
 };
 
+export type ProgressionState = {
+  stations: {
+    basicWorkbenchBuilt: boolean;
+  };
+  exposedPathSteps: {
+    medicine: 0 | 1;
+    blade: 0 | 1;
+    axe: 0 | 1;
+  };
+};
+
 export type HotbarState = {
   utilityCooldownMs: number;
 };
@@ -230,6 +241,7 @@ export type GameState = {
   inventory: Inventory;
   behaviorMemory: BehaviorMemory;
   evolution: EvolutionState;
+  progression: ProgressionState;
   equipment: EquipmentState;
   hotbar: HotbarState;
   ecosystem: EcosystemState;
@@ -322,6 +334,7 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       bladeSeedAffinity: 0,
       axeSeedAffinity: 0
     },
+    progression: createProgressionState(),
     equipment: createStarterEquipmentState(),
     hotbar: {
       utilityCooldownMs: 0
@@ -404,6 +417,17 @@ const createEncounterState = (): EncounterState => ({
     spawnedEnemyIds: [],
     lockedResourceIds: []
   }))
+});
+
+const createProgressionState = (): ProgressionState => ({
+  stations: {
+    basicWorkbenchBuilt: false
+  },
+  exposedPathSteps: {
+    medicine: 0,
+    blade: 0,
+    axe: 0
+  }
 });
 
 const createItemMemory = (): ItemMemory => ({

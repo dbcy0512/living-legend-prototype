@@ -308,6 +308,10 @@ const getCraftingReasonText = (reason: ReturnType<typeof getAvailableCraftingRec
       return 'Missing';
     case 'needs-active-fire':
       return 'Needs Fire';
+    case 'needs-workbench':
+      return 'Needs Bench';
+    case 'already-built':
+      return 'Built';
     case 'satchel-full':
       return 'No Room';
     case 'unknown-recipe':

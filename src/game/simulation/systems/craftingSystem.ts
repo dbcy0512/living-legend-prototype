@@ -8,19 +8,43 @@ const activeFireCraftingReach = 118;
 
 export type CraftingAvailability = {
   canCraft: boolean;
-  reason: 'ready' | 'missing-items' | 'needs-active-fire' | 'satchel-full' | 'unknown-recipe';
+  reason:
+    | 'ready'
+    | 'missing-items'
+    | 'needs-active-fire'
+    | 'needs-workbench'
+    | 'already-built'
+    | 'satchel-full'
+    | 'unknown-recipe';
 };
 
 export const getAvailableCraftingRecipes = (state: GameState) =>
-  getCraftingRecipes().map((recipe) => ({
+  getExposedCraftingRecipes(state).map((recipe) => ({
     recipe,
     availability: getCraftingAvailability(state, recipe.id)
   }));
+
+export const getExposedCraftingRecipes = (state: GameState) =>
+  getCraftingRecipes().filter((recipe) => {
+    if (recipe.id === 'basic-workbench') {
+      return !state.progression.stations.basicWorkbenchBuilt;
+    }
+    if (recipe.progressionGate === 'workbench-path-step') {
+      return state.progression.stations.basicWorkbenchBuilt;
+    }
+    return true;
+  });
 
 export const getCraftingAvailability = (state: GameState, recipeId: CraftingRecipeId): CraftingAvailability => {
   const recipe = getCraftingRecipe(recipeId);
   if (!recipe) {
     return { canCraft: false, reason: 'unknown-recipe' };
+  }
+  if (recipe.effect.type === 'build-station' && state.progression.stations.basicWorkbenchBuilt) {
+    return { canCraft: false, reason: 'already-built' };
+  }
+  if (recipe.stationRequired === 'basic-workbench' && !state.progression.stations.basicWorkbenchBuilt) {
+    return { canCraft: false, reason: 'needs-workbench' };
   }
   if (!hasCraftingCost(state, recipe.cost)) {
     return { canCraft: false, reason: 'missing-items' };
@@ -71,6 +95,14 @@ export const craftRecipe = (state: GameState, recipeId: CraftingRecipeId): boole
     fire.fuelMs += recipe.effect.fuelMs;
   } else if (recipe.effect.type === 'heal-player') {
     state.player.health = clamp(state.player.health + recipe.effect.health, 0, state.player.maxHealth);
+  } else if (recipe.effect.type === 'build-station') {
+    if (recipe.effect.station === 'basic-workbench') {
+      state.progression.stations.basicWorkbenchBuilt = true;
+      state.progression.exposedPathSteps.medicine = 1;
+      state.progression.exposedPathSteps.blade = 1;
+      state.progression.exposedPathSteps.axe = 1;
+      state.ui.selectedCraftingRecipeIndex = 0;
+    }
   } else {
     state.inventory[recipe.effect.item] += recipe.effect.amount;
     state.ui.inventoryMessage = '';
@@ -135,6 +167,10 @@ const getCraftingFailureMessage = (recipeName: string, reason: CraftingAvailabil
       return `${recipeName} needs more pieces.`;
     case 'needs-active-fire':
       return `${recipeName} needs a living flame.`;
+    case 'needs-workbench':
+      return `${recipeName} needs the workbench.`;
+    case 'already-built':
+      return `${recipeName} already has a place.`;
     case 'satchel-full':
       return `${recipeName} needs room in the satchel.`;
     case 'unknown-recipe':

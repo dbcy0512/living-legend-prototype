@@ -1,5 +1,4 @@
 import type { ActionState } from '../../input/actions';
-import { getCraftingRecipes } from '../../content/craftingRecipes';
 import { getResourceProfile } from '../../content/resources';
 import type { GameState, Inventory, PlayerState, ResourceNode } from '../state';
 import {
@@ -14,7 +13,7 @@ import {
 } from '../rules/satchel';
 import { clamp, distance } from '../rules/math';
 import { getGatherThought, setPlayerThought } from '../rules/thoughts';
-import { craftRecipe } from './craftingSystem';
+import { craftRecipe, getExposedCraftingRecipes } from './craftingSystem';
 import { isResourceLockedByActiveWave, tryTriggerResourcePocketWave } from './encounterSystem';
 
 const campfireWoodCost = 2;
@@ -104,7 +103,7 @@ export const updateInventory = (state: GameState, actions: ActionState, deltaMs:
   }
 
   if (actions.craftRecipeConfirm && state.ui.craftingOpen) {
-    const recipe = getCraftingRecipes()[state.ui.selectedCraftingRecipeIndex];
+    const recipe = getExposedCraftingRecipes(state)[state.ui.selectedCraftingRecipeIndex];
     if (recipe) {
       craftRecipe(state, recipe.id);
     }

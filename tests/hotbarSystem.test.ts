@@ -26,6 +26,8 @@ describe('hotbar system', () => {
 
   it('uses a crafted poultice from the heal slot instead of healing at craft time', () => {
     const state = createGameState();
+    state.progression.stations.basicWorkbenchBuilt = true;
+    state.progression.exposedPathSteps.medicine = 1;
     state.player.health = 50;
     state.inventory.herbs = 1;
     state.inventory.bark = 1;

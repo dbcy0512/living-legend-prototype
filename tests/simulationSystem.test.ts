@@ -11,6 +11,8 @@ describe('simulation status', () => {
     state.world.status = 'lost';
     state.player.health = 0;
     state.inventory.food = 4;
+    state.progression.stations.basicWorkbenchBuilt = true;
+    state.progression.exposedPathSteps.blade = 1;
     state.equipment.mainHand = 'stone-edge';
     state.hotbar.utilityCooldownMs = 1200;
     actions.restart = true;
@@ -20,6 +22,8 @@ describe('simulation status', () => {
     expect(state.world.status).toBe('playing');
     expect(state.player.health).toBe(state.player.maxHealth);
     expect(state.inventory.food).toBe(0);
+    expect(state.progression.stations.basicWorkbenchBuilt).toBe(false);
+    expect(state.progression.exposedPathSteps.blade).toBe(0);
     expect(state.equipment.mainHand).toBe('bare-hands');
     expect(state.equipment.tool).toBe('none');
     expect(state.equipment.body).toBe('worn-cloth');

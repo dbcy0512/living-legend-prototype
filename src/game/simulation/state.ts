@@ -5,6 +5,7 @@ import {
 } from '../content/ecosystem';
 import { getEnemyDefinition, type EnemyKind } from '../content/enemies';
 import { createStarterEquipmentState, type EquipmentState } from '../content/equipment';
+import { createStarterCharacterModelState, type CharacterModelState } from '../content/characterModel';
 import { getZoneOneEnemyWaveTriggers, type ZoneOneTriggerId } from '../content/maps/zoneOneConcept';
 import type { MeleeSeed } from '../content/meleeSeeds';
 import { createStartingResourceSeeds, type ResourceKind, type ResourceSource } from '../content/resources';
@@ -222,6 +223,7 @@ export type UiState = {
 
 export type GameState = {
   player: PlayerState;
+  characterModel: CharacterModelState;
   combat: CombatState;
   ability: AbilityState;
   world: WorldState;
@@ -261,6 +263,7 @@ export const createGameState = (options: GameStateOptions = {}): GameState => {
       speed: 132,
       invulnerableMs: 0
     },
+    characterModel: createStarterCharacterModelState(),
     combat: {
       phase: 'idle',
       timerMs: 0,

@@ -6,6 +6,7 @@ import { startingArea, startingAreaLayout, viewportSize } from '../../game/conte
 import { getZoneOneHabitatAnchors, getZoneOneLivingCues, getZoneOnePreparedGroundPatches } from '../../game/content/maps/zoneOneConcept';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
 import { getStarterChildPaperDollLayers } from '../../game/content/paperDoll';
+import { withCharacterCondition } from '../../game/content/characterModel';
 import { getResourceProfile, isEcosystemResourceSource } from '../../game/content/resources';
 import type { CampfireState, EnemyState, GameState, ResourceNode } from '../../game/simulation/state';
 import { getCampfireCollisionObstacles, getPlayerCollisionRadius } from '../../game/simulation/rules/collision';
@@ -816,6 +817,7 @@ export class WorldScene extends Phaser.Scene {
     const movedDistance = Math.hypot(this.state.player.x - this.previousPlayerX, this.state.player.y - this.previousPlayerY);
     const moving = movedDistance > 0.08;
     const bodyAnimationKey = this.getPlayerAnimationKey(coldBody, moving, rolling);
+    const action = rolling ? 'dodge-roll' : moving ? 'walk' : 'idle';
     const phaseSpeed = moving ? 10.5 : coldBody ? 7.5 : 2.6;
     this.playerAnimPhase += frameSeconds * phaseSpeed;
     const step = Math.sin(this.playerAnimPhase);
@@ -873,7 +875,7 @@ export class WorldScene extends Phaser.Scene {
       shadow.setAlpha(0.34 - coldPressure * 0.08);
     }
 
-    this.syncPlayerPaperDollView(heldItem, coldPressure);
+    this.syncPlayerPaperDollView(heldItem, coldPressure, action);
     this.previousPlayerX = this.state.player.x;
     this.previousPlayerY = this.state.player.y;
   }
@@ -925,15 +927,23 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
-  private syncPlayerPaperDollView(heldItem: Phaser.GameObjects.Image | undefined, coldPressure: number): void {
+  private syncPlayerPaperDollView(
+    heldItem: Phaser.GameObjects.Image | undefined,
+    coldPressure: number,
+    action: 'idle' | 'walk' | 'dodge-roll'
+  ): void {
     if (!heldItem) {
       return;
     }
 
     const mainHandLayer = getStarterChildPaperDollLayers(
       this.state.equipment,
-      this.state.player.facing,
-      coldPressure
+      {
+        model: withCharacterCondition(this.state.characterModel, this.isPlayerColdBody(coldPressure) ? 'cold' : 'warm'),
+        facing: this.state.player.facing,
+        coldPressure,
+        action
+      }
     ).find((layer) => layer.slot === 'mainHand');
 
     if (!mainHandLayer?.visible || !mainHandLayer.textureKey) {

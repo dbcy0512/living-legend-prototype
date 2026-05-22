@@ -4,8 +4,9 @@ import {
   type CharacterDirection,
   type CharacterEquipmentSocket
 } from '../src/game/content/characterVisualStandard';
-import { getStarterEquipmentSlots } from '../src/game/content/equipment';
+import { getEquipmentFitProfile, getStarterEquipmentSlots } from '../src/game/content/equipment';
 import { getStarterChildPaperDollLayers } from '../src/game/content/paperDoll';
+import { createStarterCharacterModelState, type CharacterModelState } from '../src/game/content/characterModel';
 import { createGameState } from '../src/game/simulation/state';
 
 describe('starter child character visual standard', () => {
@@ -50,6 +51,8 @@ describe('starter child character visual standard', () => {
       tool: 'none',
       feet: 'bare-feet'
     });
+    expect(state.characterModel.bodyStage).toBe('starter-child');
+    expect(state.characterModel.socketSet).toBe('starter-child-v1');
   });
 
   it('keeps paper doll slots data-driven for future gear visuals', () => {
@@ -58,7 +61,12 @@ describe('starter child character visual standard', () => {
 
     state.equipment.mainHand = 'branch-club';
 
-    const layers = getStarterChildPaperDollLayers(state.equipment, 'south', 0);
+    const layers = getStarterChildPaperDollLayers(state.equipment, {
+      model: state.characterModel,
+      facing: 'south',
+      coldPressure: 0,
+      action: 'idle'
+    });
     const mainHand = layers.find((layer) => layer.slot === 'mainHand');
 
     expect(slotDefinitions.map((slot) => slot.slot)).toEqual([
@@ -73,6 +81,50 @@ describe('starter child character visual standard', () => {
     ]);
     expect(mainHand?.visible).toBe(true);
     expect(mainHand?.textureKey).toBe('character:held-branch-club');
+    expect(mainHand?.fitStatus).toBe('ready');
+  });
+
+  it('blocks equipment visuals when the body stage has no generated fit', () => {
+    const state = createGameState();
+    const evolvedModel: CharacterModelState = {
+      ...createStarterCharacterModelState('warm'),
+      bodyStage: 'adolescent-survivor',
+      scaleTier: 'adolescent-medium'
+    };
+
+    state.equipment.mainHand = 'branch-club';
+
+    const layers = getStarterChildPaperDollLayers(state.equipment, {
+      model: evolvedModel,
+      facing: 'south',
+      coldPressure: 0,
+      action: 'idle'
+    });
+    const mainHand = layers.find((layer) => layer.slot === 'mainHand');
+
+    expect(mainHand?.visible).toBe(false);
+    expect(mainHand?.fitStatus).toBe('blocked-body-stage');
+    expect(mainHand?.blockedReason).toContain('adolescent-survivor');
+  });
+
+  it('marks seed weapon combat frames as PixelLab generation requirements', () => {
+    const branchClub = getEquipmentFitProfile('branch-club', 'mainHand');
+    const stoneEdge = getEquipmentFitProfile('stone-edge', 'mainHand');
+
+    expect(branchClub?.compatibleBodyStages).toEqual(['starter-child']);
+    expect(stoneEdge?.compatibleBodyStages).toEqual(['starter-child']);
+    expect(
+      branchClub?.visualRequirements.some(
+        (requirement) =>
+          requirement.status === 'needs-pixellab-pass' && requirement.actions.includes('attack-main-hand')
+      )
+    ).toBe(true);
+    expect(
+      stoneEdge?.visualRequirements.some(
+        (requirement) =>
+          requirement.status === 'needs-pixellab-pass' && requirement.actions.includes('attack-main-hand')
+      )
+    ).toBe(true);
   });
 
   it('requires condition states that come from an alive world instead of class selection', () => {

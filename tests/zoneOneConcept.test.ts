@@ -4,6 +4,7 @@ import {
   getZoneOneEnemyWaveTriggers,
   getZoneOneHabitatAnchorsForTrigger,
   getZoneOneLivingCues,
+  getZoneOnePoiAnchors,
   getZoneOnePreparedGroundPatches,
   getZoneOneRegion,
   getZoneOneRegions,
@@ -185,6 +186,42 @@ describe('zone one concept map', () => {
     expect(reedBend?.material).toBe('reed-bank');
     expect(wetBank?.regionId).toBe('water-source');
     expect(wetBank?.material).toBe('muddy-bank');
+  });
+
+  it('places generated POI anchors inside the regions they explain', () => {
+    const anchors = getZoneOnePoiAnchors();
+
+    expect(anchors.map((anchor) => anchor.id)).toEqual([
+      'poi-herb-berry-living-patch',
+      'poi-stone-outcrop-landmark',
+      'poi-water-source-pond',
+      'poi-clay-mud-bank',
+      'poi-deep-forest-deadfall',
+      'poi-dense-forest-windfall',
+      'poi-animal-trail-crossing',
+      'poi-future-danger-gate',
+      'camp-basic-workbench-station'
+    ]);
+    for (const anchor of anchors) {
+      const region = getZoneOneRegion(anchor.regionId);
+
+      expect(Math.abs(anchor.x - region.center.x)).toBeLessThanOrEqual(region.radius.x + 130);
+      expect(Math.abs(anchor.y - region.center.y)).toBeLessThanOrEqual(region.radius.y + 130);
+      expect(anchor.scale).toBeGreaterThan(0);
+      for (const kind of anchor.resourceKinds) {
+        expect(region.resourceKinds).toContain(kind);
+      }
+      expect(anchor.designIntent.length).toBeGreaterThan(28);
+    }
+  });
+
+  it('keeps the workbench anchor tied to progression instead of starting visible as scenery', () => {
+    const workbench = getZoneOnePoiAnchors().find((anchor) => anchor.id === 'camp-basic-workbench-station');
+
+    expect(workbench?.regionId).toBe('camp-clearing-hub');
+    expect(workbench?.visibleWhen).toBe('basic-workbench-built');
+    expect(workbench?.resourceKinds).toEqual([]);
+    expect(workbench?.designIntent).toContain('earns and builds');
   });
 
   it('authors living map cues for POIs that should not feel static', () => {

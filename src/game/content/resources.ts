@@ -173,11 +173,20 @@ const staticStartingResources = [
   openingResource('dry-grass-handful', 'dryGrass', 1540, 818, 'dry-clearing-edge', 'Dry grass caught on the sun-exposed clearing edge.'),
   openingResource('curl-of-bark', 'bark', 1318, 1000, 'tree-shed', 'Loose bark near deadfall and root litter, not open grass.'),
   openingResource('striking-stone', 'stone', 1508, 976, 'exposed-stone', 'A usable stone from the exposed dirt and fire ring.'),
-  fixedZoneResource('elder-branch', 'wood', 1138, 740, 'camp-clearing-hub', 'early-crafting', 'tree-shed', 'A fallen branch under the shelter tree.', 3),
   fixedZoneResource('moon-stone', 'stone', 470, 780, 'stone-outcrop', 'early-crafting', 'exposed-stone', 'Loose stone near the western outcrop and erosion line.', 2),
   fixedZoneResource('sun-herb', 'herbs', 610, 420, 'herb-berry-patch', 'medicine', 'damp-shade', 'Herbs in the lower damp shade of the herb and berry patch.', 2),
   fixedZoneResource('wild-fruit', 'food', 640, 360, 'herb-berry-patch', 'food', 'edge-growth', 'Fruit tucked into dense edge growth, not open field.', 2),
-  fixedZoneResource('silver-herb', 'herbs', 510, 510, 'herb-berry-patch', 'medicine', 'damp-shade', 'A shaded herb pocket near the first western path.', 2)
+  fixedZoneResource('silver-herb', 'herbs', 510, 510, 'herb-berry-patch', 'medicine', 'damp-shade', 'A shaded herb pocket near the first western path.', 2),
+  fixedZoneResource('reed-bank-root', 'food', 520, 1215, 'water-source', 'food', 'edge-growth', 'Edible roots and small food traces belong on the reed-heavy shoreline.', 2),
+  fixedZoneResource('waterline-herb', 'herbs', 598, 1168, 'water-source', 'medicine', 'damp-shade', 'Damp herbs grow against the shoreline and reed bend.', 2),
+  fixedZoneResource('clay-bank-flat-stone', 'stone', 860, 1285, 'clay-mud-bank', 'early-crafting', 'exposed-stone', 'Flat stones sit in the wet clay bank as future vessel and tool support.', 2),
+  fixedZoneResource('deep-bark-sheet', 'bark', 1338, 430, 'deep-forest', 'early-crafting', 'tree-shed', 'A bark sheet shed by older deep-forest trees; this is a workbench material source.', 2),
+  fixedZoneResource('deep-deadfall-branch', 'wood', 1426, 412, 'deep-forest', 'early-crafting', 'tree-shed', 'A heavier deadfall branch that belongs to the old forest floor.', 2),
+  fixedZoneResource('dense-forest-bark', 'bark', 2138, 468, 'dense-forest-east', 'early-crafting', 'tree-shed', 'Routine bark from the eastern dense forest edge.', 2),
+  fixedZoneResource('deadwood-rotten-branch', 'wood', 2098, 868, 'deadwood-mushrooms', 'early-crafting', 'tree-shed', 'Rotten deadwood that can wake what lives under the log.', 2),
+  fixedZoneResource('deadwood-moss-herb', 'herbs', 2248, 922, 'deadwood-mushrooms', 'medicine', 'damp-shade', 'Damp moss herbs grow in the rot pocket after danger is handled.', 2),
+  fixedZoneResource('trail-bent-twigs', 'twigs', 2180, 1120, 'animal-trails', 'early-crafting', 'tree-shed', 'Twigs snapped and carried along repeated animal movement.', 2),
+  fixedZoneResource('trail-foraged-food', 'food', 2270, 1150, 'animal-trails', 'food', 'edge-growth', 'Small food traces sit along the animal trail edge rather than in open grass.', 1)
 ] as const satisfies readonly ResourceSeed[];
 
 export const getResourceProfile = (kind: ResourceKind): ResourceProfile => resourceProfiles[kind];

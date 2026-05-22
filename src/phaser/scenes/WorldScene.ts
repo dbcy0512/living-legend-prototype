@@ -3,7 +3,12 @@ import { idleActions, type ActionState } from '../../game/input/actions';
 import { animationKeys, assetKeys } from '../../game/assets/manifest';
 import { getEnemyDefinition } from '../../game/content/enemies';
 import { startingArea, startingAreaLayout, viewportSize } from '../../game/content/maps/startingArea';
-import { getZoneOneHabitatAnchors, getZoneOneLivingCues, getZoneOnePreparedGroundPatches } from '../../game/content/maps/zoneOneConcept';
+import {
+  getZoneOneHabitatAnchors,
+  getZoneOneLivingCues,
+  getZoneOnePoiAnchors,
+  getZoneOnePreparedGroundPatches
+} from '../../game/content/maps/zoneOneConcept';
 import { getEnvironmentAsset } from '../../game/content/environmentCatalog';
 import { getStarterChildPaperDollLayers } from '../../game/content/paperDoll';
 import { withCharacterCondition } from '../../game/content/characterModel';
@@ -71,6 +76,7 @@ export class WorldScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
   private sleepingSpot!: Phaser.GameObjects.Image;
   private treeViews: TreeView[] = [];
+  private poiAnchorSprites = new Map<string, Phaser.GameObjects.Image>();
   private enemySprites = new Map<string, Phaser.GameObjects.Container>();
   private resourceSprites = new Map<string, Phaser.GameObjects.Image>();
   private resourceAmounts = new Map<string, number>();
@@ -501,6 +507,17 @@ export class WorldScene extends Phaser.Scene {
     this.sleepingSpot.setDepth(groundPropDepth);
     this.sleepingSpot.setScale(0.86);
 
+    for (const anchor of getZoneOnePoiAnchors()) {
+      const asset = getEnvironmentAsset(anchor.assetId);
+      const sprite = this.add.image(anchor.x, anchor.y, asset.textureKey);
+      sprite.setOrigin(0.5, anchor.depth === 'landmark' ? 0.78 : 0.5);
+      sprite.setDepth(anchor.depth === 'landmark' ? groundPropDepth + 1.5 : groundPropDepth + 0.5);
+      sprite.setScale(anchor.scale);
+      sprite.setAlpha(1);
+      sprite.setVisible(this.isPoiAnchorVisible(anchor.visibleWhen));
+      this.poiAnchorSprites.set(anchor.id, sprite);
+    }
+
     for (const anchor of getZoneOneHabitatAnchors()) {
       const shadow = this.add.image(anchor.x, anchor.y + 10, assetKeys.shadow);
       shadow.setDepth(groundPropDepth);
@@ -732,6 +749,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     this.syncCampfires();
+    this.syncPoiAnchors();
     this.drawGatherPreview();
 
     this.skyTint.setFillStyle(world.lighting.ambient.color, world.lighting.ambient.alpha);
@@ -743,6 +761,19 @@ export class WorldScene extends Phaser.Scene {
     this.drawColdFx();
     this.drawCombatFx();
     this.drawCollisionDebug();
+  }
+
+  private syncPoiAnchors(): void {
+    for (const anchor of getZoneOnePoiAnchors()) {
+      this.poiAnchorSprites.get(anchor.id)?.setVisible(this.isPoiAnchorVisible(anchor.visibleWhen));
+    }
+  }
+
+  private isPoiAnchorVisible(visibleWhen: ReturnType<typeof getZoneOnePoiAnchors>[number]['visibleWhen']): boolean {
+    if (visibleWhen === 'basic-workbench-built') {
+      return this.state.progression.stations.basicWorkbenchBuilt;
+    }
+    return true;
   }
 
   private createThoughtBubble(): void {

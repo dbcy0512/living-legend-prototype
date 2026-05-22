@@ -39,6 +39,14 @@ export class BootScene extends Phaser.Scene {
     this.load.image(assetKeys.deadwoodLogHabitat, 'assets/environment/deadwood-log-habitat-v1.png');
     this.load.image(assetKeys.mushroomHabitat, 'assets/environment/mushroom-habitat-v1.png');
     this.load.image(assetKeys.rootHoleHabitat, 'assets/environment/root-hole-habitat-v1.png');
+    this.load.image(assetKeys.zone1PoiWaterSource, 'assets/environment/zone1-poi-water-source-v1.png');
+    this.load.image(assetKeys.zone1PoiStoneOutcrop, 'assets/environment/zone1-poi-stone-outcrop-v1.png');
+    this.load.image(assetKeys.zone1PoiHerbBerryPatch, 'assets/environment/zone1-poi-herb-berry-patch-v1.png');
+    this.load.image(assetKeys.zone1PoiClayMudBank, 'assets/environment/zone1-poi-clay-mud-bank-v1.png');
+    this.load.image(assetKeys.zone1PoiAnimalTrail, 'assets/environment/zone1-poi-animal-trail-v1.png');
+    this.load.image(assetKeys.zone1PoiFutureGate, 'assets/environment/zone1-poi-future-gate-v1.png');
+    this.load.image(assetKeys.zone1PoiDeepForestDeadfall, 'assets/environment/zone1-poi-deep-forest-deadfall-v1.png');
+    this.load.image(assetKeys.basicWorkbench, 'assets/environment/basic-workbench-v1.png');
     this.load.image(assetKeys.playerSouth, 'assets/characters/starter-child-cold-v3-south.png');
     this.load.image(assetKeys.playerNorth, 'assets/characters/starter-child-cold-v3-north.png');
     this.load.image(assetKeys.playerEast, 'assets/characters/starter-child-cold-v3-east.png');

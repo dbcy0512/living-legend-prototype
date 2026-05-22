@@ -8,6 +8,7 @@ import {
   isEcosystemResourceSource
 } from '../src/game/content/resources';
 import { createEcosystemResourceSeeds } from '../src/game/content/ecosystem';
+import { getZoneOneRegion } from '../src/game/content/maps/zoneOneConcept';
 
 describe('resource registry', () => {
   it('defines inspectable profiles for each first-zone resource kind', () => {
@@ -55,16 +56,41 @@ describe('resource registry', () => {
     expect(
       fixed.some((resource) => resource.source?.type === 'fixed-zone' && resource.source.zoneId === 'stone-outcrop')
     ).toBe(true);
-    expect(
-      resources.every(
-        (resource) =>
-          (resource.source?.type === 'opening' || resource.source?.type === 'fixed-zone') &&
-          (resource.source.zoneId === 'camp-clearing-hub' ||
-            resource.source.zoneId === 'herb-berry-patch' ||
-            resource.source.zoneId === 'stone-outcrop')
-      )
-    ).toBe(true);
+    expect(resources.every((resource) => resource.source?.type === 'opening' || resource.source?.type === 'fixed-zone')).toBe(true);
     expect(fixed.every((resource) => resource.source?.placementNote)).toBe(true);
+  });
+
+  it('keeps authored fixed resources inside POIs that support their ecology', () => {
+    const fixed = getStaticStartingResourceSeeds().filter((resource) => resource.source?.type === 'fixed-zone');
+
+    expect(fixed.map((resource) => {
+      if (resource.source?.type !== 'fixed-zone') {
+        throw new Error('fixed resource fixture has wrong source type');
+      }
+      return resource.source.zoneId;
+    })).toEqual(
+      expect.arrayContaining([
+        'herb-berry-patch',
+        'stone-outcrop',
+        'water-source',
+        'clay-mud-bank',
+        'deep-forest',
+        'dense-forest-east',
+        'deadwood-mushrooms',
+        'animal-trails'
+      ])
+    );
+    for (const resource of fixed) {
+      if (resource.source?.type !== 'fixed-zone') {
+        throw new Error('fixed resource fixture has wrong source type');
+      }
+      const region = getZoneOneRegion(resource.source.zoneId);
+
+      expect(region.resourceKinds).toContain(resource.kind);
+      expect(region.ecologyTags).toContain(resource.source.ecology);
+      expect(Math.abs(resource.x - region.center.x)).toBeLessThanOrEqual(region.radius.x + 210);
+      expect(Math.abs(resource.y - region.center.y)).toBeLessThanOrEqual(region.radius.y + 210);
+    }
   });
 
   it('classifies placement modes for authored and living-world resource sources', () => {

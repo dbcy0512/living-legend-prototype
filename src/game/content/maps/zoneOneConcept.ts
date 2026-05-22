@@ -1,5 +1,6 @@
 import { assetKeys } from '../../assets/manifest';
 import type { EnemyHabitatTag, EnemyKind } from '../enemies';
+import type { EnvironmentAssetId } from '../environmentCatalog';
 import type { ResourceEcologyTag, ResourceKind } from '../resources';
 import { startingAreaLayout } from './startingArea';
 
@@ -139,6 +140,22 @@ export type ZoneOneHabitatAnchor = {
     x: number;
     y: number;
   };
+  designIntent: string;
+};
+
+export type ZoneOnePoiAnchor = {
+  id: string;
+  regionId: ZoneOneRegionId;
+  label: string;
+  assetId: EnvironmentAssetId;
+  textureKey: string;
+  x: number;
+  y: number;
+  scale: number;
+  depth: 'ground' | 'landmark';
+  visibleWhen: 'always' | 'basic-workbench-built';
+  resourceKinds: readonly ResourceKind[];
+  enemyKinds: readonly EnemyKind[];
   designIntent: string;
 };
 
@@ -796,6 +813,146 @@ const zoneOneCampSanctuary = {
 } as const satisfies ZoneOneSanctuary;
 
 export const getZoneOneCampSanctuary = (): ZoneOneSanctuary => zoneOneCampSanctuary;
+
+const zoneOnePoiAnchors = [
+  {
+    id: 'poi-herb-berry-living-patch',
+    regionId: 'herb-berry-patch',
+    label: 'Herb & Berry Growth',
+    assetId: 'zone1-poi-herb-berry-patch-v1',
+    textureKey: assetKeys.zone1PoiHerbBerryPatch,
+    x: 590,
+    y: 450,
+    scale: 1.05,
+    depth: 'ground',
+    visibleWhen: 'always',
+    resourceKinds: ['herbs', 'food'],
+    enemyKinds: [],
+    designIntent: 'Makes food and medicine read as a living plant pocket before individual herbs and berries are gathered.'
+  },
+  {
+    id: 'poi-stone-outcrop-landmark',
+    regionId: 'stone-outcrop',
+    label: 'Exposed Stone Outcrop',
+    assetId: 'zone1-poi-stone-outcrop-v1',
+    textureKey: assetKeys.zone1PoiStoneOutcrop,
+    x: 470,
+    y: 790,
+    scale: 1.05,
+    depth: 'landmark',
+    visibleWhen: 'always',
+    resourceKinds: ['stone'],
+    enemyKinds: [],
+    designIntent: 'Makes stone and future flint placement read as erosion and exposed hard ground.'
+  },
+  {
+    id: 'poi-water-source-pond',
+    regionId: 'water-source',
+    label: 'Water Source',
+    assetId: 'zone1-poi-water-source-v1',
+    textureKey: assetKeys.zone1PoiWaterSource,
+    x: 430,
+    y: 1240,
+    scale: 1.45,
+    depth: 'ground',
+    visibleWhen: 'always',
+    resourceKinds: ['herbs', 'food'],
+    enemyKinds: [],
+    designIntent: 'Gives the water POI a real surface and shoreline before later water/reed/fish systems are expanded.'
+  },
+  {
+    id: 'poi-clay-mud-bank',
+    regionId: 'clay-mud-bank',
+    label: 'Clay & Mud Bank',
+    assetId: 'zone1-poi-clay-mud-bank-v1',
+    textureKey: assetKeys.zone1PoiClayMudBank,
+    x: 860,
+    y: 1285,
+    scale: 0.96,
+    depth: 'ground',
+    visibleWhen: 'always',
+    resourceKinds: ['stone'],
+    enemyKinds: [],
+    designIntent: 'Makes the clay bank read as wet useful terrain with puddles, reeds, stones, and reddish clay.'
+  },
+  {
+    id: 'poi-deep-forest-deadfall',
+    regionId: 'deep-forest',
+    label: 'Deep Forest Deadfall',
+    assetId: 'zone1-poi-deep-forest-deadfall-v1',
+    textureKey: assetKeys.zone1PoiDeepForestDeadfall,
+    x: 1400,
+    y: 402,
+    scale: 1.05,
+    depth: 'landmark',
+    visibleWhen: 'always',
+    resourceKinds: ['wood', 'twigs', 'bark'],
+    enemyKinds: ['mire-spider'],
+    designIntent: 'Ties stronger wood, bark, shade, and future ambush pressure to a visible old-forest deadfall.'
+  },
+  {
+    id: 'poi-dense-forest-windfall',
+    regionId: 'dense-forest-east',
+    label: 'Dense Forest Windfall',
+    assetId: 'zone1-poi-deep-forest-deadfall-v1',
+    textureKey: assetKeys.zone1PoiDeepForestDeadfall,
+    x: 2180,
+    y: 448,
+    scale: 0.82,
+    depth: 'landmark',
+    visibleWhen: 'always',
+    resourceKinds: ['wood', 'twigs', 'bark'],
+    enemyKinds: ['violet-moss-blob'],
+    designIntent: 'Marks the routine eastern wood route as useful forest windfall instead of loose pickup scatter.'
+  },
+  {
+    id: 'poi-animal-trail-crossing',
+    regionId: 'animal-trails',
+    label: 'Animal Trail Crossing',
+    assetId: 'zone1-poi-animal-trail-v1',
+    textureKey: assetKeys.zone1PoiAnimalTrail,
+    x: 2180,
+    y: 1120,
+    scale: 1.16,
+    depth: 'ground',
+    visibleWhen: 'always',
+    resourceKinds: ['twigs', 'food'],
+    enemyKinds: ['thorn-shell-mite', 'mire-spider'],
+    designIntent: 'Makes the trail a readable information and pressure corridor, not a random spawn rectangle.'
+  },
+  {
+    id: 'poi-future-danger-gate',
+    regionId: 'future-danger-gate',
+    label: 'Old Stone Gate',
+    assetId: 'zone1-poi-future-gate-v1',
+    textureKey: assetKeys.zone1PoiFutureGate,
+    x: 1400,
+    y: 1450,
+    scale: 1.05,
+    depth: 'landmark',
+    visibleWhen: 'always',
+    resourceKinds: [],
+    enemyKinds: ['violet-moss-blob', 'thorn-shell-mite'],
+    designIntent: 'Turns the future exit into a visible soft warning instead of an invisible boundary.'
+  },
+  {
+    id: 'camp-basic-workbench-station',
+    regionId: 'camp-clearing-hub',
+    label: 'Basic Workbench',
+    assetId: 'basic-workbench-v1',
+    textureKey: assetKeys.basicWorkbench,
+    x: 1518,
+    y: 902,
+    scale: 0.72,
+    depth: 'landmark',
+    visibleWhen: 'basic-workbench-built',
+    resourceKinds: [],
+    enemyKinds: [],
+    designIntent: 'The first visible progression station appears only after the player earns and builds it.'
+  }
+] as const satisfies readonly ZoneOnePoiAnchor[];
+
+export const getZoneOnePoiAnchors = (): readonly ZoneOnePoiAnchor[] => zoneOnePoiAnchors;
 
 const zoneOneHabitatAnchors = [
   {
